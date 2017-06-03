@@ -1,5 +1,7 @@
 # fernet-java8
 
+[![Build Status](https://travis-ci.org/l0s/fernet-java8.svg?branch=master)](https://travis-ci.org/l0s/fernet-java8)
+
 This is a work-in-progress implementation of the
 [Fernet Spec](https://github.com/fernet/spec) using Java 8.
 The goal is to use only native Java constructs to avoid pulling in any
