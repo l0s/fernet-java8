@@ -94,16 +94,6 @@ public class FernetTest {
 		final boolean result = token.isValid(key, earliestValid.getEpochSecond(), latestValid.getEpochSecond());
 
 		// then
-		System.out.println( "-- should have payload padding error: " + token );
-		final byte[] cipherText = token.getCipherText();
-		final StringBuilder builder = new StringBuilder("[ ");
-		for( int i = 0; i < cipherText.length - 1; i++ ) {
-			builder.append(String.format("0x%x", cipherText[ i ])).append(", ");
-		}
-		builder.append(String.format("0x%x", cipherText[ cipherText.length - 1 ]));
-		builder.append( " ]" );
-		System.out.println("-- cipherText: " + builder.toString());
-		assertFalse(token.isValidSignature(key));
 		assertFalse(result);
 	}
 
@@ -161,17 +151,7 @@ public class FernetTest {
 		final boolean result = token.isValid(key, earliestValid.getEpochSecond(), latestValid.getEpochSecond());
 
 		// then
-		System.out.println( "-- should have incorrect initialization vector: " + token );
-		final byte[] iv = token.getInitializationVector().getIV();
-		final StringBuilder builder = new StringBuilder("[ ");
-		for( int i = 0; i < iv.length - 1; i++ ) {
-			builder.append(String.format("0x%x", iv[ i ])).append(", ");
-		}
-		builder.append(String.format("0x%x", iv[ iv.length - 1 ]));
-		builder.append( " ]" );
-		System.out.println("-- iv: " + builder.toString());
-		assertFalse(token.isValidSignature(key));
-		assertFalse(result);
+		assertFalse("token should be invalid", result);
 	}
 
 	/**

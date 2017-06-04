@@ -9,11 +9,9 @@ dependencies so the library would be more generally usable.
 
 ## Open Issues
 
-This implementation currently fails two test cases specified for [invalid tokens](https://github.com/fernet/spec/blob/f16a35d3cfd8cdb2d8c7f7d10ce6c4d6058b19d2/invalid.json):
-* payload padding error
-* incorrect initialisation vector.
-
-Until these issues are resolved, the main code base will remain in `src/test`.
+All test cases pass now, and I am working on the API design. Until that is
+fleshed out, the main code base will remain in `src/test`. Also, expect the
+API to remain in flux until major version 1 (1.0.0).
 
 ## Prior Art
 

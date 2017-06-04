@@ -6,7 +6,20 @@
   <packaging>jar</packaging>
   <version>0.0.0-SNAPSHOT</version>
   <name>fernet-java8</name>
-  <!-- url>http://maven.apache.org</url -->
+  <url>https://github.com/l0s/fernet-java8</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://raw.githubusercontent.com/l0s/fernet-java8/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>l0s</id>
+      <name>Carlos Macasaet</name>
+    </developer>
+  </developers>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -19,4 +32,11 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <scm>
+  	<url>git@github.com:l0s/fernet-java8.git</url>
+  </scm>
+  <ciManagement>
+  	<system>Travis CI</system>
+  	<url>https://travis-ci.org/l0s/fernet-java8/</url>
+  </ciManagement>
 </project>
