@@ -33,10 +33,28 @@
     </dependency>
   </dependencies>
   <scm>
-  	<url>git@github.com:l0s/fernet-java8.git</url>
+  	<url>https://github.com/l0s/fernet-java8.git</url>
   </scm>
   <ciManagement>
   	<system>Travis CI</system>
   	<url>https://travis-ci.org/l0s/fernet-java8/</url>
   </ciManagement>
+  <build>
+    <plugins>
+	  <plugin>
+	    <groupId>org.pitest</groupId>
+	    <artifactId>pitest-maven</artifactId>
+	    <version>1.2.0</version>
+	    <configuration>
+	      <targetClasses>
+	        <param>com.macasaet.fernet.*</param>
+	      </targetClasses>
+	      <targetTests>
+	        <param>com.macasaet.fernet.*</param>
+	      </targetTests>
+	      <verbose>true</verbose>
+	    </configuration>
+	   </plugin>
+    </plugins>
+  </build>
 </project>

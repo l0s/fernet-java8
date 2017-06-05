@@ -51,8 +51,8 @@ public class Key {
 		if (encryptionKey == null || encryptionKey.length != encryptionKeyBytes) {
 			throw new IllegalArgumentException("Encryption key must be 128 bits");
 		}
-		this.signingKey = copyOf(signingKey, signingKey.length);
-		this.encryptionKey = copyOf(encryptionKey, encryptionKey.length);
+		this.signingKey = copyOf(signingKey, signingKeyBytes);
+		this.encryptionKey = copyOf(encryptionKey, encryptionKeyBytes);
 	}
 
 	/**
@@ -104,6 +104,7 @@ public class Key {
 						mac.init(getSigningKeySpec());
 						return mac.doFinal(byteStream.toByteArray());
 					} catch (final InvalidKeyException ike) {
+						// this should not happen because we control the signing key algorithm and pre-validate the length
 						throw new RuntimeException("Unable to initialise HMAC with shared secret: " + ike.getMessage(), ike);
 					}
 				} catch (final NoSuchAlgorithmException nsae) {
@@ -134,6 +135,7 @@ public class Key {
 			byteStream.write(getEncryptionKey());
 			return getEncoder().encodeToString(byteStream.toByteArray());
 		} catch (final IOException ioe) {
+			// this should not happen as I/O is to memory
 			throw new RuntimeException(ioe.getMessage(), ioe);
 		}
 	}
