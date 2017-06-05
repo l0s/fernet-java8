@@ -82,27 +82,27 @@ public class Token {
 			final byte[] initializationVector = new byte[initializationVectorBytes];
 			final int ivBytesRead = dataStream.read(initializationVector);
 			if (ivBytesRead < 16) {
-				throw new IllegalArgumentException("Not enough bits to generate a Token");
+				throw new InvalidTokenException("Not enough bits to generate a Token");
 			}
 
 			final byte[] cipherText = new byte[bytes.length - tokenStaticBytes];
 			final int cipherTextBytesRead = dataStream.read(cipherText);
 			if (cipherTextBytesRead < cipherText.length) {
-				throw new IllegalArgumentException("Not enough bits to generate a Token");
+				throw new InvalidTokenException("Not enough bits to generate a Token");
 			}
 			final int padLength = Byte.valueOf(cipherText[cipherText.length - 1]).intValue();
 			if (padLength > cipherTextBlockSize) {
-				throw new IllegalArgumentException("Padding cannot exceed 16 bytes.");
+				throw new InvalidTokenException("Padding cannot exceed 16 bytes.");
 			}
 
 			final byte[] hmac = new byte[signatureBytes];
 			final int hmacBytesRead = dataStream.read(hmac);
 			if (hmacBytesRead < signatureBytes) {
-				throw new IllegalArgumentException("not enough bits to generate a Token");
+				throw new InvalidTokenException("not enough bits to generate a Token");
 			}
 
 			if (dataStream.read() != -1) {
-				throw new IllegalArgumentException("more bits found");
+				throw new InvalidTokenException("more bits found");
 			}
 			return new Token(version, timestamp, new IvParameterSpec(initializationVector), cipherText, hmac);
 		} catch (final IOException ioe) {
@@ -123,21 +123,12 @@ public class Token {
 		return fromBytes(decoder.decode(string));
 	}
 
-	public Token(final IvParameterSpec initializationVector, final byte[] cipherText, final byte[] hmac) {
-		this((byte) 0x80, MILLISECONDS.toSeconds(currentTimeMillis()), initializationVector, cipherText, hmac);
-	}
-
-	public Token(final Random random, final byte[] cipherText, final byte[] hmac) {
-		this(generateInitializationVector(random), cipherText, hmac);
-	}
-
-	public static Token generate(final Random random, final Key key, final String plainText)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+	public static Token generate(final Random random, final Key key, final String plainText) {
 		final IvParameterSpec initializationVector = generateInitializationVector(random);
 		final byte[] cipherText = encrypt(key, plainText, initializationVector);
-		final byte[] hmac = key.getHmac((byte)0x80, currentTimeMillis(), initializationVector, cipherText);
-		return new Token(initializationVector, cipherText, hmac);
+		final long timestamp = MILLISECONDS.toSeconds(currentTimeMillis());
+		final byte[] hmac = key.getHmac(supportedVersion, timestamp, initializationVector, cipherText);
+		return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
 	}
 
 	/**
@@ -310,6 +301,7 @@ public class Token {
 			final byte[] plainBytes = cipher.doFinal(getCipherText());
 			return new String(plainBytes, charset);
 		} catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
+			// these should not happen due to upfront validation
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

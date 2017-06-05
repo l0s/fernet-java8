@@ -52,9 +52,27 @@
 	      <targetTests>
 	        <param>com.macasaet.fernet.*</param>
 	      </targetTests>
-	      <verbose>true</verbose>
+	      <avoidCallsTo>
+	        <avoidCallsTo>java.io.ByteArrayOutputStream</avoidCallsTo>
+	      </avoidCallsTo>
 	    </configuration>
 	   </plugin>
     </plugins>
   </build>
+<reporting>
+    <plugins>
+        <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>1.2.0</version>
+            <reportSets>
+                <reportSet>
+                    <reports>
+                        <report>report</report>
+                    </reports>
+                </reportSet>
+            </reportSets>
+        </plugin>
+    </plugins>
+</reporting>
 </project>
