@@ -10,9 +10,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.junit.Test;
 
-import com.macasaet.fernet.Fernet.Key;
-import com.macasaet.fernet.Fernet.Token;
-
 public class FernetTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
