@@ -1,13 +1,13 @@
 package com.macasaet.fernet;
 
-import static com.macasaet.fernet.FernetConstants.decoder;
-import static com.macasaet.fernet.FernetConstants.encoder;
-import static com.macasaet.fernet.FernetConstants.encryptionAlgorithm;
-import static com.macasaet.fernet.FernetConstants.encryptionKeyBytes;
-import static com.macasaet.fernet.FernetConstants.fernetKeyBytes;
-import static com.macasaet.fernet.FernetConstants.signingAlgorithm;
-import static com.macasaet.fernet.FernetConstants.signingKeyBytes;
-import static com.macasaet.fernet.FernetConstants.tokenPrefixBytes;
+import static com.macasaet.fernet.Constants.decoder;
+import static com.macasaet.fernet.Constants.encoder;
+import static com.macasaet.fernet.Constants.encryptionAlgorithm;
+import static com.macasaet.fernet.Constants.encryptionKeyBytes;
+import static com.macasaet.fernet.Constants.fernetKeyBytes;
+import static com.macasaet.fernet.Constants.signingAlgorithm;
+import static com.macasaet.fernet.Constants.signingKeyBytes;
+import static com.macasaet.fernet.Constants.tokenPrefixBytes;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 
@@ -44,7 +44,7 @@ public class Key {
 	 *            a 128-bit (16 byte) key for encrypting and decrypting token
 	 *            contents.
 	 */
-	public Key(final byte[] signingKey, final byte[] encryptionKey) {
+	protected Key(final byte[] signingKey, final byte[] encryptionKey) {
 		if (signingKey == null || signingKey.length != signingKeyBytes) {
 			throw new IllegalArgumentException("Signing key must be 128 bits");
 		}
@@ -54,6 +54,8 @@ public class Key {
 		this.signingKey = copyOf(signingKey, signingKeyBytes);
 		this.encryptionKey = copyOf(encryptionKey, encryptionKeyBytes);
 	}
+
+	// TODO Key(InputStream)
 
 	/**
 	 * @param string a Base 64 URL string in the format Signing-key (128 bits) || Encryption-key (128 bits)
@@ -82,7 +84,7 @@ public class Key {
 
 	/**
 	 * Generate an HMAC signature from the components of a Fernet token.
-	 *
+	 * TODO: refactor to accept instant
 	 * @param version the Fernet version number
 	 * @param timestamp the seconds after the epoch that the token was generated
 	 * @param initializationVector the encryption and decryption initialization vector
@@ -140,6 +142,8 @@ public class Key {
 		}
 	}
 
+	// TODO public void serialise(OutputStream)
+
 	protected byte[] getSigningKey() {
 		return signingKey;
 	}
@@ -163,4 +167,5 @@ public class Key {
 	protected Encoder getEncoder() {
 		return encoder;
 	}
+
 }

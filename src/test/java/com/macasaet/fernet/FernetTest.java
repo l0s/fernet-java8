@@ -10,6 +10,14 @@ import java.time.format.DateTimeFormatter;
 
 import org.junit.Test;
 
+/**
+ * Test class that validates the the scenarios in the <a href="https://github.com/fernet/spec">Fernet Spec</a>.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ * @see https://github.com/fernet/spec
+ */
 public class FernetTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;

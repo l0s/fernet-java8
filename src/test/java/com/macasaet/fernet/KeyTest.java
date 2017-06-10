@@ -1,26 +1,27 @@
 package com.macasaet.fernet;
 
-import static com.macasaet.fernet.FernetConstants.*;
-import static org.junit.Assert.*;
+import static com.macasaet.fernet.Constants.encoder;
+import static com.macasaet.fernet.Constants.encryptionKeyBytes;
+import static com.macasaet.fernet.Constants.signingKeyBytes;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Unit tests for the {@link Key} class.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 public class KeyTest {
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public final void testConstructorValidatesSigningKey() {

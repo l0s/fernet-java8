@@ -13,6 +13,12 @@ All test cases pass now, and I am working on the API design. Until that is
 fleshed out, the main code base will remain in `src/test`. Also, expect the
 API to remain in flux until major version 1 (1.0.0).
 
+## Notes
+
+### Mutation Testing and Test Coverage
+
+`mvn clean install org.pitest:pitest-maven:mutationCoverage site`
+
 ## Prior Art
 
 There is a library called

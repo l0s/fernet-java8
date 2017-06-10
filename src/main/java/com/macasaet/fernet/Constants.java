@@ -10,7 +10,7 @@ import java.util.Base64.Encoder;
 
 import javax.crypto.Cipher;
 
-interface FernetConstants {
+interface Constants {
 
 	static final Charset charset = UTF_8;
 	static final Encoder encoder = getUrlEncoder();

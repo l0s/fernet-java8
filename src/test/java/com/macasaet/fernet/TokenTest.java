@@ -1,6 +1,6 @@
 package com.macasaet.fernet;
 
-import static com.macasaet.fernet.FernetConstants.initializationVectorBytes;
+import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,6 +13,13 @@ import javax.crypto.spec.IvParameterSpec;
 
 import org.junit.Test;
 
+/**
+ * Unit tests for the {@link Token} class.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -32,17 +39,7 @@ public class TokenTest {
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
 				result.getInitializationVector().getIV());
 	}
-/*
-	@Test
-	public void testTokenIvParameterSpecByteArrayByteArray() {
-		fail("Not yet implemented");
-	}
 
-	@Test
-	public void testTokenRandomByteArrayByteArray() {
-		fail("Not yet implemented");
-	}
-*/
 	@Test
 	public void testGenerate() {
 		// given
@@ -56,7 +53,6 @@ public class TokenTest {
 
 		// when
 		final Token result = Token.generate(deterministicRandom, key, "Hello, world!");
-		System.out.println( "-- generated token: " + result);
 
 		// then
 		final Instant now = Instant.now();

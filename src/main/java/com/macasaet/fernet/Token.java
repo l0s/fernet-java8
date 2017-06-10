@@ -1,14 +1,14 @@
 package com.macasaet.fernet;
 
-import static com.macasaet.fernet.FernetConstants.charset;
-import static com.macasaet.fernet.FernetConstants.cipherTextBlockSize;
-import static com.macasaet.fernet.FernetConstants.cipherTransformation;
-import static com.macasaet.fernet.FernetConstants.decoder;
-import static com.macasaet.fernet.FernetConstants.encoder;
-import static com.macasaet.fernet.FernetConstants.initializationVectorBytes;
-import static com.macasaet.fernet.FernetConstants.signatureBytes;
-import static com.macasaet.fernet.FernetConstants.supportedVersion;
-import static com.macasaet.fernet.FernetConstants.tokenStaticBytes;
+import static com.macasaet.fernet.Constants.charset;
+import static com.macasaet.fernet.Constants.cipherTextBlockSize;
+import static com.macasaet.fernet.Constants.cipherTransformation;
+import static com.macasaet.fernet.Constants.decoder;
+import static com.macasaet.fernet.Constants.encoder;
+import static com.macasaet.fernet.Constants.initializationVectorBytes;
+import static com.macasaet.fernet.Constants.signatureBytes;
+import static com.macasaet.fernet.Constants.supportedVersion;
+import static com.macasaet.fernet.Constants.tokenStaticBytes;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.crypto.Cipher.DECRYPT_MODE;
@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -70,7 +71,9 @@ public class Token {
 		this.hmac = hmac;
 	}
 
-	protected static Token fromBytes(final byte[] bytes) {
+	// TODO fromBytes(final InputStream inputStream)
+
+	protected static Token fromBytes(final byte[] bytes) throws InvalidTokenException {
 		if (bytes.length < tokenStaticBytes) {
 			throw new InvalidTokenException("Not enough bits to generate a Token");
 		}
@@ -119,7 +122,7 @@ public class Token {
 	 * @return a new Token
 	 * @throws InvalidTokenException if the input string cannot be a valid token irrespective of key or timestamp
 	 */
-	public static Token fromString(final String string) {
+	public static Token fromString(final String string) throws InvalidTokenException {
 		return fromBytes(decoder.decode(string));
 	}
 
@@ -134,17 +137,16 @@ public class Token {
 	/**
 	 * Validate the token. 
 	 *
+	 * TODO: refactor to accept instants
+	 * 
 	 * @param key stored shared secret key
 	 * @param earliestValidTimestamp the earliest time for which tokens are valid
 	 * @param latestValidTimestamp the latest time (in the future) for which tokens are valid.
 	 * @return true if and only if the token was generated using the supplied key and is within the specified time bounds.
 	 */
+	@Deprecated
 	public boolean isValid(final Key key, final long earliestValidTimestamp, final long latestValidTimestamp) {
-		final boolean staticChecksPass = isValidVersion()
-				&& isNotExpired(earliestValidTimestamp)
-				&& isNotTooFarInTheFuture(latestValidTimestamp)
-				&& isValidSignature(key);
-		if (!staticChecksPass) {
+		if (!isMostlyValid(key, earliestValidTimestamp, latestValidTimestamp)) {
 			return false;
 		}
 		try {
@@ -160,7 +162,8 @@ public class Token {
 		}
 	}
 
-	public String decrypt(final Key key) {
+	@Deprecated
+	public String decrypt(final Key key) throws TokenValidationException {
 		try {
 			final Cipher cipher = Cipher.getInstance(getCipherTransformation());
 			return decrypt(cipher, key);
@@ -172,25 +175,45 @@ public class Token {
 		}
 	}
 
+	// FIXME: refactor to accept Instants instead
+	public String validateAndDecrypt(final Key key, final long earliestValidTimestamp,
+			final long latestValidTimestamp) {
+		// TODO I think this should be the primary validation method moving forward
+		// TODO throw separate exceptions for each scenario
+		if (!isMostlyValid(key, earliestValidTimestamp, latestValidTimestamp)) {
+			throw new TokenValidationException("Invalid token");
+		}
+		return decrypt(key);
+	}
+
+	public String validateAndDecrypt(final Key key, final TokenValidator validator) throws TokenValidationException {
+		return validator.validateAndDecrypt(key, this);
+	}
+
+	// TODO String validateAndDecrypt(Key, TemporalAmount, TemporalAmount, Predicate<String>)
+
 	/**
 	 * @return the Base 64 URL encoding of this token in the form Version | Timestamp | IV | Ciphertext | HMAC
 	 */
 	public String serialise() {
 		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
 				tokenStaticBytes + getCipherText().length)) {
-			try (final DataOutputStream dataStream = new DataOutputStream(byteStream)) {
-				dataStream.writeByte(getVersion());
-				dataStream.writeLong(getTimestamp());
-				dataStream.write(getInitializationVector().getIV());
-				dataStream.write(getCipherText());
-				dataStream.write(getHmac());
-				dataStream.flush();
-	
-				return getEncoder().encodeToString(byteStream.toByteArray());
-			}
+			serialise(byteStream);
+			return getEncoder().encodeToString(byteStream.toByteArray());
 		} catch (final IOException e) {
 			// this should not happen as IO is to memory only
 			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	public void serialise(final OutputStream outputStream) throws IOException {
+		try (final DataOutputStream dataStream = new DataOutputStream(outputStream)) {
+			dataStream.writeByte(getVersion());
+			dataStream.writeLong(getTimestamp());
+			dataStream.write(getInitializationVector().getIV());
+			dataStream.write(getCipherText());
+			dataStream.write(getHmac());
+			dataStream.flush();
 		}
 	}
 
@@ -218,8 +241,8 @@ public class Token {
 		builder.append("Token [version=").append(String.format("0x%x", new BigInteger(1, new byte[] { getVersion() })))
 				.append(", timestamp=").append(toDateString(getTimestamp()))
 				.append(", initializationVector=").append(toBase64String(ivBytes))
-				.append(", cipherText=").append(FernetConstants.encoder.encodeToString(getCipherText()))
-				.append(", hmac=").append(FernetConstants.encoder.encodeToString(getHmac())).append("]");
+				.append(", cipherText=").append(Constants.encoder.encodeToString(getCipherText()))
+				.append(", hmac=").append(Constants.encoder.encodeToString(getHmac())).append("]");
 		return builder.toString();
 	}
 
@@ -247,7 +270,7 @@ public class Token {
 			final IvParameterSpec initializationVector) {
 		try {
 			cipher.init(ENCRYPT_MODE, key.getEncryptionKeySpec(), initializationVector);
-			return cipher.doFinal(string.getBytes(FernetConstants.charset));
+			return cipher.doFinal(string.getBytes(Constants.charset));
 		} catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
 			// this should not happen as the key is validated ahead of time and
 			// we use an algorithm guaranteed to exist
@@ -256,6 +279,13 @@ public class Token {
 			// these should not happen as we control the block size and padding
 			throw new RuntimeException("Unable to encrypt data: " + e.getMessage(), e);
 		}
+	}
+
+	protected boolean isMostlyValid(final Key key, final long earliestValidTimestamp, final long latestValidTimestamp) {
+		return isValidVersion()
+				&& isNotExpired(earliestValidTimestamp)
+				&& isNotTooFarInTheFuture(latestValidTimestamp)
+				&& isValidSignature(key);
 	}
 
 	/**
