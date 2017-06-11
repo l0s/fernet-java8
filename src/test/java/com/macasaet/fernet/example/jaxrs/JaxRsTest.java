@@ -12,8 +12,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.macasaet.fernet.Key;
+import com.macasaet.fernet.Token;
+
 /**
  * This test demonstrates how Fernet tokens can be used with JAX-RS (Jersey).
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
  */
@@ -38,12 +43,16 @@ public class JaxRsTest {
 		protectedResource.repository = userRepository;
 	}
 
+	/**
+	 * This demonstrates a client who provides the correct credentials, a valid
+	 * token, and passes all of the business rules to access the protected
+	 * resource.
+	 */
 	@Test
 	public final void verifySuccessfulBusinessRuleCheck() {
 		// given
 		final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
 		final String tokenString = authenticationResource.createSession(login);
-		System.out.println("-- token: " + tokenString);
 
 		// when
 		final String result = protectedResource.getSecret(tokenString);
@@ -52,6 +61,11 @@ public class JaxRsTest {
 		assertEquals("42", result);
 	}
 
+	/**
+	 * This demonstrates a client who provides the correct credentials, a valid
+	 * token, but does not pass the business rules required to access the
+	 * protected resource.
+	 */
 	@Test
 	public final void verifyFailedBusinessRuleCheck() {
 		// given
@@ -65,6 +79,10 @@ public class JaxRsTest {
 		// then (nothing)
 	}
 
+	/**
+	 * This demonstrates a client who provides incorrect credentials and
+	 * therefore is not issued a token.
+	 */
 	@Test
 	public final void verifyFailedLogin() {
 		// given
@@ -73,6 +91,23 @@ public class JaxRsTest {
 		// when
 		thrown.expect(NotAuthorizedException.class);
 		authenticationResource.createSession(login);
+
+		// then (nothing)
+	}
+
+	/**
+	 * This demonstrates a client who attempts to forge a Fernet token but
+	 * cannot do so without knowing the secret key.
+	 */
+	@Test
+	public final void verifyFailedForgery() {
+		// given
+		final Key invalidKey = Key.generateKey(random);
+		final Token forgedToken = Token.generate(random, invalidKey, "alice");
+
+		// when
+		thrown.expect(RuntimeException.class);
+		protectedResource.getSecret(forgedToken.serialise());
 
 		// then (nothing)
 	}

@@ -14,16 +14,45 @@ import javax.ws.rs.core.Response.Status;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
+/**
+ * This is an example of a resource that generates a Fernet token. Here, the
+ * Fernet token identifies a session. Once a client has started a session using
+ * this resource, they can issue requests by providing only the token they have
+ * been provided. The do not need to provide login credentials again until the
+ * token expires.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 @Path("session")
 public class AuthenticationResource {
 
 	@Inject
 	Random random = new SecureRandom();
-	private final Key key = Key.fromString("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
+
+	/**
+	 * This is the secret key. There is no need to share it with the client. The
+	 * resource that generates the tokens and the resource that validates the
+	 * tokens need not share the same infrastructure as long as they both have
+	 * access to the same key.
+	 */
+	final Key key = Key.fromString("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
 
 	@Inject
 	UserRepository repository;
 
+	/**
+	 * This is an example of an endpoint that generates a new Fernet token. The
+	 * client authenticates using this method then can use the token provided to
+	 * perform secured operations. The client may, at their discretion, store
+	 * the token insecurely (e.g. in a cookie or browser storage) since it will
+	 * no longer be valid after the TTL (60 seconds by default).
+	 *
+	 * @param request
+	 *            client credentials to create a new session token
+	 * @return a Fernet token
+	 */
 	@POST
 	@Produces("text/plain")
 	public String createSession(final LoginRequest request) {
@@ -32,7 +61,6 @@ public class AuthenticationResource {
 			// password is correct, so generate a Fernet token
 			// payload is the username, but it could easily be JSON or XML
 			final Token token = Token.generate(random, key, request.getUsername());
-			System.out.println("-- generated token: " + token);
 			return token.serialise();
 		}
 		throw new NotAuthorizedException(Response.status(Status.UNAUTHORIZED).entity("bad password").build());

@@ -8,6 +8,13 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Random;
 
+/**
+ * This is an example of a POJO that may be used for both authentication and authorisation.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 public class User {
 
 	private static final Random random = new SecureRandom();
@@ -26,6 +33,10 @@ public class User {
 		setTrustworthy(trustworthy);
 	}
 
+	/**
+	 * @return salt used to generate the two-round password hash
+	 * @see #getTwoRoundPasswordHash()
+	 */
 	public String getSalt() {
 		return salt;
 	}
@@ -34,6 +45,11 @@ public class User {
 		this.salt = salt;
 	}
 
+	/**
+	 * @return the password as it is stored in the datastore. It is a function
+	 *         of the single-round password hash and the salt
+	 * @see #getSalt()
+	 */
 	public String getTwoRoundPasswordHash() {
 		return twoRoundPasswordHash;
 	}
@@ -42,6 +58,9 @@ public class User {
 		this.twoRoundPasswordHash = passwordHash;
 	}
 
+	/**
+	 * A contrived field used for demonstrating domain-specific token validation.
+	 */
 	public boolean isTrustworthy() {
 		return trustworthy;
 	}
@@ -65,6 +84,11 @@ public class User {
 		}
 	}
 
+	/**
+	 * Set the salt and password based on a new single-round password hash.
+	 *
+	 * @param singleRoundPasswordHash SHA-256 hash of the plain-text password
+	 */
 	public void setPassword(final String singleRoundPasswordHash) {
 		final byte[] bytes = new byte[16];
 		random.nextBytes(bytes);
