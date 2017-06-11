@@ -7,19 +7,19 @@ package com.macasaet.fernet;
  *
  * @author Carlos Macasaet
  */
-public class InvalidTokenException extends IllegalArgumentException {
+public class IllegalTokenException extends IllegalArgumentException {
 
 	private static final long serialVersionUID = 8019898267609912205L;
 
-	public InvalidTokenException(final String s) {
+	public IllegalTokenException(final String s) {
 		super(s);
 	}
 
-	public InvalidTokenException(final Throwable cause) {
+	public IllegalTokenException(final Throwable cause) {
 		this(cause.getMessage(), cause);
 	}
 
-	public InvalidTokenException(final String message, final Throwable cause) {
+	public IllegalTokenException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 

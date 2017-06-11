@@ -14,6 +14,7 @@ import static java.util.Arrays.copyOfRange;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64.Encoder;
@@ -133,8 +134,7 @@ public class Key {
 	 */
 	public String serialise() {
 		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
-			byteStream.write(getSigningKey());
-			byteStream.write(getEncryptionKey());
+			serialise(byteStream);
 			return getEncoder().encodeToString(byteStream.toByteArray());
 		} catch (final IOException ioe) {
 			// this should not happen as I/O is to memory
@@ -142,7 +142,10 @@ public class Key {
 		}
 	}
 
-	// TODO public void serialise(OutputStream)
+	public void serialise(final OutputStream outputStream) throws IOException {
+		outputStream.write(getSigningKey());
+		outputStream.write(getEncryptionKey());
+	}
 
 	protected byte[] getSigningKey() {
 		return signingKey;

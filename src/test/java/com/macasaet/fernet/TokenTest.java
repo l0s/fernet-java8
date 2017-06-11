@@ -3,14 +3,15 @@ package com.macasaet.fernet;
 import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -23,6 +24,18 @@ import org.junit.Test;
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+	private Clock clock;
+	private Validator<String> validator;
+
+	@Before
+	public void setUp() {
+		clock = Clock.systemUTC();
+		validator = new StringValidator() {
+			public Clock getClock() {
+				return clock;
+			}
+		};
+	}
 
 	@Test
 	public void testFromString() {
@@ -55,19 +68,10 @@ public class TokenTest {
 		final Token result = Token.generate(deterministicRandom, key, "Hello, world!");
 
 		// then
-		final Instant now = Instant.now();
-		assertTrue(result.isNotExpired(now.minusSeconds(120).getEpochSecond()));
-		assertTrue(result.isNotTooFarInTheFuture(now.plusSeconds(120).getEpochSecond()));
-		assertTrue(result.isValidVersion());
-		assertTrue(result.isValidSignature(key));
-		assertTrue(result.isValid(key, now.minusSeconds(120).getEpochSecond(), now.plusSeconds(120).getEpochSecond()));
+		final String plainText = result.validateAndDecrypt(key, validator);
+		assertEquals("Hello, world!", plainText);
 	}
-/*
-	@Test
-	public void testIsValid() {
-		fail("Not yet implemented");
-	}
-*/
+
 	@Test
 	public void testDecryptKey() {
 		// given
@@ -82,7 +86,7 @@ public class TokenTest {
 		final Token token = Token.generate(deterministicRandom, key, "Hello, world!");
 
 		// when
-		final String result = token.decrypt(key);
+		final String result = token.validateAndDecrypt(key, validator);
 
 		// then
 		assertEquals("Hello, world!", result);

@@ -1,7 +1,8 @@
 package com.macasaet.fernet;
 
 /**
- * This exception indicates that an operation was attempted on an invalid Fernet token.
+ * This exception indicates that an operation (e.g. payload decryption) was
+ * attempted on an invalid Fernet token.
  *
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  *

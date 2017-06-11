@@ -25,12 +25,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
 import java.util.Random;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -56,16 +53,16 @@ public class Token {
 	protected Token(final byte version, final long timestamp, final IvParameterSpec initializationVector,
 			final byte[] cipherText, final byte[] hmac) {
 		if (version != supportedVersion) {
-			throw new InvalidTokenException("Unsupported version: " + version);
+			throw new IllegalTokenException("Unsupported version: " + version);
 		}
 		if (initializationVector == null || initializationVector.getIV().length != initializationVectorBytes) {
-			throw new InvalidTokenException("Initialization Vector must be 128 bits");
+			throw new IllegalTokenException("Initialization Vector must be 128 bits");
 		}
 		if (cipherText == null || cipherText.length % cipherTextBlockSize != 0) {
-			throw new InvalidTokenException("Ciphertext must be a multiple of 128 bits");
+			throw new IllegalTokenException("Ciphertext must be a multiple of 128 bits");
 		}
 		if (hmac == null || hmac.length != signatureBytes) {
-			throw new InvalidTokenException("hmac must be 256 bits");
+			throw new IllegalTokenException("hmac must be 256 bits");
 		}
 		this.version = version;
 		this.timestamp = timestamp;
@@ -74,11 +71,9 @@ public class Token {
 		this.hmac = hmac;
 	}
 
-	// TODO fromBytes(final InputStream inputStream)
-
-	protected static Token fromBytes(final byte[] bytes) throws InvalidTokenException {
+	protected static Token fromBytes(final byte[] bytes) throws IllegalTokenException {
 		if (bytes.length < tokenStaticBytes) {
-			throw new InvalidTokenException("Not enough bits to generate a Token");
+			throw new IllegalTokenException("Not enough bits to generate a Token");
 		}
 		try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
 			final DataInputStream dataStream = new DataInputStream(inputStream);
@@ -88,27 +83,27 @@ public class Token {
 			final byte[] initializationVector = new byte[initializationVectorBytes];
 			final int ivBytesRead = dataStream.read(initializationVector);
 			if (ivBytesRead < 16) {
-				throw new InvalidTokenException("Not enough bits to generate a Token");
+				throw new IllegalTokenException("Not enough bits to generate a Token");
 			}
 
 			final byte[] cipherText = new byte[bytes.length - tokenStaticBytes];
 			final int cipherTextBytesRead = dataStream.read(cipherText);
 			if (cipherTextBytesRead < cipherText.length) {
-				throw new InvalidTokenException("Not enough bits to generate a Token");
+				throw new IllegalTokenException("Not enough bits to generate a Token");
 			}
 			final int padLength = Byte.valueOf(cipherText[cipherText.length - 1]).intValue();
 			if (padLength > cipherTextBlockSize) {
-				throw new InvalidTokenException("Padding cannot exceed 16 bytes.");
+				throw new IllegalTokenException("Padding cannot exceed 16 bytes.");
 			}
 
 			final byte[] hmac = new byte[signatureBytes];
 			final int hmacBytesRead = dataStream.read(hmac);
 			if (hmacBytesRead < signatureBytes) {
-				throw new InvalidTokenException("not enough bits to generate a Token");
+				throw new IllegalTokenException("not enough bits to generate a Token");
 			}
 
 			if (dataStream.read() != -1) {
-				throw new InvalidTokenException("more bits found");
+				throw new IllegalTokenException("more bits found");
 			}
 			return new Token(version, timestamp, new IvParameterSpec(initializationVector), cipherText, hmac);
 		} catch (final IOException ioe) {
@@ -123,9 +118,9 @@ public class Token {
 	 *
 	 * @param string the Base 64 URL encoding of a token in the form Version | Timestamp | IV | Ciphertext | HMAC
 	 * @return a new Token
-	 * @throws InvalidTokenException if the input string cannot be a valid token irrespective of key or timestamp
+	 * @throws IllegalTokenException if the input string cannot be a valid token irrespective of key or timestamp
 	 */
-	public static Token fromString(final String string) throws InvalidTokenException {
+	public static Token fromString(final String string) throws IllegalTokenException {
 		return fromBytes(decoder.decode(string));
 	}
 
@@ -137,90 +132,32 @@ public class Token {
 		return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
 	}
 
-	/**
-	 * Validate the token. 
-	 *
-	 * TODO: refactor to accept instants
-	 * 
-	 * @param key stored shared secret key
-	 * @param earliestValidTimestamp the earliest time for which tokens are valid
-	 * @param latestValidTimestamp the latest time (in the future) for which tokens are valid.
-	 * @return true if and only if the token was generated using the supplied key and is within the specified time bounds.
-	 */
-	@Deprecated
-	public boolean isValid(final Key key, final long earliestValidTimestamp, final long latestValidTimestamp) {
-		if (!isMostlyValid(key, earliestValidTimestamp, latestValidTimestamp)) {
-			return false;
-		}
-		try {
-			// validate the encryption
-			final Cipher cipher = Cipher.getInstance(cipherTransformation);
-			decrypt(cipher, key);
-			return true;
-		} catch (final BadPaddingException e) {
-			return false;
-		} catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
-			// these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
-			throw new RuntimeException(e.getMessage(), e);
-		}
+	public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
+		return validator.validateAndDecrypt(key, this);
 	}
 
-	@Deprecated
-	public String decrypt(final Key key) throws TokenValidationException {
+	public String validateAndDecrypt(final Key key, final Instant earliestValidInstant,
+			final Instant latestValidInstant) {
+		if (!isValidVersion()) {
+			throw new TokenValidationException("Invalid version");
+		} else if (!isNotExpired(earliestValidInstant.getEpochSecond())) {
+			throw new TokenValidationException("Token is expired");
+		} else if (!isNotTooFarInTheFuture(latestValidInstant.getEpochSecond())) {
+			throw new TokenValidationException("Token timestamp is in the future (clock skew).");
+		} else if (!isValidSignature(key)) {
+			throw new TokenValidationException("Signature does not match.");
+		}
+
 		try {
 			final Cipher cipher = Cipher.getInstance(getCipherTransformation());
 			return decrypt(cipher, key);
 		} catch (final BadPaddingException bpe) {
 			throw new TokenValidationException("Invalid padding in token: " + bpe.getMessage(), bpe);
 		} catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
-			// this should not happen
+			// this should not happen as we use an algorithm (AES) and padding
+			// (PKCS5) that are guaranteed to exist.
 			throw new RuntimeException(e.getMessage(), e);
 		}
-	}
-
-	// FIXME: refactor to accept Instants instead
-	public String validateAndDecrypt(final Key key, final long earliestValidTimestamp,
-			final long latestValidTimestamp) {
-		// TODO throw separate exceptions for each scenario
-		if (!isMostlyValid(key, earliestValidTimestamp, latestValidTimestamp)) {
-			throw new TokenValidationException("Invalid token");
-		}
-		return decrypt(key);
-	}
-
-	public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
-		// TODO I think this should be the primary validation method moving forward
-		return validator.validateAndDecrypt(key, this);
-	}
-
-	@Deprecated
-	public String validateAndDecrypt(final Key key, final TokenValidator validator) throws TokenValidationException {
-		return validator.validateAndDecrypt(key, this);
-	}
-
-	@Deprecated
-	public String validateAndDecrypt(final Key key, final TemporalAmount timeToLive, final TemporalAmount acceptableClockSkew) throws TokenValidationException {
-		final Instant now = Instant.now(); // FIXME: hard to test, do we need to be able to inject a Clock?
-		return validateAndDecrypt(key, now.minus(timeToLive).getEpochSecond(), now.plus(acceptableClockSkew).getEpochSecond());
-	}
-
-	@Deprecated
-	public String validateAndDecrypt(final Key key, final TemporalAmount timeToLive,
-			final TemporalAmount acceptableClockSkew, final Predicate<String> plainTextValidator)
-			throws TokenValidationException {
-		return validateAndDecrypt(key, timeToLive, acceptableClockSkew, plainTextValidator, Function.identity());
-	}
-
-	@Deprecated
-	public <T> T validateAndDecrypt(final Key key, final TemporalAmount timeToLive,
-			final TemporalAmount acceptableClockSkew, final Predicate<T> objectValidator,
-			final Function<String, T> transformer) {
-		final String plainText = validateAndDecrypt(key, timeToLive, acceptableClockSkew);
-		final T result = transformer.apply(plainText);
-		if (!objectValidator.test(result)) {
-			throw new TokenValidationException("Token contents failed validation.");
-		}
-		return result;
 	}
 
 	/**
@@ -310,13 +247,6 @@ public class Token {
 			// these should not happen as we control the block size and padding
 			throw new RuntimeException("Unable to encrypt data: " + e.getMessage(), e);
 		}
-	}
-
-	protected boolean isMostlyValid(final Key key, final long earliestValidTimestamp, final long latestValidTimestamp) {
-		return isValidVersion()
-				&& isNotExpired(earliestValidTimestamp)
-				&& isNotTooFarInTheFuture(latestValidTimestamp)
-				&& isValidSignature(key);
 	}
 
 	/**
