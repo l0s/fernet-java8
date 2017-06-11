@@ -13,10 +13,10 @@ advantage of the Java 8 time objects to add type-safety.
 * type-safety by using Java 8 time objects (no confusing milliseconds vs seconds after the epoch)
 * no dependencies!
 * pluggable mechanism so you can specify your own:
-** Clock
-** TTL / max clock skew
-** payload validator
-** payload transformation (i.e. to POJO)
+    * Clock
+    * TTL / max clock skew
+    * payload validator
+    * payload transformation (i.e. to POJO)
 
 ## Examples
 
