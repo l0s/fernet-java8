@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.macasaet.fernet</groupId>
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.0</version>
   <name>fernet-java8</name>
   <url>https://github.com/l0s/fernet-java8</url>
   <licenses>
@@ -50,7 +49,7 @@
   	<url>https://github.com/l0s/fernet-java8</url>
     <connection>scm:git:ssh://github.com/l0s/fernet-java8.git</connection>
     <developerConnection>scm:git:git@github.com:l0s/fernet-java8.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>fernet-java8-0.2.0</tag>
   </scm>
   <ciManagement>
   	<system>Travis CI</system>
