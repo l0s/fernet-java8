@@ -25,9 +25,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -178,7 +181,6 @@ public class Token {
 	// FIXME: refactor to accept Instants instead
 	public String validateAndDecrypt(final Key key, final long earliestValidTimestamp,
 			final long latestValidTimestamp) {
-		// TODO I think this should be the primary validation method moving forward
 		// TODO throw separate exceptions for each scenario
 		if (!isMostlyValid(key, earliestValidTimestamp, latestValidTimestamp)) {
 			throw new TokenValidationException("Invalid token");
@@ -186,11 +188,40 @@ public class Token {
 		return decrypt(key);
 	}
 
+	public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
+		// TODO I think this should be the primary validation method moving forward
+		return validator.validateAndDecrypt(key, this);
+	}
+
+	@Deprecated
 	public String validateAndDecrypt(final Key key, final TokenValidator validator) throws TokenValidationException {
 		return validator.validateAndDecrypt(key, this);
 	}
 
-	// TODO String validateAndDecrypt(Key, TemporalAmount, TemporalAmount, Predicate<String>)
+	@Deprecated
+	public String validateAndDecrypt(final Key key, final TemporalAmount timeToLive, final TemporalAmount acceptableClockSkew) throws TokenValidationException {
+		final Instant now = Instant.now(); // FIXME: hard to test, do we need to be able to inject a Clock?
+		return validateAndDecrypt(key, now.minus(timeToLive).getEpochSecond(), now.plus(acceptableClockSkew).getEpochSecond());
+	}
+
+	@Deprecated
+	public String validateAndDecrypt(final Key key, final TemporalAmount timeToLive,
+			final TemporalAmount acceptableClockSkew, final Predicate<String> plainTextValidator)
+			throws TokenValidationException {
+		return validateAndDecrypt(key, timeToLive, acceptableClockSkew, plainTextValidator, Function.identity());
+	}
+
+	@Deprecated
+	public <T> T validateAndDecrypt(final Key key, final TemporalAmount timeToLive,
+			final TemporalAmount acceptableClockSkew, final Predicate<T> objectValidator,
+			final Function<String, T> transformer) {
+		final String plainText = validateAndDecrypt(key, timeToLive, acceptableClockSkew);
+		final T result = transformer.apply(plainText);
+		if (!objectValidator.test(result)) {
+			throw new TokenValidationException("Token contents failed validation.");
+		}
+		return result;
+	}
 
 	/**
 	 * @return the Base 64 URL encoding of this token in the form Version | Timestamp | IV | Ciphertext | HMAC
