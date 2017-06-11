@@ -49,7 +49,8 @@
   <scm>
   	<url>https://github.com/l0s/fernet-java8</url>
     <connection>scm:git:ssh://github.com/l0s/fernet-java8.git</connection>
-    <developerConnection>scm:git:ssh://github.com/l0s/fernet-java8.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:l0s/fernet-java8.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
   <ciManagement>
   	<system>Travis CI</system>
