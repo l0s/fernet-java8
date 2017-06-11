@@ -88,7 +88,7 @@ public class Key {
 	 * @param version the Fernet version number
 	 * @param timestamp the seconds after the epoch that the token was generated
 	 * @param initializationVector the encryption and decryption initialization vector
-	 * @param cipherText the encrypted content of the token // FIXME not thead safe
+	 * @param cipherText the encrypted content of the token // FIXME not thread safe
 	 * @return the HMAC signature
 	 */
 	public byte[] getHmac(final byte version, final Instant timestamp, final IvParameterSpec initializationVector, final byte[] cipherText) {

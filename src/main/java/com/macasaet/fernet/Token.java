@@ -93,10 +93,6 @@ public class Token {
 			if (cipherTextBytesRead < cipherText.length) {
 				throw new IllegalTokenException("Not enough bits to generate a Token");
 			}
-			final int padLength = Byte.valueOf(cipherText[cipherText.length - 1]).intValue();
-			if (padLength > cipherTextBlockSize) {
-				throw new IllegalTokenException("Padding cannot exceed 16 bytes.");
-			}
 
 			final byte[] hmac = new byte[signatureBytes];
 			final int hmacBytesRead = dataStream.read(hmac);

@@ -37,6 +37,12 @@
     	<version>2.8.9</version>
     	<scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.glassfish.jersey.containers</groupId>
+    	<artifactId>jersey-container-servlet-core</artifactId>
+    	<version>2.25.1</version>
+    	<scope>test</scope>
+    </dependency>
   </dependencies>
   <scm>
   	<url>https://github.com/l0s/fernet-java8.git</url>
@@ -62,7 +68,7 @@
 	        <avoidCallsTo>java.io.ByteArrayOutputStream</avoidCallsTo>
 	      </avoidCallsTo>
 	      <excludedMethods>
-	        <excludedMethod>toString</excludedMethod>
+	        <excludedMethod>ByteArrayOutputStream</excludedMethod>
 	      </excludedMethods>
 	    </configuration>
 	   </plugin>
