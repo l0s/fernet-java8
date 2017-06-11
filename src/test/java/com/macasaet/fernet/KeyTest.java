@@ -7,6 +7,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.time.Instant;
 import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
@@ -112,7 +113,8 @@ public class KeyTest {
 		final Key key = Key.fromString("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
 		// when
-		final byte[] result = key.getHmac((byte) 0x80, 1l, new IvParameterSpec(new byte[] { 2 }), new byte[] { 3 });
+		final byte[] result =
+				key.getHmac((byte) 0x80, Instant.ofEpochSecond(1), new IvParameterSpec(new byte[] { 2 }), new byte[] { 3 });
 
 		// then
 		assertEquals("WvLIvt4MSCQKgeLyvltUqN8O7mvcozhsEAgIiytxypw=", encoder.encodeToString(result));

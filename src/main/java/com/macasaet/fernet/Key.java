@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.Base64.Encoder;
 import java.util.Random;
 
@@ -56,8 +57,6 @@ public class Key {
 		this.encryptionKey = copyOf(encryptionKey, encryptionKeyBytes);
 	}
 
-	// TODO Key(InputStream)
-
 	/**
 	 * @param string a Base 64 URL string in the format Signing-key (128 bits) || Encryption-key (128 bits)
 	 * @return a Fernet key from the specification
@@ -85,46 +84,52 @@ public class Key {
 
 	/**
 	 * Generate an HMAC signature from the components of a Fernet token.
-	 * TODO: refactor to accept instant
+	 *
 	 * @param version the Fernet version number
 	 * @param timestamp the seconds after the epoch that the token was generated
 	 * @param initializationVector the encryption and decryption initialization vector
-	 * @param cipherText the encrypted content of the token
+	 * @param cipherText the encrypted content of the token // FIXME not thead safe
 	 * @return the HMAC signature
 	 */
-	public byte[] getHmac(final byte version, final long timestamp, final IvParameterSpec initializationVector, final byte[] cipherText) {
-		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(getTokenPrefixBytes() + cipherText.length)) {
+	public byte[] getHmac(final byte version, final Instant timestamp, final IvParameterSpec initializationVector, final byte[] cipherText) {
+		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
+				getTokenPrefixBytes() + cipherText.length)) {
 			try (final DataOutputStream dataStream = new DataOutputStream(byteStream)) {
 				dataStream.writeByte(version);
-				dataStream.writeLong(timestamp);
+				dataStream.writeLong(timestamp.getEpochSecond());
 				dataStream.write(initializationVector.getIV());
 				dataStream.write(cipherText);
-				dataStream.flush();
-	
+
 				try {
 					final Mac mac = Mac.getInstance(getSigningAlgorithm());
-					try {
-						mac.init(getSigningKeySpec());
-						return mac.doFinal(byteStream.toByteArray());
-					} catch (final InvalidKeyException ike) {
-						// this should not happen because we control the signing key algorithm and pre-validate the length
-						throw new RuntimeException("Unable to initialise HMAC with shared secret: " + ike.getMessage(), ike);
-					}
+					mac.init(getSigningKeySpec());
+					return mac.doFinal(byteStream.toByteArray());
+				} catch (final InvalidKeyException ike) {
+					// this should not happen because we control the signing key
+					// algorithm and pre-validate the length
+					throw new RuntimeException("Unable to initialise HMAC with shared secret: " + ike.getMessage(), ike);
 				} catch (final NoSuchAlgorithmException nsae) {
-					// this should not happen as implementors are required to provide the HmacSHA256 algorithm.
+					// this should not happen as implementors are required to
+					// provide the HmacSHA256 algorithm.
 					throw new RuntimeException(nsae.getMessage(), nsae);
 				}
 			}
 		} catch (final IOException e) {
-			// this should not happen as IO is to memory only
+			// this should not happen as I/O is to memory only
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
+	/**
+	 * @return an HMAC key for signing the token
+	 */
 	public SecretKeySpec getSigningKeySpec() {
 		return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
 	}
 
+	/**
+	 * @return the key for encrypting and decrypting the token payload
+	 */
 	public SecretKeySpec getEncryptionKeySpec() {
 		return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
 	}
@@ -134,7 +139,7 @@ public class Key {
 	 */
 	public String serialise() {
 		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
-			serialise(byteStream);
+			writeTo(byteStream);
 			return getEncoder().encodeToString(byteStream.toByteArray());
 		} catch (final IOException ioe) {
 			// this should not happen as I/O is to memory
@@ -142,7 +147,13 @@ public class Key {
 		}
 	}
 
-	public void serialise(final OutputStream outputStream) throws IOException {
+	/**
+	 * Write the raw bytes of this key to the specified output stream.
+	 *
+	 * @param outputStream the target
+	 * @throws IOException if the underlying I/O device cannot be written to
+	 */
+	public void writeTo(final OutputStream outputStream) throws IOException {
 		outputStream.write(getSigningKey());
 		outputStream.write(getEncryptionKey());
 	}

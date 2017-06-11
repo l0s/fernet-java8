@@ -69,8 +69,12 @@ interface Constants {
 	 */
 	static final byte supportedVersion = (byte)0x80;
 	/**
-	 * The minimum number of bytes in a token.
+	 * The number of bytes in the static portion of the token (excludes cipher text).
 	 */
 	static final int tokenStaticBytes = versionBytes + timestampBytes + initializationVectorBytes + signatureBytes;
+	/**
+	 * The minimum number of bytes in a token (i.e. with an empty plaintext).
+	 */
+	static final int minimumTokenBytes = tokenStaticBytes + cipherTextBlockSize;
 
 }

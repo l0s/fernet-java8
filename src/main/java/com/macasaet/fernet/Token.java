@@ -6,11 +6,10 @@ import static com.macasaet.fernet.Constants.cipherTransformation;
 import static com.macasaet.fernet.Constants.decoder;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.initializationVectorBytes;
+import static com.macasaet.fernet.Constants.minimumTokenBytes;
 import static com.macasaet.fernet.Constants.signatureBytes;
 import static com.macasaet.fernet.Constants.supportedVersion;
 import static com.macasaet.fernet.Constants.tokenStaticBytes;
-import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.crypto.Cipher.DECRYPT_MODE;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
@@ -45,15 +44,18 @@ import javax.crypto.spec.IvParameterSpec;
 public class Token {
 
 	private final byte version;
-	private final long timestamp;
+	private final Instant timestamp;
 	private final IvParameterSpec initializationVector;
 	private final byte[] cipherText;
 	private final byte[] hmac;
 
-	protected Token(final byte version, final long timestamp, final IvParameterSpec initializationVector,
+	protected Token(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
 			final byte[] cipherText, final byte[] hmac) {
 		if (version != supportedVersion) {
 			throw new IllegalTokenException("Unsupported version: " + version);
+		}
+		if( timestamp == null ) {
+			throw new IllegalTokenException("timestamp cannot be null");
 		}
 		if (initializationVector == null || initializationVector.getIV().length != initializationVectorBytes) {
 			throw new IllegalTokenException("Initialization Vector must be 128 bits");
@@ -72,17 +74,17 @@ public class Token {
 	}
 
 	protected static Token fromBytes(final byte[] bytes) throws IllegalTokenException {
-		if (bytes.length < tokenStaticBytes) {
+		if (bytes.length < minimumTokenBytes) {
 			throw new IllegalTokenException("Not enough bits to generate a Token");
 		}
 		try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
 			final DataInputStream dataStream = new DataInputStream(inputStream);
 			final byte version = dataStream.readByte();
-			final long timestamp = dataStream.readLong();
+			final long timestampSeconds = dataStream.readLong();
 
 			final byte[] initializationVector = new byte[initializationVectorBytes];
 			final int ivBytesRead = dataStream.read(initializationVector);
-			if (ivBytesRead < 16) {
+			if (ivBytesRead < initializationVectorBytes) {
 				throw new IllegalTokenException("Not enough bits to generate a Token");
 			}
 
@@ -105,7 +107,8 @@ public class Token {
 			if (dataStream.read() != -1) {
 				throw new IllegalTokenException("more bits found");
 			}
-			return new Token(version, timestamp, new IvParameterSpec(initializationVector), cipherText, hmac);
+			return new Token(version, Instant.ofEpochSecond(timestampSeconds),
+					new IvParameterSpec(initializationVector), cipherText, hmac);
 		} catch (final IOException ioe) {
 			// this should not happen as I/O is from memory and stream
 			// length is verified ahead of time
@@ -127,7 +130,7 @@ public class Token {
 	public static Token generate(final Random random, final Key key, final String plainText) {
 		final IvParameterSpec initializationVector = generateInitializationVector(random);
 		final byte[] cipherText = encrypt(key, plainText, initializationVector);
-		final long timestamp = MILLISECONDS.toSeconds(currentTimeMillis());
+		final Instant timestamp = Instant.now();
 		final byte[] hmac = key.getHmac(supportedVersion, timestamp, initializationVector, cipherText);
 		return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
 	}
@@ -138,11 +141,11 @@ public class Token {
 
 	public String validateAndDecrypt(final Key key, final Instant earliestValidInstant,
 			final Instant latestValidInstant) {
-		if (!isValidVersion()) {
+		if (getVersion() != (byte) 0x80) {
 			throw new TokenValidationException("Invalid version");
-		} else if (!isNotExpired(earliestValidInstant.getEpochSecond())) {
+		} else if (!getTimestamp().isAfter(earliestValidInstant)) {
 			throw new TokenValidationException("Token is expired");
-		} else if (!isNotTooFarInTheFuture(latestValidInstant.getEpochSecond())) {
+		} else if (!getTimestamp().isBefore(latestValidInstant)) {
 			throw new TokenValidationException("Token timestamp is in the future (clock skew).");
 		} else if (!isValidSignature(key)) {
 			throw new TokenValidationException("Signature does not match.");
@@ -166,7 +169,7 @@ public class Token {
 	public String serialise() {
 		try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
 				tokenStaticBytes + getCipherText().length)) {
-			serialise(byteStream);
+			writeTo(byteStream);
 			return getEncoder().encodeToString(byteStream.toByteArray());
 		} catch (final IOException e) {
 			// this should not happen as IO is to memory only
@@ -174,25 +177,33 @@ public class Token {
 		}
 	}
 
-	public void serialise(final OutputStream outputStream) throws IOException {
+	/**
+	 * Write the raw bytes of this token to the specified output stream.
+	 *
+	 * @param outputStream the target
+	 * @throws IOException if data cannot be written to the underlying stream
+	 */
+	public void writeTo(final OutputStream outputStream) throws IOException {
 		try (final DataOutputStream dataStream = new DataOutputStream(outputStream)) {
 			dataStream.writeByte(getVersion());
-			dataStream.writeLong(getTimestamp());
+			dataStream.writeLong(getTimestamp().getEpochSecond());
 			dataStream.write(getInitializationVector().getIV());
 			dataStream.write(getCipherText());
 			dataStream.write(getHmac());
-			dataStream.flush();
 		}
 	}
 
+	/**
+	 * @return the Fernet specification version of this token
+	 */
 	public byte getVersion() {
 		return version;
 	}
 
 	/**
-	 * @return the number of seconds after the epoch that this token was generated
+	 * @return the time that this token was generated
 	 */
-	public long getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
 
@@ -207,8 +218,8 @@ public class Token {
 		final StringBuilder builder = new StringBuilder();
 		final byte[] ivBytes = getInitializationVector().getIV();
 		builder.append("Token [version=").append(String.format("0x%x", new BigInteger(1, new byte[] { getVersion() })))
-				.append(", timestamp=").append(toDateString(getTimestamp()))
-				.append(", initializationVector=").append(toBase64String(ivBytes))
+				.append(", timestamp=").append(getTimestamp())
+				.append(", initializationVector=").append(encoder.encodeToString(ivBytes))
 				.append(", cipherText=").append(Constants.encoder.encodeToString(getCipherText()))
 				.append(", hmac=").append(Constants.encoder.encodeToString(getHmac())).append("]");
 		return builder.toString();
@@ -256,34 +267,9 @@ public class Token {
 	 * @return true if and only if the signature on the token was generated using the supplied key
 	 */
 	protected boolean isValidSignature(final Key key) {
-		final byte[] computedHmac = key.getHmac(getVersion(), getTimestamp(), getInitializationVector(),
-				getCipherText());
+		final byte[] computedHmac =
+				key.getHmac(getVersion(), getTimestamp(), getInitializationVector(), getCipherText());
 		return Arrays.equals(getHmac(), computedHmac);
-	}
-
-	/**
-	 * Evaluate whether or not any clock skew is acceptable.
-	 *
-	 * @param latestValidTimestamp the latest time that this token would be considered valid, expressed in seconds after the epoch
-	 * @return true if and only if this token is not too far in the future
-	 */
-	protected boolean isNotTooFarInTheFuture(final long latestValidTimestamp) {
-		return getTimestamp() <= latestValidTimestamp;
-	}
-
-	/**
-	 * @param earliestValidTimestamp the earliest time that this token would be considered valid, expressed in seconds after the epoch.
-	 * @return true if and only if this token is not expired
-	 */
-	protected boolean isNotExpired(final long earliestValidTimestamp) {
-		return getTimestamp() >= earliestValidTimestamp;
-	}
-
-	/**
-	 * @return true if and only if the token specifies a valid version
-	 */
-	protected boolean isValidVersion() {
-		return getVersion() == (byte) 0x80;
 	}
 
 	protected String decrypt(final Cipher cipher, final Key key) throws BadPaddingException {
@@ -311,14 +297,6 @@ public class Token {
 
 	protected byte[] getHmac() {
 		return hmac;
-	}
-
-	protected static String toDateString(final long secondsSinceEpoch) {
-		return Instant.ofEpochSecond(secondsSinceEpoch).toString();
-	}
-
-	protected static String toBase64String(final byte[] input) {
-		return encoder.encodeToString(input);
 	}
 
 }

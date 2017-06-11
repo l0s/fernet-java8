@@ -47,8 +47,7 @@ public class TokenTest {
 
 		// then
 		assertEquals((byte) 0x80, result.getVersion());
-		assertEquals(Instant.from(formatter.parse("1985-10-26T01:20:00-07:00")),
-				Instant.ofEpochSecond(result.getTimestamp()));
+		assertEquals(Instant.from(formatter.parse("1985-10-26T01:20:00-07:00")), result.getTimestamp());
 		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
 				result.getInitializationVector().getIV());
 	}
@@ -70,6 +69,25 @@ public class TokenTest {
 		// then
 		final String plainText = result.validateAndDecrypt(key, validator);
 		assertEquals("Hello, world!", plainText);
+	}
+
+	@Test
+	public void testGenerateEmptyToken() {
+		// given
+		final Random deterministicRandom = new Random() {
+			private static final long serialVersionUID = 3075400891983079965L;
+			public void nextBytes(final byte[] bytes) {
+				for( int i = bytes.length; --i >= 0; bytes[ i ] = 1 );
+			}
+		};
+		final Key key = Key.generateKey(deterministicRandom);
+
+		// when
+		final Token result = Token.generate(deterministicRandom, key, "");
+
+		// then
+		final String plainText = result.validateAndDecrypt(key, validator);
+		assertEquals("", plainText);
 	}
 
 	@Test
@@ -97,7 +115,7 @@ public class TokenTest {
 		// given
 		final IvParameterSpec initializationVector = new IvParameterSpec(
 				new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 });
-		final Token invalidToken = new Token((byte) 0x80, 0l, initializationVector,
+		final Token invalidToken = new Token((byte) 0x80, Instant.ofEpochSecond(0), initializationVector,
 				new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
 				new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
 						26, 27, 28, 29, 30, 31, 32 });
