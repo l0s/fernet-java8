@@ -31,174 +31,179 @@ public class FernetTest {
 	private Clock clock;
 	private Validator<String> validator;
 
-	@Before
-	public void setUp() {
-		clock = new Clock() {
-			public Clock withZone(final ZoneId zone) {
-				return this;
-			}
+    @Before
+    public void setUp() {
+        clock = new Clock() {
+            public Clock withZone(final ZoneId zone) {
+                return this;
+            }
 
-			public Instant instant() {
-				return Instant.from(formatter.parse(now));
-			}
+            public Instant instant() {
+                return Instant.from(formatter.parse(now));
+            }
 
-			public ZoneId getZone() {
-				return ZoneId.of("UTC");
-			}
-		};
-		validator = new StringValidator() {
-			public Clock getClock() {
-				return clock;
-			}
-		};
-	}
+            public ZoneId getZone() {
+                return ZoneId.of("UTC");
+            }
+        };
+        validator = new StringValidator() {
+            public Clock getClock() {
+                return clock;
+            }
+        };
+    }
 
-	/*
-	 * Verify validation errors
-	 * https://github.com/fernet/spec/blob/master/invalid.json
-	 */
+    /*
+     * Verify validation errors https://github.com/fernet/spec/blob/master/invalid.json
+     */
 
-	@Test
-	public final void incorrectMac() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykQUFBQUFBQUFBQQ==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+    @Test
+    public final void incorrectMac() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykQUFBQUFBQUFBQQ==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// when
-		thrown.expect(TokenValidationException.class);
-		token.validateAndDecrypt(key, validator);
+        // when
+        thrown.expect(TokenValidationException.class);
+        token.validateAndDecrypt(key, validator);
 
-		// then (nothing)
-	}
+        // then (nothing)
+    }
 
-	@Test
-	public final void tooShort() {
-		// given
-		final String invalidToken = "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPA==";
+    @Test
+    public final void tooShort() {
+        // given
+        final String invalidToken = "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPA==";
 
-		// when
-		thrown.expect(IllegalArgumentException.class);
-		Token.fromString(invalidToken);
+        // when
+        thrown.expect(IllegalArgumentException.class);
+        Token.fromString(invalidToken);
 
-		// then (nothing)
-	}
+        // then (nothing)
+    }
 
-	@Test
-	public final void invalidBase64() {
-		// given
-		final String invalidToken = "%%%%%%%%%%%%%AECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==";
+    @Test
+    public final void invalidBase64() {
+        // given
+        final String invalidToken = "%%%%%%%%%%%%%AECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==";
 
-		// when
-		thrown.expect(IllegalArgumentException.class);
-		Token.fromString(invalidToken);
-		
-		// then (nothing)
-	}
+        // when
+        thrown.expect(IllegalArgumentException.class);
+        Token.fromString(invalidToken);
 
-	@Test
-	public final void payloadSizeNotMultipleOfBlockSize() {
-		// given
-		final String invalidToken = "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPOm73QeoCk9uGib28Xe5vz6oxq5nmxbx_v7mrfyudzUm";
+        // then (nothing)
+    }
 
-		// when
-		thrown.expect(IllegalArgumentException.class);
-		Token.fromString(invalidToken);
+    @Test
+    public final void payloadSizeNotMultipleOfBlockSize() {
+        // given
+        final String invalidToken = "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPOm73QeoCk9uGib28Xe5vz6oxq5nmxbx_v7mrfyudzUm";
 
-		// then (nothing)
-	}
+        // when
+        thrown.expect(IllegalArgumentException.class);
+        Token.fromString(invalidToken);
 
-	@Test
-	public final void payloadPaddingError() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0ODz4LEpdELGQAad7aNEHbf-JkLPIpuiYRLQ3RtXatOYREu2FWke6CnJNYIbkuKNqOhw==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        // then (nothing)
+    }
 
-		// when
-		thrown.expect(TokenValidationException.class);
-		token.validateAndDecrypt(key, validator);
+    @Test
+    public final void payloadPaddingError() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0ODz4LEpdELGQAad7aNEHbf-JkLPIpuiYRLQ3RtXatOYREu2FWke6CnJNYIbkuKNqOhw==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// then (nothing)
-	}
+        // when
+        thrown.expect(TokenValidationException.class);
+        token.validateAndDecrypt(key, validator);
 
-	@Test
-	public final void farFutureTimestamp() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwStRAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAnja1xKYyhd-Y6mSkTOyTGJmw2Xc2a6kBd-iX9b_qXQcw==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        // then (nothing)
+    }
 
-		// when
-		thrown.expect(TokenValidationException.class);
-		token.validateAndDecrypt(key, validator);
+    @Test
+    public final void farFutureTimestamp() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwStRAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAnja1xKYyhd-Y6mSkTOyTGJmw2Xc2a6kBd-iX9b_qXQcw==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// then (nothing)
-	}
+        // when
+        thrown.expect(TokenValidationException.class);
+        token.validateAndDecrypt(key, validator);
 
-	@Test
-	public final void expiredTtl() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
-		now = "1985-10-26T01:21:31-07:00";
+        // then (nothing)
+    }
 
-		// when
-		thrown.expect(TokenValidationException.class);
-		thrown.reportMissingExceptionWithMessage("Token should be expired: " + token);
-		token.validateAndDecrypt(key, validator);
+    @Test
+    public final void expiredTtl() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        now = "1985-10-26T01:21:31-07:00";
 
-		// then (nothing)
-	}
+        // when
+        thrown.expect(TokenValidationException.class);
+        thrown.reportMissingExceptionWithMessage("Token should be expired: " + token);
+        token.validateAndDecrypt(key, validator);
 
-	/**
-	 * Verify the scenario that the token has an incorrect initialization vector, which should cause a padding error
-	 */
-	@Test
-	public final void incorrectInitializationVector() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwJ6xBQECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAkLhFLHpGtDBRLRTZeUfWgHSv49TF2AUEZ1TIvcZjK1zQ==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        // then (nothing)
+    }
 
-		// when
-		thrown.expect(TokenValidationException.class);
-		token.validateAndDecrypt(key, validator);
+    /**
+     * Verify the scenario that the token has an incorrect initialization vector, which should cause a padding error
+     */
+    @Test
+    public final void incorrectInitializationVector() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6xBQECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAkLhFLHpGtDBRLRTZeUfWgHSv49TF2AUEZ1TIvcZjK1zQ==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// then
-	}
+        // when
+        thrown.expect(TokenValidationException.class);
+        token.validateAndDecrypt(key, validator);
 
-	/**
-	 * Verify ability to generate well-formed token.
-	 *
-	 * https://github.com/fernet/spec/blob/master/generate.json
-	 */
-	@Test
-	public final void generate() {
-		// given
-		final Token token = Token.fromString(
-				"gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        // then
+    }
 
-		// when
-		final String result = token.validateAndDecrypt(key, validator);
+    /**
+     * Verify ability to generate well-formed token.
+     *
+     * https://github.com/fernet/spec/blob/master/generate.json
+     */
+    @Test
+    public final void generate() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// then
-		assertEquals("hello", result);
-	}
+        // when
+        final String result = token.validateAndDecrypt(key, validator);
 
-	/**
-	 * Verify ability to verify a valid token.
-	 *
-	 * https://github.com/fernet/spec/blob/master/verify.json
-	 */
-	@Test
-	public final void verify() {
-		// given
-		final Token token = Token.fromString("gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
-		final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        // then
+        assertEquals("hello", result);
+    }
 
-		// when
-		final String result = token.validateAndDecrypt(key, validator);
+    /**
+     * Verify ability to verify a valid token.
+     *
+     * https://github.com/fernet/spec/blob/master/verify.json
+     */
+    @Test
+    public final void verify() {
+        // given
+        final Token token = Token.fromString(
+                "gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
+        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
-		// then
-		assertEquals("hello", result);
-	}
+        // when
+        final String result = token.validateAndDecrypt(key, validator);
+
+        // then
+        assertEquals("hello", result);
+    }
 
 }

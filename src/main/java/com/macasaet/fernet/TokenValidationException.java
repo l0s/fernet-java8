@@ -10,23 +10,23 @@ package com.macasaet.fernet;
  */
 public class TokenValidationException extends RuntimeException {
 
-	private static final long serialVersionUID = 4917583778149819611L;
+    private static final long serialVersionUID = 4917583778149819611L;
 
-	public TokenValidationException(final String message) {
-		super(message);
-	}
+    public TokenValidationException(final String message) {
+        super(message);
+    }
 
-	public TokenValidationException(final Throwable cause) {
-		this(cause.getMessage(), cause);
-	}
+    public TokenValidationException(final Throwable cause) {
+        this(cause.getMessage(), cause);
+    }
 
-	public TokenValidationException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
+    public TokenValidationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
-	public TokenValidationException(final String message, final Throwable cause, final boolean enableSuppression,
-			final boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
+    public TokenValidationException(final String message, final Throwable cause, final boolean enableSuppression,
+            final boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 
 }
