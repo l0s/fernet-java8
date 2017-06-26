@@ -9,6 +9,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 
 import com.macasaet.fernet.Key;
+import com.macasaet.fernet.StringObjectValidator;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.Validator;
 
@@ -40,10 +41,10 @@ public class ProtectedResource {
 	 * addition, it applies domain-specific business rules to evaluate the
 	 * deserialised payload.
 	 */
-	final Validator<User> validator = new Validator<User>() {
-		public Function<String, User> getTransformer() {
-			return repository::findUser;
-		}
+	final Validator<User> validator = new StringObjectValidator<User>() {
+        public Function<String, User> getStringTransformer() {
+            return repository::findUser;
+        }
 
 		public Predicate<User> getObjectValidator() {
 			return User::isTrustworthy;

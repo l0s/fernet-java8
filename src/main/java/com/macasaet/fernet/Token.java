@@ -126,8 +126,12 @@ public class Token {
     }
 
     public static Token generate(final Random random, final Key key, final String plainText) {
+        return generate(random, key, plainText.getBytes(charset));
+    }
+
+    public static Token generate(final Random random, final Key key, final byte[] payload) {
         final IvParameterSpec initializationVector = generateInitializationVector(random);
-        final byte[] cipherText = encrypt(key, plainText, initializationVector);
+        final byte[] cipherText = encrypt(key, payload, initializationVector);
         final Instant timestamp = Instant.now();
         final byte[] hmac = key.getHmac(supportedVersion, timestamp, initializationVector, cipherText);
         return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
@@ -137,8 +141,8 @@ public class Token {
         return validator.validateAndDecrypt(key, this);
     }
 
-    public String validateAndDecrypt(final Key key, final Instant earliestValidInstant,
-            final Instant latestValidInstant) {
+    protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
+            final Instant latestValidInstant) throws TokenValidationException {
         if (getVersion() != (byte) 0x80) {
             throw new TokenValidationException("Invalid version");
         } else if (!getTimestamp().isAfter(earliestValidInstant)) {
@@ -235,21 +239,21 @@ public class Token {
         return retval;
     }
 
-    protected static byte[] encrypt(final Key key, final String string, final IvParameterSpec initializationVector) {
+    protected static byte[] encrypt(final Key key, final byte[] payload, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(cipherTransformation);
-            return encrypt(key, cipher, string, initializationVector);
+            return encrypt(key, cipher, payload, initializationVector);
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
             // these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
             throw new RuntimeException("Unable to access cipher: " + e.getMessage(), e);
         }
     }
 
-    protected static byte[] encrypt(final Key key, final Cipher cipher, final String string,
+    protected static byte[] encrypt(final Key key, final Cipher cipher, final byte[] payload,
             final IvParameterSpec initializationVector) {
         try {
             cipher.init(ENCRYPT_MODE, key.getEncryptionKeySpec(), initializationVector);
-            return cipher.doFinal(string.getBytes(Constants.charset));
+            return cipher.doFinal(payload);
         } catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
             // this should not happen as the key is validated ahead of time and
             // we use an algorithm guaranteed to exist
@@ -273,11 +277,22 @@ public class Token {
         return Arrays.equals(getHmac(), computedHmac);
     }
 
-    protected String decrypt(final Cipher cipher, final Key key) throws BadPaddingException {
+    protected byte[] decrypt(final Cipher cipher, final Key key) throws BadPaddingException {
         try {
             cipher.init(DECRYPT_MODE, key.getEncryptionKeySpec(), getInitializationVector());
             final byte[] plainBytes = cipher.doFinal(getCipherText());
-            return new String(plainBytes, charset);
+            return plainBytes;
+        } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
+            // these should not happen due to upfront validation
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void decrypt(final Cipher cipher, final Key key, final OutputStream sink) throws BadPaddingException, IOException {
+        try {
+            cipher.init(DECRYPT_MODE, key.getEncryptionKeySpec(), getInitializationVector());
+            final byte[] plainBytes = cipher.doFinal(getCipherText());
+            sink.write(plainBytes);
         } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
             // these should not happen due to upfront validation
             throw new RuntimeException(e.getMessage(), e);

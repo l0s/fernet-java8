@@ -36,11 +36,11 @@ public interface Validator<T> {
         return (T) -> true;
     }
 
-    Function<String, T> getTransformer();
+    Function<byte[], T> getTransformer();
 
     default T validateAndDecrypt(final Key key, final Token token) throws TokenValidationException {
         final Instant now = Instant.now(getClock());
-        final String plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
+        final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
         final T object = getTransformer().apply(plainText);
         if (!getObjectValidator().test(object)) {
             throw new TokenValidationException("Invalid token contents.");
