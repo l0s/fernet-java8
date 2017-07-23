@@ -288,17 +288,6 @@ public class Token {
         }
     }
 
-    protected void decrypt(final Cipher cipher, final Key key, final OutputStream sink) throws BadPaddingException, IOException {
-        try {
-            cipher.init(DECRYPT_MODE, key.getEncryptionKeySpec(), getInitializationVector());
-            final byte[] plainBytes = cipher.doFinal(getCipherText());
-            sink.write(plainBytes);
-        } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
-            // these should not happen due to upfront validation
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
     protected String getCipherTransformation() {
         return cipherTransformation;
     }

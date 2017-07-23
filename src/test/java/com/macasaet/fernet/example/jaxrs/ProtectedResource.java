@@ -51,20 +51,23 @@ public class ProtectedResource {
 		}
 	};
 
-	/**
-	 * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
-	 *
-	 * @param authHeader a Fernet token
-	 * @return the secret information
-	 */
-	@GET
-	public String getSecret(@HeaderParam("X-Auth-Token") final String authHeader) {
-		// first, validate the token
-		// if we had more sophisticated authorisation rules, we could make use
-		// of the output POJO
-		final Token token = Token.fromString(authHeader);
-		token.validateAndDecrypt(key, validator);
-		return "42";
-	}
+    /**
+     * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
+     *
+     * @param authHeader
+     *            a Fernet token
+     * @return the secret information
+     */
+    @GET
+    public String getSecret(@HeaderParam("X-Auth-Token") final String authHeader) {
+        // first, validate the token
+        // if the token is valid, proceed to return the requested data
+        final Token token = Token.fromString(authHeader);
+        final User user = token.validateAndDecrypt(key, validator);
+        // if the token is invalid, an exception will be thrown and the next line will not be executed
+        // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
+        // access to the data requested
+        return user.getSecret();
+    }
 
 }

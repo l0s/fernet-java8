@@ -40,6 +40,13 @@ import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.example.pb.Example.Session;
 import com.macasaet.fernet.example.pb.Example.Session.Builder;
 
+/**
+ * This class demonstrates storing binary content in the Fernet token.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 public class ProtocolBuffersExample {
 
     final Charset charset = StandardCharsets.UTF_8;
@@ -66,6 +73,11 @@ public class ProtocolBuffersExample {
         }
     };
 
+    /**
+     * Start a new session.
+     *
+     * @return a serialised Fernet token with a {@link Session} embedded in the payload
+     */
     @POST
     @Path("/api/sessions")
     public String createSession(@Context final HttpServletResponse servletResponse) {
@@ -80,6 +92,13 @@ public class ProtocolBuffersExample {
         return token.serialise();
     }
 
+    /**
+     * Renew a session 
+     *
+     * @param sessionId the existing session ID
+     * @param tokenString a current valid Fernet token
+     * @return a new Fernet token with the updated session state embedded
+     */
     @PUT
     @Path("/api/sessions/{sessionId}/renewal")
     public String renew(@PathParam("sessionId") final String sessionId, final String tokenString,
@@ -99,10 +118,12 @@ public class ProtocolBuffersExample {
             throw new WebApplicationException("Try again in a minute", 429);
         }
 
+        // The token and session are valid, now update the session
         final Builder builder = Session.newBuilder(session);
         builder.setRenewalCount(session.getRenewalCount() + 1);
         builder.setLastRenewalTime(Instant.now().getEpochSecond());
         final Session updatedSession = builder.build();
+        // store the updated session in a new Fernet token
         final Token retval = Token.generate(random, key, updatedSession.toByteArray());
         return retval.serialise();
     }

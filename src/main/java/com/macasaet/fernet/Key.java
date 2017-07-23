@@ -93,7 +93,7 @@ public class Key {
      * @param initializationVector
      *            the encryption and decryption initialization vector
      * @param cipherText
-     *            the encrypted content of the token // FIXME not thread safe
+     *            the encrypted content of the token
      * @return the HMAC signature
      */
     public byte[] getHmac(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,

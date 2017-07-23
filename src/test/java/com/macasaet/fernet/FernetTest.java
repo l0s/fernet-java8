@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.Before;
@@ -27,28 +27,14 @@ public class FernetTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private String now = "1985-10-26T01:20:01-07:00";
-	private Clock clock;
+	private Instant now = Instant.from(formatter.parse("1985-10-26T01:20:01-07:00"));
 	private Validator<String> validator;
 
     @Before
     public void setUp() {
-        clock = new Clock() {
-            public Clock withZone(final ZoneId zone) {
-                return this;
-            }
-
-            public Instant instant() {
-                return Instant.from(formatter.parse(now));
-            }
-
-            public ZoneId getZone() {
-                return ZoneId.of("UTC");
-            }
-        };
         validator = new StringValidator() {
             public Clock getClock() {
-                return clock;
+                return Clock.fixed(now, ZoneOffset.UTC);
             }
         };
     }
@@ -141,7 +127,7 @@ public class FernetTest {
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==");
         final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
-        now = "1985-10-26T01:21:31-07:00";
+        now = Instant.from(formatter.parse("1985-10-26T01:21:31-07:00"));
 
         // when
         thrown.expect(TokenValidationException.class);

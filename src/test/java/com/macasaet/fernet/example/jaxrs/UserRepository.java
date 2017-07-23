@@ -9,6 +9,8 @@ import jersey.repackaged.com.google.common.collect.ImmutableMap;
 /**
  * Example of how to incorporate external storage into a Fernet token creation and validation scheme.
  *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
  * @author Carlos Macasaet
  */
 @Singleton
