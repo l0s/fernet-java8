@@ -41,15 +41,15 @@ public class ProtectedResource {
 	 * addition, it applies domain-specific business rules to evaluate the
 	 * deserialised payload.
 	 */
-	final Validator<User> validator = new StringObjectValidator<User>() {
+    final Validator<User> validator = new StringObjectValidator<User>() {
         public Function<String, User> getStringTransformer() {
             return repository::findUser;
         }
 
-		public Predicate<User> getObjectValidator() {
-			return User::isTrustworthy;
-		}
-	};
+        public Predicate<User> getObjectValidator() {
+            return User::isTrustworthy;
+        }
+    };
 
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
