@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package example;
+
+option java_package = "com.macasaet.fernet.example.pb";
+
+message Session {
+  required string sessionId = 1;
+  required int32 renewalCount = 2;
+  required int64 startTime = 3; // seconds after the epoch
+  optional int64 lastRenewalTime = 4; // seconds after the epoch
+}

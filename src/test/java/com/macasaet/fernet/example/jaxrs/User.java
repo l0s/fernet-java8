@@ -24,6 +24,7 @@ public class User {
 	private String salt;
 	private String twoRoundPasswordHash;
 	private boolean trustworthy;
+	private String secret = "42";
 
 	public User() {
 	}
@@ -101,6 +102,17 @@ public class User {
 		} catch (final NoSuchAlgorithmException e) {
 			throw new RuntimeException("Password hashing algorithm not found: " + e.getMessage(), e);
 		}
-	}
+    }
+
+    /**
+     * @return a value that should only be presented to authenticated principals
+     */
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
 
 }

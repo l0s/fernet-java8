@@ -4,7 +4,6 @@ import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -24,16 +23,11 @@ import org.junit.Test;
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-	private Clock clock;
 	private Validator<String> validator;
 
     @Before
     public void setUp() {
-        clock = Clock.systemUTC();
         validator = new StringValidator() {
-            public Clock getClock() {
-                return clock;
-            }
         };
     }
 
@@ -98,7 +92,7 @@ public class TokenTest {
         final Random deterministicRandom = new Random() {
             private static final long serialVersionUID = 3075400891983079965L;
 
-            public void nextBytes(byte[] bytes) {
+            public void nextBytes(final byte[] bytes) {
                 for (int i = initializationVectorBytes; --i >= 0; bytes[i] = 1);
             }
         };
