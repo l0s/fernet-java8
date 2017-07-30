@@ -42,6 +42,8 @@ Alternatively, you can just download the latest
 [jar](https://github.com/l0s/fernet-java8/releases) and add it to your
 classpath. It does not have any dependencies.
 
+Note that this library requires Java 8 or higher.
+
 ## Examples
 
 Create a new key:
@@ -76,6 +78,13 @@ example, the payload is just the decrypted cipher text portion of the token.
 If you choose to store structured data in the token (e.g. JSON), or a
 pointer to a domain object (e.g. a username), you can implement your own
 `Validator<T>` that returs the type of POJO your application expects.
+
+### Storing Sensitive Data on the Client
+
+For an example of how to securely store sensitive data on the client (e.g. browser cookie), see the classes in
+[src/test/java](https://github.com/l0s/fernet-java8/tree/master/src/test/java/com/macasaet/fernet/example/autofill). The class 
+[AutofillExample](https://github.com/l0s/fernet-java8/blob/master/src/test/java/com/macasaet/fernet/example/autofill/AutofillExample.java) 
+shows a full end-to-end example.
 
 ### JAX-RS
 
