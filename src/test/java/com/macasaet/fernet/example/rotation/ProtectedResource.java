@@ -1,4 +1,4 @@
-package com.macasaet.fernet.rotation;
+package com.macasaet.fernet.example.rotation;
 
 import java.util.Random;
 

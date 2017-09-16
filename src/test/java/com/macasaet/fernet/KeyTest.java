@@ -74,7 +74,7 @@ public class KeyTest {
         final String string = "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=";
 
         // when
-        final Key key = Key.fromString(string);
+        final Key key = new Key(string);
 
         // then
         assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
@@ -112,7 +112,7 @@ public class KeyTest {
     @Test
     public void testGetHmac() {
         // given
-        final Key key = Key.fromString("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
+        final Key key = new Key("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
         // when
         final byte[] result = key.getHmac((byte) 0x80, Instant.ofEpochSecond(1), new IvParameterSpec(new byte[] {2}),
@@ -125,7 +125,7 @@ public class KeyTest {
     @Test
     public void testGetSigningKeySpec() {
         // given
-        final Key key = Key.fromString("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
+        final Key key = new Key("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
         // when
         final SecretKeySpec result = key.getSigningKeySpec();
@@ -137,7 +137,7 @@ public class KeyTest {
     @Test
     public void testGetEncryptionKeySpec() {
         // given
-        final Key key = Key.fromString("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
+        final Key key = new Key("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
         // when
         final SecretKeySpec result = key.getEncryptionKeySpec();

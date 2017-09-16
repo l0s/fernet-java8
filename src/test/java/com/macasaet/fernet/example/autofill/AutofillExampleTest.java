@@ -28,7 +28,7 @@ import com.macasaet.fernet.example.autofill.Client.Form;
  *
  * @author Carlos Macasaet
  */
-public class AutofillExample {
+public class AutofillExampleTest {
 
     private Instant now = Instant.now();
     private Clock clock = new Clock() {

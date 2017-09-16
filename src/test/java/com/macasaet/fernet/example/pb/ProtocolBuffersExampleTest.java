@@ -47,7 +47,7 @@ import com.macasaet.fernet.example.pb.Example.Session.Builder;
  *
  * @author Carlos Macasaet
  */
-public class ProtocolBuffersExample {
+public class ProtocolBuffersExampleTest {
 
     final Charset charset = StandardCharsets.UTF_8;
     final Random random = new SecureRandom();

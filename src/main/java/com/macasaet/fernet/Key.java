@@ -83,16 +83,6 @@ public class Key {
     }
 
     /**
-     * @param string
-     *            a Base 64 URL string in the format Signing-key (128 bits) || Encryption-key (128 bits)
-     * @return a Fernet key from the specification
-     */
-    @Deprecated
-    public static Key fromString(final String string) {
-        return new Key(string);
-    }
-
-    /**
      * Generate a random key
      *
      * @param random

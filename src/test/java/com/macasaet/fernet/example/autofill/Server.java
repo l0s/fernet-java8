@@ -32,7 +32,7 @@ public class Server {
     // this encapsulates a signing key and symmetric encryption key
     // server-side components may share this
     // it should not be shared with any client code
-    private final Key key = Key.fromString("eJEnkKigwjZDSdV0G-XCtUwyM0C0C4l2pz82CWDDzEg=");
+    private final Key key = new Key("eJEnkKigwjZDSdV0G-XCtUwyM0C0C4l2pz82CWDDzEg=");
     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
     // this defines how long a token will be considered valid

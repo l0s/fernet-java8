@@ -1,4 +1,4 @@
-package com.macasaet.fernet.rotation;
+package com.macasaet.fernet.example.rotation;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -23,10 +23,12 @@ import redis.clients.jedis.JedisPool;
 /**
  * This class shows how one can incorporate a key-rotation mechanism when using Fernet tokens.
  *
+ * This test is currently disabled because it requires an external Redis instance to be running.
+ *
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-public class KeyRotationExample {
+public class KeyRotationExampleTest {
 
     private JedisPool pool;
     private RedisKeyRepository repository;
