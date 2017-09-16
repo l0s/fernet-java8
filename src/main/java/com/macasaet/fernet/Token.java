@@ -10,8 +10,6 @@ import static com.macasaet.fernet.Constants.minimumTokenBytes;
 import static com.macasaet.fernet.Constants.signatureBytes;
 import static com.macasaet.fernet.Constants.supportedVersion;
 import static com.macasaet.fernet.Constants.tokenStaticBytes;
-import static javax.crypto.Cipher.DECRYPT_MODE;
-import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,18 +18,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
+import java.util.Collection;
 import java.util.Random;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
@@ -131,7 +123,7 @@ public class Token {
 
     public static Token generate(final Random random, final Key key, final byte[] payload) {
         final IvParameterSpec initializationVector = generateInitializationVector(random);
-        final byte[] cipherText = encrypt(key, payload, initializationVector);
+        final byte[] cipherText = key.encrypt(payload, initializationVector);
         final Instant timestamp = Instant.now();
         final byte[] hmac = key.getHmac(supportedVersion, timestamp, initializationVector, cipherText);
         return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
@@ -139,6 +131,11 @@ public class Token {
 
     public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
         return validator.validateAndDecrypt(key, this);
+    }
+
+    public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator)
+        throws TokenValidationException {
+        return validator.validateAndDecrypt(keys, this);
     }
 
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
@@ -152,17 +149,7 @@ public class Token {
         } else if (!isValidSignature(key)) {
             throw new TokenValidationException("Signature does not match.");
         }
-
-        try {
-            final Cipher cipher = Cipher.getInstance(getCipherTransformation());
-            return decrypt(cipher, key);
-        } catch (final BadPaddingException bpe) {
-            throw new TokenValidationException("Invalid padding in token: " + bpe.getMessage(), bpe);
-        } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
-            // this should not happen as we use an algorithm (AES) and padding
-            // (PKCS5) that are guaranteed to exist.
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return key.decrypt(getCipherText(), getInitializationVector());
     }
 
     /**
@@ -239,31 +226,6 @@ public class Token {
         return retval;
     }
 
-    protected static byte[] encrypt(final Key key, final byte[] payload, final IvParameterSpec initializationVector) {
-        try {
-            final Cipher cipher = Cipher.getInstance(cipherTransformation);
-            return encrypt(key, cipher, payload, initializationVector);
-        } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
-            // these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
-            throw new RuntimeException("Unable to access cipher: " + e.getMessage(), e);
-        }
-    }
-
-    protected static byte[] encrypt(final Key key, final Cipher cipher, final byte[] payload,
-            final IvParameterSpec initializationVector) {
-        try {
-            cipher.init(ENCRYPT_MODE, key.getEncryptionKeySpec(), initializationVector);
-            return cipher.doFinal(payload);
-        } catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
-            // this should not happen as the key is validated ahead of time and
-            // we use an algorithm guaranteed to exist
-            throw new RuntimeException("Unable to initialise cipher: " + e.getMessage(), e);
-        } catch (final IllegalBlockSizeException | BadPaddingException e) {
-            // these should not happen as we control the block size and padding
-            throw new RuntimeException("Unable to encrypt data: " + e.getMessage(), e);
-        }
-    }
-
     /**
      * Recompute the HMAC signature of the token with the stored shared secret key.
      *
@@ -271,21 +233,10 @@ public class Token {
      *            the shared secret key against which to validate the token
      * @return true if and only if the signature on the token was generated using the supplied key
      */
-    protected boolean isValidSignature(final Key key) {
+    public boolean isValidSignature(final Key key) {
         final byte[] computedHmac = key.getHmac(getVersion(), getTimestamp(), getInitializationVector(),
                 getCipherText());
         return Arrays.equals(getHmac(), computedHmac);
-    }
-
-    protected byte[] decrypt(final Cipher cipher, final Key key) throws BadPaddingException {
-        try {
-            cipher.init(DECRYPT_MODE, key.getEncryptionKeySpec(), getInitializationVector());
-            final byte[] plainBytes = cipher.doFinal(getCipherText());
-            return plainBytes;
-        } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
-            // these should not happen due to upfront validation
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 
     protected String getCipherTransformation() {

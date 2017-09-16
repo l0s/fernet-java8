@@ -3,7 +3,7 @@
   <groupId>com.macasaet.fernet</groupId>
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
-  <version>0.2.4-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <name>fernet-java8</name>
   <url>https://github.com/l0s/fernet-java8</url>
   <description>A Java implementation of the Fernet specification.</description>
@@ -61,6 +61,12 @@
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-databind</artifactId>
     	<version>2.8.8.1</version>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>redis.clients</groupId>
+    	<artifactId>jedis</artifactId>
+    	<version>2.9.0</version>
     	<scope>test</scope>
     </dependency>
   </dependencies>

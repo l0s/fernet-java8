@@ -1,5 +1,6 @@
 package com.macasaet.fernet;
 
+import static com.macasaet.fernet.Constants.cipherTransformation;
 import static com.macasaet.fernet.Constants.decoder;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.encryptionAlgorithm;
@@ -10,18 +11,25 @@ import static com.macasaet.fernet.Constants.signingKeyBytes;
 import static com.macasaet.fernet.Constants.tokenPrefixBytes;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static javax.crypto.Cipher.DECRYPT_MODE;
+import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64.Encoder;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -57,15 +65,31 @@ public class Key {
     }
 
     /**
+     * @param concatenatedKeys
+     *            an array of 32 bytes of which the first 16 is the signing key and the last 16 is the
+     *            encryption/decryption key
+     */
+    protected Key(final byte[] concatenatedKeys) {
+        this(copyOfRange(concatenatedKeys, 0, signingKeyBytes),
+                copyOfRange(concatenatedKeys, signingKeyBytes, fernetKeyBytes));
+    }
+
+    /**
+     * @param string
+     *            a Base 64 URL string in the format Signing-key (128 bits) || Encryption-key (128 bits)
+     */
+    public Key(final String string) {
+        this(decoder.decode(string));
+    }
+
+    /**
      * @param string
      *            a Base 64 URL string in the format Signing-key (128 bits) || Encryption-key (128 bits)
      * @return a Fernet key from the specification
      */
+    @Deprecated
     public static Key fromString(final String string) {
-        final byte[] bytes = decoder.decode(string);
-        final byte[] signingKey = copyOfRange(bytes, 0, signingKeyBytes);
-        final byte[] encryptionKey = copyOfRange(bytes, signingKeyBytes, fernetKeyBytes);
-        return new Key(signingKey, encryptionKey);
+        return new Key(string);
     }
 
     /**
@@ -137,8 +161,43 @@ public class Key {
     /**
      * @return the key for encrypting and decrypting the token payload
      */
-    public SecretKeySpec getEncryptionKeySpec() {
+    protected SecretKeySpec getEncryptionKeySpec() {
         return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
+    }
+
+    public byte[] encrypt(final byte[] payload, final IvParameterSpec initializationVector) {
+        try {
+            final Cipher cipher = Cipher.getInstance(cipherTransformation);
+            cipher.init(ENCRYPT_MODE, getEncryptionKeySpec(), initializationVector);
+            return cipher.doFinal(payload);
+        } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
+            // these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
+            throw new RuntimeException("Unable to access cipher: " + e.getMessage(), e);
+        } catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
+            // this should not happen as the key is validated ahead of time and
+            // we use an algorithm guaranteed to exist
+            throw new RuntimeException("Unable to initialise cipher: " + e.getMessage(), e);
+        } catch (final IllegalBlockSizeException | BadPaddingException e) {
+            // these should not happen as we control the block size and padding
+            throw new RuntimeException("Unable to encrypt data: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
+        try {
+            final Cipher cipher = Cipher.getInstance(getCipherTransformation());
+            cipher.init(DECRYPT_MODE, getEncryptionKeySpec(), initializationVector);
+            return cipher.doFinal(cipherText);
+        } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
+            // this should not happen as we use an algorithm (AES) and padding
+            // (PKCS5) that are guaranteed to exist.
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
+            // these should not happen due to upfront validation
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (final BadPaddingException bpe) {
+            throw new TokenValidationException("Invalid padding in token: " + bpe.getMessage(), bpe);
+        }
     }
 
     /**
@@ -189,6 +248,10 @@ public class Key {
 
     protected Encoder getEncoder() {
         return encoder;
+    }
+
+    protected String getCipherTransformation() {
+        return cipherTransformation;
     }
 
 }
