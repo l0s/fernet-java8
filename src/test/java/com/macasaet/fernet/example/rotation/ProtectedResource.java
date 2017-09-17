@@ -71,7 +71,6 @@ public class ProtectedResource {
         if ("username".equals(username) && "password".equals(password)) {
             // might be nice to have Token.generate(repository, payload)
             final Key primaryKey = getKeyRepository().getPrimaryKey();
-            System.out.println("-- generating token from key: " + primaryKey.serialise());
             final Token token = Token.generate(random, primaryKey, username);
             return token.serialise();
         }

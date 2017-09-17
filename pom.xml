@@ -69,6 +69,12 @@
     	<version>2.9.0</version>
     	<scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>com.github.kstyrc</groupId>
+    	<artifactId>embedded-redis</artifactId>
+    	<version>0.6</version>
+    	<scope>test</scope>
+    </dependency>
   </dependencies>
   <scm>
   	<url>https://github.com/l0s/fernet-java8</url>
@@ -82,6 +88,24 @@
   </ciManagement>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.20.1</version>
+      </plugin>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-failsafe-plugin</artifactId>
+	    <version>2.20.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+	  </plugin>
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
@@ -100,7 +124,15 @@
             <excludedMethod>ByteArrayOutputStream</excludedMethod>
           </excludedMethods>
         </configuration>
-	    </plugin>
+        <executions>
+          <execution>
+            <goals>
+              <goal>mutationCoverage</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+	  </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>

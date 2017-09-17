@@ -3,6 +3,7 @@ package com.macasaet.fernet.example.rotation;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -19,6 +20,7 @@ import com.macasaet.fernet.TokenValidationException;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.embedded.RedisServer;
 
 /**
  * This class shows how one can incorporate a key-rotation mechanism when using Fernet tokens.
@@ -28,8 +30,9 @@ import redis.clients.jedis.JedisPool;
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-public class KeyRotationExampleTest {
+public class KeyRotationExampleIT {
 
+    private RedisServer redisServer;
     private JedisPool pool;
     private RedisKeyRepository repository;
     private RedisKeyManager manager;
@@ -41,10 +44,13 @@ public class KeyRotationExampleTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-//    @Before
-    public void setUp() {
+    @Before
+    public void setUp() throws IOException {
         initMocks(this);
         final Random random = new SecureRandom();
+        redisServer = new RedisServer();
+        redisServer.start();
+
         pool = new JedisPool();
         repository = new RedisKeyRepository(pool);
         manager = new RedisKeyManager(random, pool, repository);
@@ -56,9 +62,10 @@ public class KeyRotationExampleTest {
         resource = new ProtectedResource(repository, random);
     }
 
-//    @After
+    @After
     public void tearDown() {
         clearData();
+        redisServer.stop();
     }
 
     protected void clearData() {
@@ -67,7 +74,7 @@ public class KeyRotationExampleTest {
         }
     }
 
-//    @Test
+    @Test
     public final void demonstrateKeyRotation() {
         final String initialToken = resource.issueToken("username", "password"); 
 
