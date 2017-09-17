@@ -117,12 +117,6 @@
           <targetTests>
             <param>com.macasaet.fernet.*</param>
           </targetTests>
-          <avoidCallsTo>
-            <avoidCallsTo>java.io.ByteArrayOutputStream</avoidCallsTo>
-          </avoidCallsTo>
-          <excludedMethods>
-            <excludedMethod>ByteArrayOutputStream</excludedMethod>
-          </excludedMethods>
         </configuration>
         <executions>
           <execution>

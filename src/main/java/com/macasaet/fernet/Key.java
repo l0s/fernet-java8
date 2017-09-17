@@ -100,6 +100,8 @@ public class Key {
     /**
      * Generate an HMAC signature from the components of a Fernet token.
      *
+     * TODO perhaps this should be called "sign" and the algorithm should be documented
+     *
      * @param version
      *            the Fernet version number
      * @param timestamp

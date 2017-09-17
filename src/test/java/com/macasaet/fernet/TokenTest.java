@@ -1,17 +1,22 @@
 package com.macasaet.fernet;
 
 import static com.macasaet.fernet.Constants.initializationVectorBytes;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import javax.crypto.spec.IvParameterSpec;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Unit tests for the {@link Token} class.
@@ -23,6 +28,8 @@ import org.junit.Test;
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+	@Rule
+    public ExpectedException thrown = ExpectedException.none();
 	private Validator<String> validator;
 
     @Before
@@ -123,6 +130,37 @@ public class TokenTest {
         assertEquals(
                 "gAAAAAAAAAAAAQIDBAUGBwgJCgsMDQ4PEAECAwQFBgcICQoLDA0ODxABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fIA==",
                 result);
+    }
+
+    @Test
+    public final void verifyExceptionThrownWhenKeyNoLongerInRotation() {
+        // given
+        final Random random = new Random();
+        final Token token = Token.generate(random, Key.generateKey(random), "Don't wait too long to decrypt this!");
+
+        final List<? extends Key> decryptionKeys =
+                IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
+
+        // when
+        thrown.expect(TokenValidationException.class);
+        token.validateAndDecrypt(decryptionKeys, validator);
+
+        // then (nothing)
+    }
+
+    @Test
+    public final void verifyKeyInRotationCanDecryptToken() {
+        // given
+        final Random random = new Random();
+        final List<? extends Key> decryptionKeys =
+                IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
+        final Token token = Token.generate(random, decryptionKeys.get(8), "Don't wait too long to decrypt this!");
+
+        // when
+        final String result = token.validateAndDecrypt(decryptionKeys, validator);
+
+        // then
+        assertEquals("Don't wait too long to decrypt this!", result);
     }
 
 }

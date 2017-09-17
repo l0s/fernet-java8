@@ -2,7 +2,6 @@ package com.macasaet.fernet;
 
 import static com.macasaet.fernet.Constants.charset;
 import static com.macasaet.fernet.Constants.cipherTextBlockSize;
-import static com.macasaet.fernet.Constants.cipherTransformation;
 import static com.macasaet.fernet.Constants.decoder;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.initializationVectorBytes;
@@ -39,7 +38,7 @@ public class Token {
     private final Instant timestamp;
     private final IvParameterSpec initializationVector;
     private final byte[] cipherText;
-    private final byte[] hmac;
+    private final byte[] hmac; // TODO maybe the field should be called "signature" and algorithm should just be documented
 
     protected Token(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final byte[] hmac) {
@@ -210,6 +209,7 @@ public class Token {
         final byte[] ivBytes = getInitializationVector().getIV();
         builder.append("Token [version=").append(String.format("0x%x", new BigInteger(1, new byte[] {getVersion()})))
                 .append(", timestamp=").append(getTimestamp())
+                // TODO remove IV and cipher text to prevent tokens from leaking into log files
                 .append(", initializationVector=").append(encoder.encodeToString(ivBytes))
                 .append(", cipherText=").append(encoder.encodeToString(getCipherText()))
                 .append(", hmac=").append(encoder.encodeToString(getHmac())).append("]");
@@ -237,10 +237,6 @@ public class Token {
         final byte[] computedHmac = key.getHmac(getVersion(), getTimestamp(), getInitializationVector(),
                 getCipherText());
         return Arrays.equals(getHmac(), computedHmac);
-    }
-
-    protected String getCipherTransformation() {
-        return cipherTransformation;
     }
 
     protected Encoder getEncoder() {
