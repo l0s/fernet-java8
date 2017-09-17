@@ -117,7 +117,7 @@ API to remain in flux until major version 1 (1.0.0).
 This project uses PITest to evaluate test coverage and test effectiveness.
 To see a report, run:
 
-    mvn clean install org.pitest:pitest-maven:mutationCoverage site
+    mvn clean install site
 
 ### Releasing to The Central Repository
 

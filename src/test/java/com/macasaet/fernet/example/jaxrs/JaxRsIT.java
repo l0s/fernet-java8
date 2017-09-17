@@ -22,7 +22,7 @@ import com.macasaet.fernet.Token;
  *
  * @author Carlos Macasaet
  */
-public class JaxRsTest {
+public class JaxRsIT {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

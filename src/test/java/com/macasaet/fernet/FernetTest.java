@@ -48,7 +48,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykQUFBQUFBQUFBQQ==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         thrown.expect(TokenValidationException.class);
@@ -98,7 +98,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0ODz4LEpdELGQAad7aNEHbf-JkLPIpuiYRLQ3RtXatOYREu2FWke6CnJNYIbkuKNqOhw==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         thrown.expect(TokenValidationException.class);
@@ -112,7 +112,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwStRAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAnja1xKYyhd-Y6mSkTOyTGJmw2Xc2a6kBd-iX9b_qXQcw==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         thrown.expect(TokenValidationException.class);
@@ -126,7 +126,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6xAAECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAl1-szkFVzXTuGb4hR8AKtwcaX1YdykRtfsH-p1YsUD2Q==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
         now = Instant.from(formatter.parse("1985-10-26T01:21:31-07:00"));
 
         // when
@@ -145,7 +145,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6xBQECAwQFBgcICQoLDA0OD3HkMATM5lFqGaerZ-fWPAkLhFLHpGtDBRLRTZeUfWgHSv49TF2AUEZ1TIvcZjK1zQ==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         thrown.expect(TokenValidationException.class);
@@ -164,7 +164,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         final String result = token.validateAndDecrypt(key, validator);
@@ -183,7 +183,7 @@ public class FernetTest {
         // given
         final Token token = Token.fromString(
                 "gAAAAAAdwJ6wAAECAwQFBgcICQoLDA0ODy021cpGVWKZ_eEwCGM4BLLF_5CV9dOPmrhuVUPgJobwOz7JcbmrR64jVmpU4IwqDA==");
-        final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+        final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
         // when
         final String result = token.validateAndDecrypt(key, validator);

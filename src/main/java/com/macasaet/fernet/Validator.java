@@ -5,6 +5,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAmount;
+import java.util.Collection;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -89,6 +91,30 @@ public interface Validator<T> {
             throw new TokenValidationException("Invalid token contents.");
         }
         return object;
+    }
+
+    /**
+     * Check the validity of a token against a pool of keys. This is useful if your application uses key rotation. Since
+     * token-verification is entirely CPU-bound, an attempt is made to evaluate the keys in parallel based on the
+     * available number of processors. If you wish to control the number of parallel threads used, invoke this inside a
+     * custom {@link ForkJoinPool}.
+     *
+     * @param keys
+     *            all the non-expired keys that could have been used to generate a token
+     * @param token
+     *            the client-provided token of unknown validity
+     * @return the deserialised contents of the token
+     * @throws TokenValidationException
+     *             if the token was not generated using any of the supplied keys.
+     */
+    default T validateAndDecrypt(final Collection<? extends Key> keys, final Token token)
+        throws TokenValidationException {
+        final Key key =
+                keys.parallelStream()
+                .filter(candidate -> token.isValidSignature(candidate))
+                .findFirst()
+                .orElseThrow(() -> new TokenValidationException("Encryption key not found."));
+        return validateAndDecrypt(key, token);
     }
 
 }

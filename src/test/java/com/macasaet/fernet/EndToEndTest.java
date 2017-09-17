@@ -1,4 +1,3 @@
-
 package com.macasaet.fernet;
 
 import static org.junit.Assert.assertEquals;
@@ -10,6 +9,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * This test eschews the use of mocks to validate the full lifecycle of token creation and validation.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ */
 public class EndToEndTest {
 
     @Rule
@@ -34,8 +40,7 @@ public class EndToEndTest {
     @Test
     public final void testInvalidKey() {
         // given
-        final Key key = Key.generateKey(random);
-        final Token token = Token.generate(random, key, "secret message");
+        final Token token = Token.generate(random, Key.generateKey(random), "secret message");
 
         // when
         thrown.expect(TokenValidationException.class);

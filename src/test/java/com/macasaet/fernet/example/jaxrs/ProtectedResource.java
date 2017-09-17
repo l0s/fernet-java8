@@ -30,7 +30,7 @@ public class ProtectedResource {
 	 * resource does not need to run on the same infrastructure as the software
 	 * that generated the token as long as it has access to the same secret key.
 	 */
-	final Key key = Key.fromString("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
+	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
 
 	@Inject
 	UserRepository repository;
