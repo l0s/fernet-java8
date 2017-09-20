@@ -31,11 +31,11 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>0.2.2</version>
+      <version>0.4.0</version>
     </dependency>
 
 If you use a dependency manager system or build system other than Maven,see
-[The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C0.2.2%7Cjar)
+[The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C0.4.0%7Cjar)
 page for details on how to integrate it.
 
 Alternatively, you can just download the latest
