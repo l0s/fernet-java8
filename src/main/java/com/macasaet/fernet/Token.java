@@ -73,23 +73,9 @@ public class Token {
             final byte version = dataStream.readByte();
             final long timestampSeconds = dataStream.readLong();
 
-            final byte[] initializationVector = new byte[initializationVectorBytes];
-            final int ivBytesRead = dataStream.read(initializationVector);
-            if (ivBytesRead < initializationVectorBytes) {
-                throw new IllegalTokenException("Not enough bits to generate a Token");
-            }
-
-            final byte[] cipherText = new byte[bytes.length - tokenStaticBytes];
-            final int cipherTextBytesRead = dataStream.read(cipherText);
-            if (cipherTextBytesRead < cipherText.length) {
-                throw new IllegalTokenException("Not enough bits to generate a Token");
-            }
-
-            final byte[] hmac = new byte[signatureBytes];
-            final int hmacBytesRead = dataStream.read(hmac);
-            if (hmacBytesRead < signatureBytes) {
-                throw new IllegalTokenException("not enough bits to generate a Token");
-            }
+            final byte[] initializationVector = read(dataStream, initializationVectorBytes);
+            final byte[] cipherText = read(dataStream, bytes.length - tokenStaticBytes);
+            final byte[] hmac = read(dataStream, signatureBytes);
 
             if (dataStream.read() != -1) {
                 throw new IllegalTokenException("more bits found");
@@ -101,6 +87,15 @@ public class Token {
             // length is verified ahead of time
             throw new RuntimeException(ioe.getMessage(), ioe);
         }
+    }
+
+    protected static byte[] read(final DataInputStream stream, final int numBytes) throws IOException {
+        final byte[] retval = new byte[numBytes];
+        final int bytesRead = stream.read(retval);
+        if (bytesRead < numBytes) {
+            throw new IllegalTokenException("Not enough bits to generate a Token");
+        }
+        return retval;
     }
 
     /**
