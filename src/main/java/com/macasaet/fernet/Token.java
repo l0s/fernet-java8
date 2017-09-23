@@ -169,7 +169,7 @@ public class Token {
         if (getVersion() != (byte) 0x80) {
             throw new TokenValidationException("Invalid version");
         } else if (!getTimestamp().isAfter(earliestValidInstant)) {
-            throw new TokenValidationException("Token is expired");
+            throw new TokenExpiredException("Token is expired");
         } else if (!getTimestamp().isBefore(latestValidInstant)) {
             throw new TokenValidationException("Token timestamp is in the future (clock skew).");
         } else if (!isValidSignature(key)) {
