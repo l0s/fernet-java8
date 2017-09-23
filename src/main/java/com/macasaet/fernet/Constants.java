@@ -1,4 +1,3 @@
-
 package com.macasaet.fernet;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -11,6 +10,12 @@ import java.util.Base64.Encoder;
 
 import javax.crypto.Cipher;
 
+/**
+ * This contains common values used throughout the framework.
+ *
+ * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
+ * @author Carlos Macasaet
+ */
 interface Constants {
 
     static final Charset charset = UTF_8;

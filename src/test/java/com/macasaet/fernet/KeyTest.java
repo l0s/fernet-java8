@@ -115,7 +115,7 @@ public class KeyTest {
         final Key key = new Key("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
         // when
-        final byte[] result = key.getHmac((byte) 0x80, Instant.ofEpochSecond(1), new IvParameterSpec(new byte[] {2}),
+        final byte[] result = key.sign((byte) 0x80, Instant.ofEpochSecond(1), new IvParameterSpec(new byte[] {2}),
                 new byte[] {3});
 
         // then

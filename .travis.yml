@@ -3,3 +3,4 @@ jdk:
   - oraclejdk8
   - openjdk8
 dist: trusty
+script: mvn clean verify

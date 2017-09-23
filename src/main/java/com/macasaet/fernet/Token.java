@@ -38,7 +38,7 @@ public class Token {
     private final Instant timestamp;
     private final IvParameterSpec initializationVector;
     private final byte[] cipherText;
-    private final byte[] hmac; // TODO maybe the field should be called "signature" and algorithm should just be documented
+    private final byte[] hmac;
 
     protected Token(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final byte[] hmac) {
@@ -104,7 +104,7 @@ public class Token {
     }
 
     /**
-     * Deserialise a Base64 URL Fernet token string.
+     * Deserialise a Base64 URL Fernet token string. This does NOT validate that the token was generated using a valid {@link Key}.
      *
      * @param string
      *            the Base 64 URL encoding of a token in the form Version | Timestamp | IV | Ciphertext | HMAC
@@ -116,22 +116,54 @@ public class Token {
         return fromBytes(decoder.decode(string));
     }
 
+    /**
+     * Convenience method to generate a new Fernet token with a string payload.
+     *
+     * @param random a source of entropy for your application
+     * @param key the secret key for encrypting <em>plainText</em> and signing the token
+     * @param plainText the payload to embed in the token
+     * @return a unique Fernet token
+     */
     public static Token generate(final Random random, final Key key, final String plainText) {
         return generate(random, key, plainText.getBytes(charset));
     }
 
+    /**
+     * Generate a new Fernet token.
+     *
+     * @param random a source of entropy for your application
+     * @param key the secret key for encrypting <em>payload</em> and signing the token
+     * @param payload the unencrypted data to embed in the token
+     * @return a unique Fernet token
+     */
     public static Token generate(final Random random, final Key key, final byte[] payload) {
         final IvParameterSpec initializationVector = generateInitializationVector(random);
         final byte[] cipherText = key.encrypt(payload, initializationVector);
         final Instant timestamp = Instant.now();
-        final byte[] hmac = key.getHmac(supportedVersion, timestamp, initializationVector, cipherText);
+        final byte[] hmac = key.sign(supportedVersion, timestamp, initializationVector, cipherText);
         return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
     }
 
+    /**
+     * Check the validity of this token. 
+     *
+     * @param key the secret key against which to validate the token
+     * @param validator an object that encapsulates the validation parameters (e.g. TTL)
+     * @return the decrypted, deserialised payload of this token
+     * @throws TokenValidationException if <em>key</em> was NOT used to generate this token
+     */
     public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
         return validator.validateAndDecrypt(key, this);
     }
 
+    /**
+     * Check the validity of this token against a collection of keys. Use this if you have implemented key rotation.
+     *
+     * @param keys the active keys which may have been used to generate token
+     * @param validator an object that encapsulates the validation parameters (e.g. TTL)
+     * @return the decrypted, deserialised payload of this token
+     * @throws TokenValidationException if none of the keys were used to generate this token
+     */
     public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator)
         throws TokenValidationException {
         return validator.validateAndDecrypt(keys, this);
@@ -206,12 +238,8 @@ public class Token {
 
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        final byte[] ivBytes = getInitializationVector().getIV();
         builder.append("Token [version=").append(String.format("0x%x", new BigInteger(1, new byte[] {getVersion()})))
                 .append(", timestamp=").append(getTimestamp())
-                // TODO remove IV and cipher text to prevent tokens from leaking into log files
-                .append(", initializationVector=").append(encoder.encodeToString(ivBytes))
-                .append(", cipherText=").append(encoder.encodeToString(getCipherText()))
                 .append(", hmac=").append(encoder.encodeToString(getHmac())).append("]");
         return builder.toString();
     }
@@ -234,7 +262,7 @@ public class Token {
      * @return true if and only if the signature on the token was generated using the supplied key
      */
     public boolean isValidSignature(final Key key) {
-        final byte[] computedHmac = key.getHmac(getVersion(), getTimestamp(), getInitializationVector(),
+        final byte[] computedHmac = key.sign(getVersion(), getTimestamp(), getInitializationVector(),
                 getCipherText());
         return Arrays.equals(getHmac(), computedHmac);
     }
@@ -247,6 +275,9 @@ public class Token {
         return cipherText;
     }
 
+    /**
+     * @return the HMAC 256 signature of this token
+     */
     protected byte[] getHmac() {
         return hmac;
     }

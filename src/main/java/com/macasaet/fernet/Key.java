@@ -98,9 +98,7 @@ public class Key {
     }
 
     /**
-     * Generate an HMAC signature from the components of a Fernet token.
-     *
-     * TODO perhaps this should be called "sign" and the algorithm should be documented
+     * Generate an HMAC SHA-256 signature from the components of a Fernet token.
      *
      * @param version
      *            the Fernet version number
@@ -112,7 +110,7 @@ public class Key {
      *            the encrypted content of the token
      * @return the HMAC signature
      */
-    public byte[] getHmac(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
+    public byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText) {
         try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 getTokenPrefixBytes() + cipherText.length)) {
@@ -144,19 +142,27 @@ public class Key {
     }
 
     /**
-     * @return an HMAC key for signing the token
+     * @return an HMAC SHA-256 key for signing the token
      */
-    public SecretKeySpec getSigningKeySpec() {
+    protected SecretKeySpec getSigningKeySpec() {
         return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
     }
 
     /**
-     * @return the key for encrypting and decrypting the token payload
+     * @return the AES key for encrypting and decrypting the token payload
      */
     protected SecretKeySpec getEncryptionKeySpec() {
         return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
     }
 
+    /**
+     * Encrypt a payload to embed in a Fernet token
+     *
+     * @param payload the raw bytes of the data to store in a token
+     * @param initializationVector random bytes from a high-entropy source to initialise the AES cipher
+     * @return the AES-encrypted payload. The length will always be a multiple of 16 (128 bits).
+     * @see #decrypt(byte[], IvParameterSpec)
+     */
     public byte[] encrypt(final byte[] payload, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(cipherTransformation);
@@ -175,6 +181,14 @@ public class Key {
         }
     }
 
+    /**
+     * Decrypt the payload of a Fernet token.
+     *
+     * @param cipherText the padded encrypted payload of a token. The length <em>must</em> be a multiple of 16 (128 bits).
+     * @param initializationVector the random bytes used in the AES encryption of the token
+     * @return the decrypted payload
+     * @see Key#encrypt(byte[], IvParameterSpec)
+     */
     public byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(getCipherTransformation());
