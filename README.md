@@ -31,7 +31,7 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>0.5.0</version>
+      <version>0.5.1</version>
     </dependency>
 
 For more details, see: 
@@ -106,8 +106,9 @@ It is also used by
 
 ## Open Issues
 
-All test cases pass now, and I am working on the API design. Expect the
-API to remain in flux until major version 1 (1.0.0).
+The core functionality is complete and unit-tested. In addition, several
+examples have been implemented to ensure the API works with common use
+cases. I plan to release version 1.0.0 soon.
 
 ## Development
 
