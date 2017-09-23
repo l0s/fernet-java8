@@ -1,0 +1,41 @@
+<project name="Fernet Java">
+  <body>
+    <menu name="Overview">
+      <item name="Documentation" href="https://github.com/l0s/fernet-java8/blob/master/README.md" />
+      <item name="Javadoc" href="https://javadoc.io/doc/com.macasaet.fernet/fernet-java8/${project.version}" />
+      <item name="Download" href="https://github.com/l0s/fernet-java8/releases" />
+      <item name="Source" href="https://github.com/l0s/fernet-java8" />
+    </menu>
+    <menu ref="reports" />
+    <links>
+      <item name="Documentation" href="https://github.com/l0s/fernet-java8/blob/master/README.md" />
+      <item name="Javadoc" href="https://javadoc.io/doc/com.macasaet.fernet/fernet-java8/${project.version}" />
+      <item name="Download" href="https://github.com/l0s/fernet-java8/releases" />
+      <item name="Source" href="https://github.com/l0s/fernet-java8" />
+    </links>
+    <footer><![CDATA[Copyright &copy; 2017 Carlos Macasaet. All rights reserved.]]></footer>
+  </body>
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.5</version>
+  </skin>
+  <custom>
+    <fluidoSkin>
+      <topBarEnabled>false</topBarEnabled>
+      <sideBarEnabled>true</sideBarEnabled>
+      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+      <gitHub>
+        <projectId>l0s/fernet-java8</projectId>
+        <ribbonOrientation>right</ribbonOrientation>
+        <ribbonColor>black</ribbonColor>
+      </gitHub>
+      <profile>pre-release</profile>
+      <twitter>
+        <user>l0s</user>
+        <showUser>true</showUser>
+        <showFollowers>false</showFollowers>
+      </twitter>
+    </fluidoSkin>
+  </custom>
+</project>

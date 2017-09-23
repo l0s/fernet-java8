@@ -5,8 +5,9 @@
   <packaging>jar</packaging>
   <version>0.5.1-SNAPSHOT</version>
   <name>fernet-java8</name>
-  <url>https://github.com/l0s/fernet-java8</url>
-  <description>A Java implementation of the Fernet specification.</description>
+  <url>https://l0s.github.io/fernet-java8/</url>
+  <inceptionYear>2017</inceptionYear>
+  <description>A Java implementation of the Fernet encrypted token specification.</description>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -18,8 +19,13 @@
     <developer>
       <id>l0s</id>
       <name>Carlos Macasaet</name>
+      <url>http://www.carlos-m.net</url>
     </developer>
   </developers>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/l0s/fernet-java8/issues</url>
+  </issueManagement>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -127,6 +133,18 @@
           </execution>
         </executions>
 	  </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-site-plugin</artifactId>
+      <version>3.5.1</version>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.maven.doxia</groupId>
+          <artifactId>doxia-module-markdown</artifactId>
+          <version>1.7</version>
+        </dependency>
+      </dependencies>
+    </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>

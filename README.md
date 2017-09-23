@@ -31,12 +31,14 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>0.4.0</version>
+      <version>0.5.0</version>
     </dependency>
 
-If you use a dependency manager system or build system other than Maven,see
+For more details, see: 
 [The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C0.4.0%7Cjar)
-page for details on how to integrate it.
+
+If you use a dependency manager system or build system other than Maven, see
+[Dependency Information](https://l0s.github.io/fernet-java8/dependency-info.html).
 
 Alternatively, you can just download the latest
 [jar](https://github.com/l0s/fernet-java8/releases) and add it to your
@@ -68,16 +70,11 @@ Validate the token:
     };
     final String payload = token.validateAndDecrypt(key, validator);
 
-Or:
-
-    final Instant now = Instant.now();
-    final String payload = token.validateAndDecrypt(key, now.minus(Duration.ofSeconds(60)), now.plus(Duration.ofSeconds(60)));
-
 When validating, an exception is thrown if the token is not valid.  In this
 example, the payload is just the decrypted cipher text portion of the token.
 If you choose to store structured data in the token (e.g. JSON), or a
 pointer to a domain object (e.g. a username), you can implement your own
-`Validator<T>` that returs the type of POJO your application expects.
+`Validator<T>` that returns the type of POJO your application expects.
 
 ### Storing Sensitive Data on the Client
 
@@ -99,11 +96,13 @@ external storage.
 ## Why Fernet, Why not JWT?
 
 Valid concerns have been raised about the JWT specification:
-* https://paragonie.com/blog/2017/03/jwt-json-web-tokens-is-bad-standard-that-everyone-should-avoid
-* https://news.ycombinator.com/item?id=13865459
+* [No Way, JOSE! Javascript Object Signing and Encryption is a Bad Standard That Everyone Should Avoid](https://paragonie.com/blog/2017/03/jwt-json-web-tokens-is-bad-standard-that-everyone-should-avoid)
+* [JSON Web Tokens should be avoided](https://news.ycombinator.com/item?id=13865459)
 
 In addition, Fernet has been available in Python's
 [cryptography](https://github.com/pyca/cryptography) package for some time.
+It is also used by
+[Keystone, the OpenStack identity service](https://docs.openstack.org/keystone/latest/admin/identity-fernet-token-faq.html).
 
 ## Open Issues
 
@@ -115,7 +114,8 @@ API to remain in flux until major version 1 (1.0.0).
 ### Mutation Testing and Test Coverage
 
 This project uses PITest to evaluate test coverage and test effectiveness.
-To see a report, run:
+The latest report is available [here](https://l0s.github.io/fernet-java8/pit-reports/).
+To generate a report for a local build, run:
 
     mvn clean install site
 
