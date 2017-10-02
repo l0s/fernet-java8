@@ -54,7 +54,7 @@ Create a new key:
 
 Deserialise an existing key:
 
-    final Key key = Key.fromString("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
+    final Key key = new Key("cw_0x689RpI-jtRR7oE8h_eQsKImvJapLeSbXpwF4e4=");
 
 Create a token:
 
