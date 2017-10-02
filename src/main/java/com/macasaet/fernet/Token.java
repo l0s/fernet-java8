@@ -17,6 +17,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
@@ -132,9 +133,14 @@ public class Token {
      * @return a unique Fernet token
      */
     public static Token generate(final Random random, final Key key, final byte[] payload) {
+        final Clock clock = Clock.systemUTC();
+        return generate(clock, random, key, payload);
+    }
+
+    protected static Token generate(final Clock clock, final Random random, final Key key, final byte[] payload) {
+        final Instant timestamp = clock.instant();
         final IvParameterSpec initializationVector = generateInitializationVector(random);
         final byte[] cipherText = key.encrypt(payload, initializationVector);
-        final Instant timestamp = Instant.now();
         final byte[] hmac = key.sign(supportedVersion, timestamp, initializationVector, cipherText);
         return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
     }
