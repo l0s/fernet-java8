@@ -14,8 +14,9 @@ import java.util.Random;
  *
  * @author Carlos Macasaet
  */
-public abstract class Generator {
+public class Generator {
 
+    private static final Clock clock = Clock.tickSeconds(ZoneOffset.UTC);
     private static final Random entropySource = new SecureRandom();
 
     /**
@@ -25,7 +26,7 @@ public abstract class Generator {
      * @return The Clock used for generating all tokens
      */
     protected Clock getClock() {
-        return Clock.tickSeconds(ZoneOffset.UTC);
+        return clock;
     }
 
     /**
@@ -37,10 +38,24 @@ public abstract class Generator {
         return entropySource;
     }
 
+    /**
+     * Generate a new Fernet token.
+     *
+     * @param key the secret key for encrypting <em>payload</em> and signing the token
+     * @param payload the unencrypted data to embed in the token
+     * @return a unique Fernet token
+     */
     public Token generate(final Key key, final byte[] payload) {
         return Token.generate(getClock(), getEntropySource(), key, payload);
     }
 
+    /**
+     * Generate a new Fernet token.
+     *
+     * @param key the secret key for encrypting <em>payload</em> and signing the token
+     * @param plainText unencrypted text to embedn in the token
+     * @return a unique Fernet token
+     */
     public Token generate(final Key key, final String plainText) {
         return generate(key, plainText.getBytes(charset));
     }
