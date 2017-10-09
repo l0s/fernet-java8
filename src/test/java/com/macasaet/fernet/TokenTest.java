@@ -31,11 +31,13 @@ public class TokenTest {
 	@Rule
     public ExpectedException thrown = ExpectedException.none();
 	private Validator<String> validator;
+	private Generator generator;
 
     @Before
     public void setUp() {
         validator = new StringValidator() {
         };
+        generator = new Generator();
     }
 
     @Test
@@ -63,10 +65,15 @@ public class TokenTest {
                 for (int i = bytes.length; --i >= 0; bytes[i] = 1);
             }
         };
+        generator = new Generator() {
+            protected Random getEntropySource() {
+                return deterministicRandom;
+            }
+        };
         final Key key = Key.generateKey(deterministicRandom);
 
         // when
-        final Token result = Token.generate(deterministicRandom, key, "Hello, world!");
+        final Token result = generator.generate(key, "Hello, world!");
 
         // then
         final String plainText = result.validateAndDecrypt(key, validator);
@@ -83,10 +90,15 @@ public class TokenTest {
                 for (int i = bytes.length; --i >= 0; bytes[i] = 1);
             }
         };
+        generator = new Generator() {
+            protected Random getEntropySource() {
+                return deterministicRandom;
+            }
+        };
         final Key key = Key.generateKey(deterministicRandom);
 
         // when
-        final Token result = Token.generate(deterministicRandom, key, "");
+        final Token result = generator.generate(key, "");
 
         // then
         final String plainText = result.validateAndDecrypt(key, validator);
@@ -103,9 +115,14 @@ public class TokenTest {
                 for (int i = initializationVectorBytes; --i >= 0; bytes[i] = 1);
             }
         };
+        generator = new Generator() {
+            protected Random getEntropySource() {
+                return deterministicRandom;
+            }
+        };
         final Key key = new Key(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
                 new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
-        final Token token = Token.generate(deterministicRandom, key, "Hello, world!");
+        final Token token = generator.generate(key, "Hello, world!");
 
         // when
         final String result = token.validateAndDecrypt(key, validator);
@@ -136,7 +153,8 @@ public class TokenTest {
     public final void verifyExceptionThrownWhenKeyNoLongerInRotation() {
         // given
         final Random random = new Random();
-        final Token token = Token.generate(random, Key.generateKey(random), "Don't wait too long to decrypt this!");
+        final Token token =
+                generator.generate(Key.generateKey(random), "Don't wait too long to decrypt this!");
 
         final List<? extends Key> decryptionKeys =
                 IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
@@ -154,7 +172,8 @@ public class TokenTest {
         final Random random = new Random();
         final List<? extends Key> decryptionKeys =
                 IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
-        final Token token = Token.generate(random, decryptionKeys.get(8), "Don't wait too long to decrypt this!");
+        final Token token =
+                generator.generate(decryptionKeys.get(8), "Don't wait too long to decrypt this!");
 
         // when
         final String result = token.validateAndDecrypt(decryptionKeys, validator);

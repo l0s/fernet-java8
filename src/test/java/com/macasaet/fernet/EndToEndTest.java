@@ -23,12 +23,17 @@ public class EndToEndTest {
     private Random random = new SecureRandom();
     private Validator<String> validator = new StringValidator() {
     };
+    private Generator generator = new Generator() {
+        protected Random getEntropySource() {
+            return random;
+        }
+    };
 
     @Test
     public final void testValidKey() {
         // given
         final Key key = Key.generateKey(random);
-        final Token token = Token.generate(random, key, "secret message");
+        final Token token = generator.generate(key, "secret message");
 
         // when
         final String result = token.validateAndDecrypt(key, validator);
@@ -40,7 +45,7 @@ public class EndToEndTest {
     @Test
     public final void testInvalidKey() {
         // given
-        final Token token = Token.generate(random, Key.generateKey(random), "secret message");
+        final Token token = generator.generate(Key.generateKey(random), "secret message");
 
         // when
         thrown.expect(TokenValidationException.class);
