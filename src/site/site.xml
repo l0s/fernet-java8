@@ -30,7 +30,7 @@
         <ribbonOrientation>right</ribbonOrientation>
         <ribbonColor>black</ribbonColor>
       </gitHub>
-      <profile>pre-release</profile>
+      <profile>production</profile>
       <twitter>
         <user>l0s</user>
         <showUser>true</showUser>

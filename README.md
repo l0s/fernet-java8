@@ -31,11 +31,11 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>0.5.1</version>
+      <version>1.0.0</version>
     </dependency>
 
 For more details, see: 
-[The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C0.4.0%7Cjar)
+[The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C1.0.0%7Cjar)
 
 If you use a dependency manager system or build system other than Maven, see
 [Dependency Information](https://l0s.github.io/fernet-java8/dependency-info.html).
@@ -103,12 +103,6 @@ In addition, Fernet has been available in Python's
 [cryptography](https://github.com/pyca/cryptography) package for some time.
 It is also used by
 [Keystone, the OpenStack identity service](https://docs.openstack.org/keystone/latest/admin/identity-fernet-token-faq.html).
-
-## Open Issues
-
-The core functionality is complete and unit-tested. In addition, several
-examples have been implemented to ensure the API works with common use
-cases. I plan to release version 1.0.0 soon.
 
 ## Development
 
