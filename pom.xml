@@ -3,7 +3,7 @@
   <groupId>com.macasaet.fernet</groupId>
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>fernet-java8</name>
   <url>https://l0s.github.io/fernet-java8/</url>
   <inceptionYear>2017</inceptionYear>
@@ -86,7 +86,7 @@
   	<url>https://github.com/l0s/fernet-java8</url>
     <connection>scm:git:ssh://github.com/l0s/fernet-java8.git</connection>
     <developerConnection>scm:git:git@github.com:l0s/fernet-java8.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>fernet-java8-1.0.0</tag>
   </scm>
   <ciManagement>
   	<system>Travis CI</system>
