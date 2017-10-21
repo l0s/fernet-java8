@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/l0s/fernet-java8.svg?branch=master)](https://travis-ci.org/l0s/fernet-java8)
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-java8.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-java8)
 
-This is a work-in-progress implementation of the
+This is an implementation of the
 [Fernet Spec](https://github.com/fernet/spec) using Java 8.
 The goal is to use only native Java constructs to avoid pulling in any
 dependencies so the library would be more generally usable. It also takes
