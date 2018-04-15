@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/l0s/fernet-java8.svg?branch=master)](https://travis-ci.org/l0s/fernet-java8)
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-java8.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-java8)
+[![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=pom.xml)
 
 This is an implementation of the
 [Fernet Spec](https://github.com/fernet/spec) using Java 8.
