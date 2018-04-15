@@ -115,7 +115,7 @@
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.2</version>
         <configuration>
           <targetClasses>
             <param>com.macasaet.fernet.*</param>
