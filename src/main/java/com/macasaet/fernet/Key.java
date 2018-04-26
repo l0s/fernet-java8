@@ -127,9 +127,9 @@ public class Key {
      */
     public byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText) {
-        try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 getTokenPrefixBytes() + cipherText.length)) {
-            try (final DataOutputStream dataStream = new DataOutputStream(byteStream)) {
+            try (DataOutputStream dataStream = new DataOutputStream(byteStream)) {
                 dataStream.writeByte(version);
                 dataStream.writeLong(timestamp.getEpochSecond());
                 dataStream.write(initializationVector.getIV());
@@ -225,7 +225,7 @@ public class Key {
      * @return the Base 64 URL representation of this Fernet key
      */
     public String serialise() {
-        try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
             writeTo(byteStream);
             return getEncoder().encodeToString(byteStream.toByteArray());
         } catch (final IOException ioe) {

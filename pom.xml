@@ -19,7 +19,7 @@
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
   <version>1.0.1-SNAPSHOT</version>
-  <name>fernet-java8</name>
+  <name>Fernet Java</name>
   <url>https://l0s.github.io/fernet-java8/</url>
   <inceptionYear>2017</inceptionYear>
   <description>A Java implementation of the Fernet encrypted token specification.</description>
@@ -34,7 +34,7 @@
     <developer>
       <id>l0s</id>
       <name>Carlos Macasaet</name>
-      <url>http://www.carlos-m.net</url>
+      <url>https://www.carlos-m.net</url>
     </developer>
   </developers>
   <issueManagement>
@@ -214,7 +214,33 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+              <goal>cpd-check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>3.9.0</version>
+          <configuration>
+            <rulesets>
+              <ruleset>src/main/config/pmd-ruleset.xml</ruleset>
+            </rulesets>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <reporting>
     <plugins>
@@ -229,6 +255,10 @@
             </reports>
           </reportSet>
         </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
     </plugins>
   </reporting>
