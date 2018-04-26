@@ -68,7 +68,7 @@ public class Token {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");
         }
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
             final DataInputStream dataStream = new DataInputStream(inputStream);
             final byte version = dataStream.readByte();
             final long timestampSeconds = dataStream.readLong();
@@ -182,7 +182,7 @@ public class Token {
      * @return the Base 64 URL encoding of this token in the form Version | Timestamp | IV | Ciphertext | HMAC
      */
     public String serialise() {
-        try (final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 tokenStaticBytes + getCipherText().length)) {
             writeTo(byteStream);
             return getEncoder().encodeToString(byteStream.toByteArray());
@@ -201,7 +201,7 @@ public class Token {
      *             if data cannot be written to the underlying stream
      */
     public void writeTo(final OutputStream outputStream) throws IOException {
-        try (final DataOutputStream dataStream = new DataOutputStream(outputStream)) {
+        try (DataOutputStream dataStream = new DataOutputStream(outputStream)) {
             dataStream.writeByte(getVersion());
             dataStream.writeLong(getTimestamp().getEpochSecond());
             dataStream.write(getInitializationVector().getIV());
