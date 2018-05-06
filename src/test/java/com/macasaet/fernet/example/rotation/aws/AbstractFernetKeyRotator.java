@@ -25,6 +25,7 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest;
@@ -33,7 +34,7 @@ import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
 
-public abstract class AbstractFernetKeyRotator {
+public abstract class AbstractFernetKeyRotator implements RequestHandler<Request, Void> {
 
     private final AWSSecretsManager secretsManager = AWSSecretsManagerClientBuilder.defaultClient();
     private final AWSKMS kms = AWSKMSClientBuilder.defaultClient();

@@ -18,7 +18,6 @@ package com.macasaet.fernet.example.rotation.aws;
 import static java.util.Collections.singletonList;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
@@ -33,7 +32,7 @@ import com.macasaet.fernet.Token;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator implements RequestHandler<Request, Void> {
+public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final GetSecretValueResult pendingSecretResult = getSecretVersionStage(secretId, clientRequestToken,
