@@ -16,8 +16,8 @@ So that
 
 *Specify one or more scenarios. For example, if there is a happy path and a failure path, describe those as separate scenarios.*
 
-**{Scenario Title}**
-Given {context|preconditions}  
+**{Scenario Title}**  
+Given {context|preconditions}  
 When {action that triggers the behaviour}  
 Then {expected outcome}  
 
