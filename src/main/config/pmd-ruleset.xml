@@ -25,6 +25,7 @@ under the License.
   <description>
     These are the custom PMD rules for the Fernet Java library.
   </description>
+  <rule ref="category/java/security.xml" />
   <rule ref="category/java/bestpractices.xml/AvoidUsingHardCodedIP"/>
   <rule ref="category/java/bestpractices.xml/CheckResultSet"/>
   <rule ref="category/java/bestpractices.xml/UnusedImports"/>
@@ -38,6 +39,7 @@ under the License.
     <exclude name="TooManyStaticImports" />
     <!-- ShortClassName was complaining about the Key class -->
     <exclude name="ShortClassName" />
+    <exclude name="ClassNamingConventions" />
   </rule>
   <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
   <rule ref="category/java/design.xml/SimplifiedTernary"/>
