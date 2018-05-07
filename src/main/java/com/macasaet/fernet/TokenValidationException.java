@@ -10,7 +10,7 @@ package com.macasaet.fernet;
  */
 public class TokenValidationException extends RuntimeException {
 
-    private static final long serialVersionUID = 4917583778149819611L;
+    private static final long serialVersionUID = 5175834607547919885L;
 
     public TokenValidationException(final String message) {
         super(message);
@@ -22,11 +22,6 @@ public class TokenValidationException extends RuntimeException {
 
     public TokenValidationException(final String message, final Throwable cause) {
         super(message, cause);
-    }
-
-    public TokenValidationException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
 }

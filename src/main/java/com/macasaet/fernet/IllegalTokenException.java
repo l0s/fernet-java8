@@ -11,12 +11,8 @@ public class IllegalTokenException extends IllegalArgumentException {
 
     private static final long serialVersionUID = 8019898267609912205L;
 
-    public IllegalTokenException(final String s) {
-        super(s);
-    }
-
-    public IllegalTokenException(final Throwable cause) {
-        this(cause.getMessage(), cause);
+    public IllegalTokenException(final String message) {
+        super(message);
     }
 
     public IllegalTokenException(final String message, final Throwable cause) {

@@ -3,7 +3,7 @@
   <groupId>com.macasaet.fernet</groupId>
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <name>Fernet Java</name>
   <url>https://l0s.github.io/fernet-java8/</url>
   <inceptionYear>2017</inceptionYear>
@@ -188,7 +188,7 @@
           <version>3.9.0</version>
           <configuration>
             <rulesets>
-              <ruleset>src/main/config/pmd-ruleset.xml</ruleset>
+              <ruleset>${project.basedir}/src/main/config/pmd-ruleset.xml</ruleset>
             </rulesets>
           </configuration>
         </plugin>
