@@ -80,7 +80,7 @@ public interface Validator<T> {
      * @return a method that implements custom validation logic on the deserialised payload
      */
     default Predicate<T> getObjectValidator() {
-        return (T) -> true;
+        return (payload) -> true;
     }
 
     /**

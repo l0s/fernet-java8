@@ -79,6 +79,7 @@ public class Token {
         this.hmac = hmac;
     }
 
+    @SuppressWarnings("PMD.PrematureDeclaration")
     protected static Token fromBytes(final byte[] bytes) throws IllegalTokenException {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");
@@ -179,6 +180,7 @@ public class Token {
         return validator.validateAndDecrypt(keys, this);
     }
 
+    @SuppressWarnings("PMD.ConfusingTernary")
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
             final Instant latestValidInstant) throws TokenValidationException {
         if (getVersion() != (byte) 0x80) {
