@@ -24,7 +24,7 @@ package com.macasaet.fernet;
  */
 public class IllegalTokenException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = 8019898267609912205L;
+    private static final long serialVersionUID = -1794971941479648725L;
 
     public IllegalTokenException(final String message) {
         super(message);
