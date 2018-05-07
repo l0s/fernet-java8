@@ -26,7 +26,7 @@ package com.macasaet.fernet;
  */
 public class TokenExpiredException extends TokenValidationException {
 
-    private static final long serialVersionUID = -434587659069852734L;
+    private static final long serialVersionUID = -8250681539503776783L;
 
     public TokenExpiredException(final String message) {
         super(message);
@@ -38,11 +38,6 @@ public class TokenExpiredException extends TokenValidationException {
 
     public TokenExpiredException(final String message, final Throwable cause) {
         super(message, cause);
-    }
-
-    public TokenExpiredException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
 }
