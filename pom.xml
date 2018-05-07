@@ -55,7 +55,7 @@
     <url>https://github.com/l0s/fernet-java8</url>
     <connection>scm:git:ssh://github.com/l0s/fernet-java8.git</connection>
     <developerConnection>scm:git:git@github.com:l0s/fernet-java8.git</developerConnection>
-    <tag>fernet-java8-1.1.1</tag>
+    <tag>HEAD</tag>
   </scm>
   <ciManagement>
     <system>Travis CI</system>
