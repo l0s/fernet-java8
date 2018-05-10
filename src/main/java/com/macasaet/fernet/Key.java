@@ -129,30 +129,36 @@ public class Key {
             final byte[] cipherText) {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 getTokenPrefixBytes() + cipherText.length)) {
-            try (DataOutputStream dataStream = new DataOutputStream(byteStream)) {
-                dataStream.writeByte(version);
-                dataStream.writeLong(timestamp.getEpochSecond());
-                dataStream.write(initializationVector.getIV());
-                dataStream.write(cipherText);
-
-                try {
-                    final Mac mac = Mac.getInstance(getSigningAlgorithm());
-                    mac.init(getSigningKeySpec());
-                    return mac.doFinal(byteStream.toByteArray());
-                } catch (final InvalidKeyException ike) {
-                    // this should not happen because we control the signing key
-                    // algorithm and pre-validate the length
-                    throw new RuntimeException("Unable to initialise HMAC with shared secret: " + ike.getMessage(),
-                            ike);
-                } catch (final NoSuchAlgorithmException nsae) {
-                    // this should not happen as implementors are required to
-                    // provide the HmacSHA256 algorithm.
-                    throw new RuntimeException(nsae.getMessage(), nsae);
-                }
-            }
+            return sign(version, timestamp, initializationVector, cipherText, byteStream);
         } catch (final IOException e) {
             // this should not happen as I/O is to memory only
-            throw new RuntimeException(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
+            final byte[] cipherText, final ByteArrayOutputStream byteStream)
+        throws IOException {
+        try (DataOutputStream dataStream = new DataOutputStream(byteStream)) {
+            dataStream.writeByte(version);
+            dataStream.writeLong(timestamp.getEpochSecond());
+            dataStream.write(initializationVector.getIV());
+            dataStream.write(cipherText);
+
+            try {
+                final Mac mac = Mac.getInstance(getSigningAlgorithm());
+                mac.init(getSigningKeySpec());
+                return mac.doFinal(byteStream.toByteArray());
+            } catch (final InvalidKeyException ike) {
+                // this should not happen because we control the signing key
+                // algorithm and pre-validate the length
+                throw new IllegalStateException("Unable to initialise HMAC with shared secret: " + ike.getMessage(),
+                        ike);
+            } catch (final NoSuchAlgorithmException nsae) {
+                // this should not happen as implementors are required to
+                // provide the HmacSHA256 algorithm.
+                throw new IllegalStateException(nsae.getMessage(), nsae);
+            }
         }
     }
 
@@ -185,14 +191,14 @@ public class Key {
             return cipher.doFinal(payload);
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
             // these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
-            throw new RuntimeException("Unable to access cipher: " + e.getMessage(), e);
+            throw new IllegalStateException("Unable to access cipher: " + e.getMessage(), e);
         } catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
             // this should not happen as the key is validated ahead of time and
             // we use an algorithm guaranteed to exist
-            throw new RuntimeException("Unable to initialise cipher: " + e.getMessage(), e);
+            throw new IllegalStateException("Unable to initialise cipher: " + e.getMessage(), e);
         } catch (final IllegalBlockSizeException | BadPaddingException e) {
             // these should not happen as we control the block size and padding
-            throw new RuntimeException("Unable to encrypt data: " + e.getMessage(), e);
+            throw new IllegalStateException("Unable to encrypt data: " + e.getMessage(), e);
         }
     }
 
@@ -209,13 +215,12 @@ public class Key {
             final Cipher cipher = Cipher.getInstance(getCipherTransformation());
             cipher.init(DECRYPT_MODE, getEncryptionKeySpec(), initializationVector);
             return cipher.doFinal(cipherText);
-        } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
+        } catch (final NoSuchAlgorithmException | NoSuchPaddingException
+                | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
             // this should not happen as we use an algorithm (AES) and padding
             // (PKCS5) that are guaranteed to exist.
-            throw new RuntimeException(e.getMessage(), e);
-        } catch (final InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
-            // these should not happen due to upfront validation
-            throw new RuntimeException(e.getMessage(), e);
+            // in addition, we validate the encryption key and initialization vector up front
+            throw new IllegalStateException(e.getMessage(), e);
         } catch (final BadPaddingException bpe) {
             throw new TokenValidationException("Invalid padding in token: " + bpe.getMessage(), bpe);
         }
@@ -230,7 +235,7 @@ public class Key {
             return getEncoder().encodeToString(byteStream.toByteArray());
         } catch (final IOException ioe) {
             // this should not happen as I/O is to memory
-            throw new RuntimeException(ioe.getMessage(), ioe);
+            throw new IllegalStateException(ioe.getMessage(), ioe);
         }
     }
 
