@@ -33,71 +33,71 @@ import javax.crypto.Cipher;
  */
 class Constants {
 
-    public static final Charset charset = UTF_8;
-    public static final Encoder encoder = getUrlEncoder();
-    public static final Decoder decoder = getUrlDecoder();
+    static final Charset charset = UTF_8;
+    static final Encoder encoder = getUrlEncoder();
+    static final Decoder decoder = getUrlDecoder();
     /**
      * The algorithm used to encrypt the token contents.
      */
-    public static final String encryptionAlgorithm = "AES";
+    static final String encryptionAlgorithm = "AES";
     /**
      * The algorithm used to sign the token.
      */
-    public static final String signingAlgorithm = "HmacSHA256";
+    static final String signingAlgorithm = "HmacSHA256";
     /**
      * The number of bytes used to store the encryption initialisation vector
      */
-    public static final int initializationVectorBytes = 16;
+    static final int initializationVectorBytes = 16;
     /**
      * The number of bytes used to store the timestamp of a Fernet token.
      */
-    public static final int timestampBytes = 8;
+    static final int timestampBytes = 8;
     /**
      * The number of bytes used to indicate the version of a Fernet token.
      */
-    public static final int versionBytes = 1;
+    static final int versionBytes = 1;
     /**
      * The number of bytes before the cipher text portion of a Fernet token.
      */
-    public static final int tokenPrefixBytes = versionBytes + timestampBytes + initializationVectorBytes;
+    static final int tokenPrefixBytes = versionBytes + timestampBytes + initializationVectorBytes;
     /**
      * The number of bytes in a valid signing key.
      */
-    public static final int signingKeyBytes = 16;
+    static final int signingKeyBytes = 16;
     /**
      * The number of bytes in a valid encryption key.
      */
-    public static final int encryptionKeyBytes = 16;
+    static final int encryptionKeyBytes = 16;
     /**
      * The total number of bytes in a valid Fernet key.
      */
-    public static final int fernetKeyBytes = signingKeyBytes + encryptionKeyBytes;
+    static final int fernetKeyBytes = signingKeyBytes + encryptionKeyBytes;
     /**
      * The AES block size used by the cipher.
      */
-    public static final int cipherTextBlockSize = 16;
+    static final int cipherTextBlockSize = 16;
     /**
      * The transformation (algorithm, mode, and padding) used by the cipher.
      * 
      * @see Cipher#getInstance(String)
      */
-    public static final String cipherTransformation = encryptionAlgorithm + "/CBC/PKCS5Padding";
+    static final String cipherTransformation = encryptionAlgorithm + "/CBC/PKCS5Padding";
     /**
      * The number of bytes for the HMAC signature.
      */
-    public static final int signatureBytes = 32;
+    static final int signatureBytes = 32;
     /**
      * The Fernet token version supported by this library.
      */
-    public static final byte supportedVersion = (byte) 0x80;
+    static final byte supportedVersion = (byte) 0x80;
     /**
      * The number of bytes in the static portion of the token (excludes cipher text).
      */
-    public static final int tokenStaticBytes = versionBytes + timestampBytes + initializationVectorBytes + signatureBytes;
+    static final int tokenStaticBytes = versionBytes + timestampBytes + initializationVectorBytes + signatureBytes;
     /**
      * The minimum number of bytes in a token (i.e. with an empty plaintext).
      */
-    public static final int minimumTokenBytes = tokenStaticBytes + cipherTextBlockSize;
+    static final int minimumTokenBytes = tokenStaticBytes + cipherTextBlockSize;
 
     private Constants() {
     }
