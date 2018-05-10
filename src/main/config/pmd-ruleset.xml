@@ -40,6 +40,8 @@ under the License.
     <!-- ShortClassName was complaining about the Key class -->
     <exclude name="ShortClassName" />
     <exclude name="ClassNamingConventions" />
+    <exclude name="DefaultPackage" />
+    <exclude name="CommentDefaultAccessModifier" />
   </rule>
   <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
   <rule ref="category/java/design.xml/SimplifiedTernary"/>

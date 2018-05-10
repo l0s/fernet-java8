@@ -101,7 +101,7 @@ public class Token {
         } catch (final IOException ioe) {
             // this should not happen as I/O is from memory and stream
             // length is verified ahead of time
-            throw new RuntimeException(ioe.getMessage(), ioe);
+            throw new IllegalStateException(ioe.getMessage(), ioe);
         }
     }
 
@@ -205,7 +205,7 @@ public class Token {
             return getEncoder().encodeToString(byteStream.toByteArray());
         } catch (final IOException e) {
             // this should not happen as IO is to memory only
-            throw new RuntimeException(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
