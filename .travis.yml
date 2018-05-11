@@ -22,5 +22,5 @@ addons:
 cache:
   directories:
     - $HOME/.m2
-    - pmd
+    - target/pmd
     - $HOME/.sonar
