@@ -19,3 +19,8 @@ addons:
     organization: 'l0s-github'
     token:
       secure: "gD90ITnrkOS1v18AZN6PWelF3chbNwP/9leSHudGior+j62sqjs5zoY26nnExyfUYUjle3rhCsIk2om1L2/tXy24k7b3nWgG7yCt229VaYoMmcT7xcAtf/3jPGYZ/lXP/Jlsb1UXZq3PutbXOIl0+RqRX8opXbUDEVycH+5pCJ/sIoteftmdMBNZCoMdc7g1D3GYFb1dwltcrYhVW4zLCNtQOK6LyAHnDpHEdT5VGjjGM7EEbMNJRJS8NJWpO24LFKrcGlX3lDJksZsykYFmI1M0Ib7TkeuqhLunqbLYY0kJb4cNXQC+p0bT3aC3kiCVCT18Up83qi6zzudkMTPnpnnUyvScx5TpmhK6Hjmb0eWviasZH3bv5AOtsZuEkh/je0TLXcheAHw0sfHnNBtG6oAEKzDQlMzLeSLDJcIbmW0iLyjWFm+anwWiaTdYjLGEzimpuMdeP8PxSYgBbroqN37/jeVBwAJrRNPqWAaqf66fsWBuRkWaxX3Pag1evN9FaWis7y6aj4DqDu/nszIzOkEgTDlxPrCytVThEErs47b2HWPhmWY9V/cItkHwO/yNTiRHJb6wJocShfGTzHkVV0ZuMvqJD1UcwXPZdywKcpnlrr98osH+Td2XtCC4sQCQJTf/qwAKsGsF0AI8q3TsUG6LJMTHwUFvJXax3DS+Yus="
+cache:
+  directories:
+    - $HOME/.m2
+    - pmd
+    - $HOME/.sonar
