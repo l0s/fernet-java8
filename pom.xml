@@ -237,6 +237,7 @@
           <artifactId>maven-pmd-plugin</artifactId>
           <version>3.9.0</version>
           <configuration>
+            <analysisCache>true</analysisCache>
             <rulesets>
               <ruleset>${project.basedir}/src/main/config/pmd-ruleset.xml</ruleset>
             </rulesets>
