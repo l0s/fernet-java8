@@ -80,7 +80,7 @@ public interface Validator<T> {
      * @return a method that implements custom validation logic on the deserialised payload
      */
     default Predicate<T> getObjectValidator() {
-        return (payload) -> true;
+        return payload -> true;
     }
 
     /**
@@ -126,7 +126,7 @@ public interface Validator<T> {
         throws TokenValidationException {
         final Key key =
                 keys.parallelStream()
-                .filter(candidate -> token.isValidSignature(candidate))
+                .filter(token::isValidSignature)
                 .findFirst()
                 .orElseThrow(() -> new TokenValidationException("Encryption key not found."));
         return validateAndDecrypt(key, token);

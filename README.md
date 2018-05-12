@@ -1,8 +1,9 @@
-# fernet-java8
+# Fernet Java
 
 [![Build Status](https://travis-ci.org/l0s/fernet-java8.svg?branch=master)](https://travis-ci.org/l0s/fernet-java8)
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-java8.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-java8)
 [![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=pom.xml)
+![Sonar](https://sonarcloud.io/api/project_badges/measure?project=com.macasaet.fernet%3Afernet-java8&metric=alert_status)
 
 This is an implementation of the
 [Fernet Spec](https://github.com/fernet/spec) using Java 8.
@@ -133,7 +134,7 @@ There is a library called
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+   https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
