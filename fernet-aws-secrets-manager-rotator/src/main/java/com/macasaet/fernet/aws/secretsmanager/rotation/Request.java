@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.example.rotation.aws;
+package com.macasaet.fernet.aws.secretsmanager.rotation;
 
 import javax.xml.bind.annotation.XmlAttribute;
 

@@ -26,6 +26,7 @@
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
   <dependencyManagement>
     <dependencies>
+      <!-- FIXME remove this -->
       <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-bom</artifactId>
@@ -33,24 +34,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- FIXME temporary offline hack -->
-      <!-- dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>4.5.2</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-cbor</artifactId>
-        <version>2.6.6</version>
-      </dependency -->
     </dependencies>
   </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
