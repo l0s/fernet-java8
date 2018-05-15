@@ -50,6 +50,7 @@
     <pmd.version>6.3.0</pmd.version>
     <sonar.organization>l0s-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <dependency.locations.enabled>false</dependency.locations.enabled>
   </properties>
   <scm>
     <url>https://github.com/l0s/fernet-java8</url>
