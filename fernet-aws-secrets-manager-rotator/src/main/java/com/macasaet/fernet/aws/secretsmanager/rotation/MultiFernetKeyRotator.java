@@ -15,18 +15,17 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
-import static java.util.Collections.singletonList;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.StringValidator;
@@ -45,12 +44,19 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     };
     private int maxActiveKeys = 3;
 
+    protected MultiFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms,
+            final SecureRandom random) {
+        super(secretsManager, kms, random);
+    }
+
     public MultiFernetKeyRotator() {
+        this(new SecretsManager(AWSSecretsManagerClientBuilder.defaultClient()), AWSKMSClientBuilder.defaultClient(),
+                new SecureRandom());
         // TODO retrieve max active keys from system property
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretVersionStage(secretId, clientRequestToken,
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
                 "AWSPENDING");
         final String string = pendingSecretResult.getSecretString();
         final byte[] bytes = Base64.getUrlDecoder().decode(string);
@@ -68,12 +74,12 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final LambdaLogger logger, final String secretId, final String clientRequestToken) {
-        assertCurrentStageExists(secretId, clientRequestToken);
+        getSecretsManager().assertCurrentStageExists(secretId, clientRequestToken);
         try {
-            getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
+            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
             logger.log("createSecret: Successfully retrieved secret for " + secretId + ". Doing nothing.");
         } catch( final ResourceNotFoundException rnfe ) {
-            final GetSecretValueResult current = getSecretVersionStage(secretId, clientRequestToken, "AWSCURRENT");
+            final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSCURRENT");
             final String currentActiveKeysBase64 = current.getSecretString();
             final byte[] currentActiveKeyBytes = Base64.getUrlDecoder().decode(currentActiveKeysBase64);
             if (currentActiveKeyBytes.length % 32 != 0) {
@@ -85,27 +91,14 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
                 final Key key = new Key(Arrays.copyOfRange(currentActiveKeyBytes, i, i + 32) ) {};
                 keys.add(key);
             }
+            // TODO currently no way to inject a key generator
             final Key keyToStage = Key.generateKey(getRandom());
             keys.add(0, keyToStage);
             if( keys.size() > getMaxActiveKeys() ) {
                 keys = keys.subList(0, getMaxActiveKeys());
             }
-            final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
-            putSecretValueRequest.setSecretId(secretId);
-            putSecretValueRequest.setClientRequestToken(clientRequestToken);
-            putSecretValueRequest.setVersionStages(singletonList("AWSPENDING"));
-            try( ByteArrayOutputStream outputStream = new ByteArrayOutputStream(32 * getMaxActiveKeys()) ) {
-                for( final Key key : keys ) {
-                    key.writeTo(outputStream);
-                }
-                final String newSecret = Base64.getUrlEncoder().encodeToString( outputStream.toByteArray() );
-                putSecretValueRequest.setSecretString(newSecret);
-            } catch( final IOException ioe ) {
-                // this really should not happen as I/O is to memory only
-                throw new RuntimeException(ioe.getMessage(), ioe);
-            }
 
-            getSecretsManager().putSecretValue(putSecretValueRequest);
+            getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, "AWSPENDING");
             logger.log("createSecret: Successfully put secret for ARN " + secretId + " and version "
                     + clientRequestToken + ".");
         }

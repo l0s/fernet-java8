@@ -15,50 +15,62 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.security.SecureRandomSpi;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.kms.model.GenerateRandomRequest;
+import com.amazonaws.services.kms.model.GenerateRandomResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
 
-public abstract class AbstractFernetKeyRotator implements RequestHandler<Request, Void> {
+abstract class AbstractFernetKeyRotator implements RequestHandler<Request, Void> {
 
-    private final AWSSecretsManager secretsManager = AWSSecretsManagerClientBuilder.defaultClient();
-    private final AWSKMS kms = AWSKMSClientBuilder.defaultClient();
-    private final SecureRandomSpi randomServiceProvider = new KmsSecureRandomServiceProvider(kms);
-    private final Random random = new SecureRandom(randomServiceProvider, null) {
-        private static final long serialVersionUID = 1069780566700570443L;
-    };
+    private final SecretsManager secretsManager;
+    private final AWSKMS kms;
+    private final SecureRandom random;
+
+    transient volatile boolean seeded = false;
+
+    protected AbstractFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms,
+            final SecureRandom random) {
+        if (secretsManager == null) {
+            throw new IllegalArgumentException("secretsManager cannot be null");
+        }
+        if (kms == null) {
+            throw new IllegalArgumentException("kms cannot be null");
+        }
+        if (random == null) {
+            throw new IllegalArgumentException("random cannot be null");
+        }
+        this.secretsManager = secretsManager;
+        this.kms = kms;
+        this.random = random;
+    }
 
     public Void handleRequest(final Request request, final Context context) {
+        seed();
+
         final LambdaLogger logger = context.getLogger();
         final String secretId = request.getSecretId();
         final String clientRequestToken = request.getClientRequestToken();
-    
-        final DescribeSecretResult secretMetadata = describeSecret(secretId);
+
+        final DescribeSecretResult secretMetadata = getSecretsManager().describeSecret(secretId);
         if (secretMetadata.isRotationEnabled() == null || !secretMetadata.isRotationEnabled()) {
             throw new IllegalArgumentException("Secret " + secretId + " is not enabled for rotation.");
         }
         final Map<String, List<String>> versions = secretMetadata.getVersionIdsToStages();
-        
+
         if (!versions.containsKey(clientRequestToken)) {
             throw new IllegalArgumentException("Secret version " + clientRequestToken
                     + " has no stage for rotation of secret " + secretId + ".");
         }
-    
+
         final List<String> stages = versions.get(clientRequestToken);
         if (stages.contains("AWSCURRENT")) {
             logger.log("Secret version " + clientRequestToken
@@ -90,11 +102,7 @@ public abstract class AbstractFernetKeyRotator implements RequestHandler<Request
                 if (currentVersion == null) {
                     throw new IllegalStateException("No AWSCURRENT secret set for " + secretId + ".");
                 }
-                final UpdateSecretVersionStageRequest updateSecretVersionStageRequest = new UpdateSecretVersionStageRequest();
-                updateSecretVersionStageRequest.setSecretId(secretId);
-                updateSecretVersionStageRequest.setMoveToVersionId(clientRequestToken);
-                updateSecretVersionStageRequest.setRemoveFromVersionId(currentVersion);
-                getSecretsManager().updateSecretVersionStage(updateSecretVersionStageRequest);
+                getSecretsManager().updateSecretVersionStage(secretId, clientRequestToken, currentVersion);
                 logger.log("finishSecret: Successfully set AWSCURRENT stage to version " + clientRequestToken
                         + " for secret " + secretId + ".");
                 return null;
@@ -113,30 +121,29 @@ public abstract class AbstractFernetKeyRotator implements RequestHandler<Request
 
     protected abstract void createSecret(LambdaLogger logger, String secretId, String clientRequestToken);
 
-    protected void assertCurrentStageExists(final String secretId, final String clientRequestToken) {
-        getSecretVersionStage(secretId, clientRequestToken, "AWSCURRENT");
-    }
-
-    protected GetSecretValueResult getSecretVersionStage(final String secretId, final String clientRequestToken, final String stage) {
-        final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
-        getSecretValueRequest.setSecretId(secretId);
-        getSecretValueRequest.setVersionId(clientRequestToken);
-        getSecretValueRequest.setVersionStage(stage);
-        return getSecretsManager().getSecretValue(getSecretValueRequest);
-    }
-
-    protected DescribeSecretResult describeSecret(final String secretId) {
-        final DescribeSecretRequest describeSecretRequest = new DescribeSecretRequest();
-        describeSecretRequest.setSecretId(secretId);
-        return getSecretsManager().describeSecret(describeSecretRequest);
-    }
-
-    protected AWSSecretsManager getSecretsManager() {
-        return secretsManager;
+    protected void seed() {
+        if (!seeded) {
+            synchronized (random) {
+                if (!seeded) {
+                    final byte[] bytes = new byte[512];
+                    final GenerateRandomRequest request = new GenerateRandomRequest();
+                    request.setNumberOfBytes(bytes.length);
+                    final GenerateRandomResult result = kms.generateRandom(request);
+                    final ByteBuffer randomBytes = result.getPlaintext();
+                    randomBytes.get(bytes);
+                    random.setSeed(bytes);
+                    seeded = true;
+                }
+            }
+        }
     }
 
     protected Random getRandom() {
         return random;
+    }
+
+    protected SecretsManager getSecretsManager() {
+        return secretsManager;
     }
 
 }

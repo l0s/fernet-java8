@@ -69,6 +69,12 @@
         <version>4.12</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+          <version>2.18.3</version>
+          <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>
@@ -121,6 +127,11 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.pitest</groupId>
+          <artifactId>pitest-maven</artifactId>
+          <version>1.4.0</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>

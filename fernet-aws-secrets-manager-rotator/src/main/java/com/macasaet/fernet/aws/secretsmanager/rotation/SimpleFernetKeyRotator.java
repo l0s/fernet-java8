@@ -15,11 +15,13 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
-import static java.util.Collections.singletonList;
+import java.security.SecureRandom;
 
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
@@ -34,8 +36,17 @@ import com.macasaet.fernet.Token;
  */
 public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
 
+    protected SimpleFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms, final SecureRandom random) {
+        super(secretsManager, kms, random);
+    }
+
+    public SimpleFernetKeyRotator() {
+        this(new SecretsManager(AWSSecretsManagerClientBuilder.defaultClient()), AWSKMSClientBuilder.defaultClient(),
+                new SecureRandom());
+    }
+
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretVersionStage(secretId, clientRequestToken,
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
                 "AWSPENDING");
         final Key key = new Key(pendingSecretResult.getSecretString());
         final Token token = Token.generate(getRandom(), key, "");
@@ -46,18 +57,14 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final LambdaLogger logger, final String secretId, final String clientRequestToken) {
-        assertCurrentStageExists(secretId, clientRequestToken);
+        getSecretsManager().assertCurrentStageExists(secretId, clientRequestToken);
         try {
-            getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
+            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
             logger.log("createSecret: Successfully retrieved secret for " + secretId + ". Doing nothing.");
         } catch( final ResourceNotFoundException rnfe ) {
+            // TODO: there is currently no way to inject a Key generator
             final Key key = Key.generateKey(getRandom());
-            final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
-            putSecretValueRequest.setSecretId(secretId);
-            putSecretValueRequest.setClientRequestToken(clientRequestToken);
-            putSecretValueRequest.setSecretString(key.serialise());
-            putSecretValueRequest.setVersionStages(singletonList("AWSPENDING"));
-            getSecretsManager().putSecretValue(putSecretValueRequest);
+            getSecretsManager().putSecretValue(secretId, clientRequestToken, key, "AWSPENDING");
             logger.log("createSecret: Successfully put secret for ARN " + secretId + " and version "
                     + clientRequestToken + ".");
         }

@@ -45,5 +45,62 @@
         <artifactId>fernet-java8</artifactId>
         <version>${project.version}</version>
     </dependency>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
+  <distributionManagement>
+    <site>
+      <id>site</id>
+      <url>${project.url}</url>
+    </site>
+  </distributionManagement>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <!-- configuration>
+          <targetClasses>
+            <param>com.macasaet.fernet.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>com.macasaet.fernet.*</param>
+          </targetTests>
+        </configuration -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>mutationCoverage</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <configuration>
+          <skipEmptyReport>false</skipEmptyReport>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
