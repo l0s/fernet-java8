@@ -22,5 +22,5 @@ addons:
 cache:
   directories:
     - $HOME/.m2
-    - target/pmd
-    - $HOME/.sonar
+    - fernet-java8/target/pmd
+    - $HOME/.sonar/cache
