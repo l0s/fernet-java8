@@ -15,9 +15,9 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
@@ -25,6 +25,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.stream.IntStream;
@@ -41,36 +46,36 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
 import com.amazonaws.services.kms.model.GenerateRandomResult;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.macasaet.fernet.Key;
 
+/**
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ * @author Carlos Macasaet
+ */
 public class SimpleFernetKeyRotatorTest {
 
-    @Mock
-    private LambdaLogger logger;
     @Mock
     private SecretsManager secretsManager;
     @Mock
     private AWSKMS kms;
     @Mock
     private SecureRandom random;
-    
+
+    private ObjectMapper mapper;
+
     @InjectMocks
     private SimpleFernetKeyRotator rotator;
 
     @Before
     public void setUp() throws Exception {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JaxbAnnotationModule());
         initMocks(this);
-        final Answer<Void> loggingAnswer = new Answer<Void>() {
-            public Void answer(final InvocationOnMock invocation) throws Throwable {
-                final String message = invocation.getArgument(0);
-                System.out.println("LAMBDA: " + message);
-                return null;
-            }
-        };
-        doAnswer(loggingAnswer).when(logger).log(anyString());
+
         final Answer<Void> nonRandomBytes = new Answer<Void>() {
             public Void answer(final InvocationOnMock invocation) throws Throwable {
                 final byte[] bytes = invocation.getArgument(0);
@@ -87,17 +92,17 @@ public class SimpleFernetKeyRotatorTest {
                 return retval;
             }
         };
-        given(kms.generateRandom(any(GenerateRandomRequest.class))).will(nonRandomResult);    }
+        given(kms.generateRandom(any(GenerateRandomRequest.class))).will(nonRandomResult);
+    }
 
     @After
     public void tearDown() throws Exception {
     }
 
     @Test
-    public void verifyCreate() {
+    public void verifyCreate() throws IOException {
         // given
         final Context context = mock(Context.class);
-        given(context.getLogger()).willReturn(logger);
         final String clientRequestToken = "clientRequestToken";
         final String secretId = "secretId";
 
@@ -105,17 +110,25 @@ public class SimpleFernetKeyRotatorTest {
         secretDescription.setRotationEnabled(true);
         secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
         given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
-        given(secretsManager.getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING")).willThrow(new ResourceNotFoundException("no value yet"));
+        given(secretsManager.getSecretVersionStage(secretId, clientRequestToken, PENDING))
+                .willThrow(new ResourceNotFoundException("no value yet"));
 
-        // when
-        final Request creationRequest = new Request();
+        final RotationRequest creationRequest = new RotationRequest();
         creationRequest.setClientRequestToken(clientRequestToken);
         creationRequest.setSecretId(secretId);
         creationRequest.setStep(Step.CREATE_SECRET);
-        rotator.handleRequest(creationRequest, context);
+        final byte[] creationRequestBytes = mapper.writeValueAsBytes(creationRequest);
 
-        // then
-        verify(secretsManager).putSecretValue(eq("secretId"), eq(clientRequestToken), any(Key.class), eq("AWSPENDING"));
+        // when
+        try (InputStream input = new ByteArrayInputStream(creationRequestBytes)) {
+            try (OutputStream output = new ByteArrayOutputStream()) {
+                rotator.handleRequest(input, output, context);
+
+                // then
+                verify(secretsManager).putSecretValue(eq("secretId"), eq(clientRequestToken), any(Key.class),
+                        eq(PENDING));
+            }
+        }
     }
 
 }

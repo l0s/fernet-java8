@@ -15,27 +15,21 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.XmlType;
-
 /**
- * Rotating an AWS Secrets Manager secret is a multi-step process. Each step will involve a separate invocation of the
- * rotation Lambda.
+ * The stage of a secret's lifecycle. When a new secret is created, it is first {@link #PENDING}. When it is activated,
+ * it will be {@link #CURRENT}. The last current secret is available as {@link #PREVIOUS}.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
- *
  * @author Carlos Macasaet
  */
-@XmlType(name="step")
-@XmlEnum
-public enum Step {
-    @XmlEnumValue("createSecret")
-    CREATE_SECRET,
-    @XmlEnumValue("setSecret")
-    SET_SECRET,
-    @XmlEnumValue("testSecret")
-    TEST_SECRET,
-    @XmlEnumValue("finishSecret")
-    FINISH_SECRET
+enum Stage {
+
+    CURRENT,
+    PENDING,
+    PREVIOUS;
+
+    public String getAwsName() {
+        return "AWS" + name();
+    }
+
 }

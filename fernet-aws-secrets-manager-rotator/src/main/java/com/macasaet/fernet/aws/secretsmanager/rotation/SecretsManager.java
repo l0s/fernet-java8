@@ -1,11 +1,27 @@
+/**
+   Copyright 2018 Carlos Macasaet
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       https://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.CURRENT;
 import static java.util.Collections.singletonList;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest;
@@ -16,6 +32,16 @@ import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
 import com.macasaet.fernet.Key;
 
+/**
+ * <p>Service façade for AWS Secrets Manager.</p>
+ *
+ * <p>This requires the following permissions: <code>secretsmanager:DescribeSecret</code>,
+ * <code>secretsmanager:GetSecretValue</code>, <code>secretsmanager:UpdateSecretVersionStage</code>, and
+ * <code>secretsmanager:PutSecretValue</code>.</p>
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ * 
+ * @author Carlos Macasaet
+ */
 class SecretsManager {
 
     private final AWSSecretsManager delegate;
@@ -27,60 +53,106 @@ class SecretsManager {
         this.delegate = delegate;
     }
 
-    protected void assertCurrentStageExists(final String secretId, final String clientRequestToken) {
-        getSecretVersionStage(secretId, clientRequestToken, "AWSCURRENT");
+    /**
+     * This requires the permission <code>secretsmanager:GetSecretValue</code>
+     *
+     * @param secretId TODO
+     */
+    public void assertCurrentStageExists(final String secretId) {
+        final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
+        getSecretValueRequest.setSecretId(secretId);
+        getSecretValueRequest.setVersionStage(CURRENT.getAwsName());
+        getDelegate().getSecretValue(getSecretValueRequest);
     }
 
+    /**
+     * This requires the permission <code>secretsmanager:DescribeSecret</code>
+     *
+     * @param secretId TODO
+     * @return TODO
+     */
     public DescribeSecretResult describeSecret(final String secretId) {
         final DescribeSecretRequest describeSecretRequest = new DescribeSecretRequest();
         describeSecretRequest.setSecretId(secretId);
         return getDelegate().describeSecret(describeSecretRequest);
     }
 
+    /**
+     * This requires the permission <code>secretsmanager:GetSecretValue</code>
+     *
+     * @param secretId TODO
+     * @param clientRequestToken TODO
+     * @param stage TODO
+     * @return TODO
+     */
     public GetSecretValueResult getSecretVersionStage(final String secretId, final String clientRequestToken,
-            final String stage) {
+            final Stage stage) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionId(clientRequestToken);
-        getSecretValueRequest.setVersionStage(stage);
+        getSecretValueRequest.setVersionStage(stage.getAwsName());
         return getDelegate().getSecretValue(getSecretValueRequest);
     }
 
-    public void updateSecretVersionStage(final String secretId, final String clientRequestToken,
+    /**
+     * This requires the permission <code>secretsmanager:UpdateSecretVersionStage</code>
+     *
+     * @param secretId TODO
+     * @param clientRequestToken the version ID to be made "current"
+     * @param currentVersion the current active version ID to be made "previous"
+     */
+    public void rotateSecret(final String secretId, final String clientRequestToken,
             String currentVersion) {
         final UpdateSecretVersionStageRequest updateSecretVersionStageRequest = new UpdateSecretVersionStageRequest();
         updateSecretVersionStageRequest.setSecretId(secretId);
+        updateSecretVersionStageRequest.setVersionStage(CURRENT.getAwsName());
         updateSecretVersionStageRequest.setMoveToVersionId(clientRequestToken);
         updateSecretVersionStageRequest.setRemoveFromVersionId(currentVersion);
         getDelegate().updateSecretVersionStage(updateSecretVersionStageRequest);
     }
 
-    public void putSecretValue(final String secretId, final String clientRequestToken, final Key key, final String stage) {
+    /**
+     * This requires the permission <code>secretsmanager:PutSecretValue</code>
+     *
+     * @param secretId TODO
+     * @param clientRequestToken TODO
+     * @param key TODO
+     * @param stage TODO
+     */
+    public void putSecretValue(final String secretId, final String clientRequestToken, final Key key, final Stage stage) {
         final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
         putSecretValueRequest.setSecretId(secretId);
         putSecretValueRequest.setClientRequestToken(clientRequestToken);
         putSecretValueRequest.setSecretString(key.serialise());
-        putSecretValueRequest.setVersionStages(singletonList(stage));
+        putSecretValueRequest.setVersionStages(singletonList(stage.getAwsName()));
         getDelegate().putSecretValue(putSecretValueRequest);        
     }
 
-    public void putSecretValue(final String secretId, final String clientRequestToken, final List<Key> keys, final String stage) {
+    /**
+     * This requires the permission <code>secretsmanager:PutSecretValue</code>
+     *
+     * @param secretId TODO
+     * @param clientRequestToken TODO
+     * @param keys TODO
+     * @param stage TODO
+     */
+    public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
+            final Stage stage) {
         final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
         putSecretValueRequest.setSecretId(secretId);
         putSecretValueRequest.setClientRequestToken(clientRequestToken);
-        putSecretValueRequest.setVersionStages(singletonList("AWSPENDING"));
-        try( ByteArrayOutputStream outputStream = new ByteArrayOutputStream(32 * keys.size()) ) {
-            for( final Key key : keys ) {
+        putSecretValueRequest.setVersionStages(singletonList(stage.getAwsName()));
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(32 * keys.size())) {
+            for (final Key key : keys) {
                 key.writeTo(outputStream);
             }
-            // TODO: need to make sure encoding is compatible
-            final String newSecret = Base64.getUrlEncoder().encodeToString( outputStream.toByteArray() );
-            putSecretValueRequest.setSecretString(newSecret);
-        } catch( final IOException ioe ) {
+            final ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
+            putSecretValueRequest.setSecretBinary(buffer);
+        } catch (final IOException ioe) {
             // this really should not happen as I/O is to memory only
             throw new IllegalStateException(ioe.getMessage(), ioe);
         }
-    
+
         getDelegate().putSecretValue(putSecretValueRequest);
     }
 

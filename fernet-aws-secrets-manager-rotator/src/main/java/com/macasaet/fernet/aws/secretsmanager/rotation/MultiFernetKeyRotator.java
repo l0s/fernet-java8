@@ -15,6 +15,9 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.CURRENT;
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +26,6 @@ import java.util.List;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
@@ -56,8 +58,8 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
-                "AWSPENDING");
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId,
+                clientRequestToken, PENDING);
         final String string = pendingSecretResult.getSecretString();
         final byte[] bytes = Base64.getUrlDecoder().decode(string);
         if (bytes.length % 32 != 0) {
@@ -65,21 +67,18 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
         }
         // first key will become the staged key
         final Key candidateStagedKey = new Key(Arrays.copyOfRange(bytes, 0, 32)) {
-        };
-        // second key will become the primary key
-        final Key candidatePrimaryKey = new Key(Arrays.copyOfRange(bytes, 32, 64)) {
-        };
+        }; // TODO: this constructor should probably be public
         Token.generate(getRandom(), candidateStagedKey, "").validateAndDecrypt(candidateStagedKey, validator);
-        Token.generate(getRandom(), candidatePrimaryKey, "").validateAndDecrypt(candidatePrimaryKey, validator);
     }
 
-    protected void createSecret(final LambdaLogger logger, final String secretId, final String clientRequestToken) {
-        getSecretsManager().assertCurrentStageExists(secretId, clientRequestToken);
+    protected void createSecret(final String secretId, final String clientRequestToken) {
+        getSecretsManager().assertCurrentStageExists(secretId);
         try {
-            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
-            logger.log("createSecret: Successfully retrieved secret for " + secretId + ". Doing nothing.");
-        } catch( final ResourceNotFoundException rnfe ) {
-            final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSCURRENT");
+            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, PENDING);
+            getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
+        } catch (final ResourceNotFoundException rnfe) {
+            final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
+                    CURRENT);
             final String currentActiveKeysBase64 = current.getSecretString();
             final byte[] currentActiveKeyBytes = Base64.getUrlDecoder().decode(currentActiveKeysBase64);
             if (currentActiveKeyBytes.length % 32 != 0) {
@@ -98,9 +97,9 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
                 keys = keys.subList(0, getMaxActiveKeys());
             }
 
-            getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, "AWSPENDING");
-            logger.log("createSecret: Successfully put secret for ARN " + secretId + " and version "
-                    + clientRequestToken + ".");
+            getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, PENDING);
+            getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId,
+                    clientRequestToken);
         }
     }
 
