@@ -1,5 +1,5 @@
 /**
-   Copyright 2017 Carlos Macasaet
+   Copyright 2018 Carlos Macasaet
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
+
 import java.security.SecureRandom;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
@@ -28,7 +29,7 @@ import com.macasaet.fernet.Token;
 
 /**
  * AWS Lambda that rotates Fernet keys. To access a key, retrieve AWSCURRENT, AWSPENDING, or AWSPREVIOUS. To validate
- * and decrypt a token, it will be necessary to retrieve AWSCURRENT and AWSPENDING as there is no way to know which one
+ * and decrypt a token, it will be necessary to retrieve AWSCURRENT and AWSPREVIOUS as there is no way to know which one
  * was used to generate the token.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
@@ -45,29 +46,29 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
                 new SecureRandom());
     }
 
+    protected void createSecret(final String secretId, final String clientRequestToken) {
+        getSecretsManager().assertCurrentStageExists(secretId);
+        try {
+            // TODO: "do nothing" logic can be pulled up
+            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, PENDING);
+            getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
+        } catch (final ResourceNotFoundException rnfe) {
+            // TODO: there is currently no way to inject a Key generator
+            final Key key = Key.generateKey(getRandom());
+            getSecretsManager().putSecretValue(secretId, clientRequestToken, key, PENDING);
+            getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId, clientRequestToken);
+        }
+    }
+
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
-                "AWSPENDING");
+                PENDING);
         final Key key = new Key(pendingSecretResult.getSecretString());
         final Token token = Token.generate(getRandom(), key, "");
         if (!token.isValidSignature(key)) {
             throw new IllegalStateException("Pending key is unable to create and validate a Fernet token.");
         }
-        // TODO log that secret was validated
-    }
-
-    protected void createSecret(final LambdaLogger logger, final String secretId, final String clientRequestToken) {
-        getSecretsManager().assertCurrentStageExists(secretId, clientRequestToken);
-        try {
-            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, "AWSPENDING");
-            logger.log("createSecret: Successfully retrieved secret for " + secretId + ". Doing nothing.");
-        } catch( final ResourceNotFoundException rnfe ) {
-            // TODO: there is currently no way to inject a Key generator
-            final Key key = Key.generateKey(getRandom());
-            getSecretsManager().putSecretValue(secretId, clientRequestToken, key, "AWSPENDING");
-            logger.log("createSecret: Successfully put secret for ARN " + secretId + " and version "
-                    + clientRequestToken + ".");
-        }
+        getLogger().info("testSecret: Successfully validated Fernet Key for ARN {} and version {}.", secretId, clientRequestToken);
     }
 
 }
