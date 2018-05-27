@@ -18,17 +18,15 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.CURRENT;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.StringValidator;
 import com.macasaet.fernet.Token;
@@ -46,68 +44,74 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     };
     private int maxActiveKeys = 3;
 
-    protected MultiFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms,
-            final SecureRandom random) {
+    protected MultiFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms, final SecureRandom random) {
         super(secretsManager, kms, random);
+        final String maxActiveKeysString = System.getenv("MAX_ACTIVE_KEYS");
+        if (maxActiveKeysString != null && !"".equals(maxActiveKeysString)) {
+            setMaxActiveKeys(Integer.parseInt(maxActiveKeysString));
+        }
     }
 
     public MultiFernetKeyRotator() {
         this(new SecretsManager(AWSSecretsManagerClientBuilder.defaultClient()), AWSKMSClientBuilder.defaultClient(),
                 new SecureRandom());
-        // TODO retrieve max active keys from system property
+    }
+
+    protected void createSecret(final String secretId, final String clientRequestToken) {
+        final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
+                CURRENT);
+        final ByteBuffer currentSecret = current.getSecretBinary();
+        if (currentSecret.remaining() % 32 != 0) {
+            throw new IllegalStateException("There must be a multiple of 32 bytes.");
+        }
+        final int numKeys = currentSecret.remaining() / 32;
+        List<Key> keys = new ArrayList<>(numKeys + 1);
+        while (currentSecret.hasRemaining()) {
+            final byte[] signingKey = new byte[16];
+            currentSecret.get(signingKey);
+            final byte[] encryptionKey = new byte[16];
+            currentSecret.get(encryptionKey);
+            final Key key = new Key(signingKey, encryptionKey);
+            keys.add(key);
+        }
+        // TODO currently no way to inject a key generator
+        final Key keyToStage = Key.generateKey(getRandom());
+        keys.add(0, keyToStage);
+        final int desiredSize = getMaxActiveKeys() + 1; // max active keys + one pending
+        if (keys.size() > desiredSize) {
+            keys = keys.subList(0, desiredSize);
+        }
+
+        getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, PENDING);
+        getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId,
+                clientRequestToken);
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId,
                 clientRequestToken, PENDING);
-        final String string = pendingSecretResult.getSecretString();
-        final byte[] bytes = Base64.getUrlDecoder().decode(string);
-        if (bytes.length % 32 != 0) {
+        final ByteBuffer currentSecret = pendingSecretResult.getSecretBinary();
+        if (currentSecret.remaining() % 32 != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
         }
         // first key will become the staged key
-        final Key candidateStagedKey = new Key(Arrays.copyOfRange(bytes, 0, 32)) {
-        }; // TODO: this constructor should probably be public
+        final byte[] signingKey = new byte[16];
+        currentSecret.get(signingKey);
+        final byte[] encryptionKey = new byte[16];
+        currentSecret.get(encryptionKey);
+        final Key candidateStagedKey = new Key(signingKey, encryptionKey);
+        // TODO currently no way to inject a token generator
         Token.generate(getRandom(), candidateStagedKey, "").validateAndDecrypt(candidateStagedKey, validator);
-    }
-
-    protected void createSecret(final String secretId, final String clientRequestToken) {
-        getSecretsManager().assertCurrentStageExists(secretId);
-        try {
-            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, PENDING);
-            getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
-        } catch (final ResourceNotFoundException rnfe) {
-            final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
-                    CURRENT);
-            final String currentActiveKeysBase64 = current.getSecretString();
-            final byte[] currentActiveKeyBytes = Base64.getUrlDecoder().decode(currentActiveKeysBase64);
-            if (currentActiveKeyBytes.length % 32 != 0) {
-                throw new IllegalStateException("There must be a multiple of 32 bytes.");
-            }
-            final int numKeys = currentActiveKeyBytes.length / 32;
-            List<Key> keys = new ArrayList<>(numKeys + 1);
-            for( int i = 0; i < currentActiveKeyBytes.length; i += 32 ) {
-                final Key key = new Key(Arrays.copyOfRange(currentActiveKeyBytes, i, i + 32) ) {};
-                keys.add(key);
-            }
-            // TODO currently no way to inject a key generator
-            final Key keyToStage = Key.generateKey(getRandom());
-            keys.add(0, keyToStage);
-            if( keys.size() > getMaxActiveKeys() ) {
-                keys = keys.subList(0, getMaxActiveKeys());
-            }
-
-            getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, PENDING);
-            getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId,
-                    clientRequestToken);
-        }
     }
 
     protected int getMaxActiveKeys() {
         return maxActiveKeys;
     }
 
-    protected void setMaxActiveKeys(int maxActiveKeys) {
+    protected void setMaxActiveKeys(final int maxActiveKeys) {
+        if (maxActiveKeys < 1) {
+            throw new IllegalArgumentException("The maximum number of active keys must be at least 1.");
+        }
         this.maxActiveKeys = maxActiveKeys;
     }
 

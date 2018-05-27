@@ -23,7 +23,6 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
@@ -47,17 +46,10 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
-        getSecretsManager().assertCurrentStageExists(secretId);
-        try {
-            // TODO: "do nothing" logic can be pulled up
-            getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, PENDING);
-            getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
-        } catch (final ResourceNotFoundException rnfe) {
-            // TODO: there is currently no way to inject a Key generator
-            final Key key = Key.generateKey(getRandom());
-            getSecretsManager().putSecretValue(secretId, clientRequestToken, key, PENDING);
-            getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId, clientRequestToken);
-        }
+        // TODO: there is currently no way to inject a Key generator
+        final Key key = Key.generateKey(getRandom());
+        getSecretsManager().putSecretValue(secretId, clientRequestToken, key, PENDING);
+        getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId, clientRequestToken);
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {

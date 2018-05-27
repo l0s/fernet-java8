@@ -120,12 +120,7 @@ class SecretsManager {
      * @param stage TODO
      */
     public void putSecretValue(final String secretId, final String clientRequestToken, final Key key, final Stage stage) {
-        final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
-        putSecretValueRequest.setSecretId(secretId);
-        putSecretValueRequest.setClientRequestToken(clientRequestToken);
-        putSecretValueRequest.setSecretString(key.serialise());
-        putSecretValueRequest.setVersionStages(singletonList(stage.getAwsName()));
-        getDelegate().putSecretValue(putSecretValueRequest);        
+        putSecretValue(secretId, clientRequestToken, singletonList(key), stage);
     }
 
     /**
