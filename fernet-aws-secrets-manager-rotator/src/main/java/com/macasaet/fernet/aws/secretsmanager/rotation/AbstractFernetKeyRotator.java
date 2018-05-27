@@ -115,7 +115,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
             case CREATE_SECRET:
                 getSecretsManager().assertCurrentStageExists(secretId);
                 try {
-                    getSecretsManager().getSecretVersionStage(secretId, clientRequestToken, PENDING);
+                    getSecretsManager().getSecretVersion(secretId, clientRequestToken, PENDING);
                     getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
                 } catch (final ResourceNotFoundException rnfe) {
                     createSecret(secretId, clientRequestToken);

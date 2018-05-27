@@ -85,11 +85,17 @@ class SecretsManager {
      * @param stage TODO
      * @return TODO
      */
-    public GetSecretValueResult getSecretVersionStage(final String secretId, final String clientRequestToken,
+    public GetSecretValueResult getSecretVersion(final String secretId, final String clientRequestToken,
             final Stage stage) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionId(clientRequestToken);
+        return getDelegate().getSecretValue(getSecretValueRequest);
+    }
+
+    public GetSecretValueResult getSecretStage(final String secretId, final Stage stage) {
+        final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
+        getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionStage(stage.getAwsName());
         return getDelegate().getSecretValue(getSecretValueRequest);
     }

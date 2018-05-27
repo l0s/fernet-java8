@@ -86,7 +86,7 @@ public class MultiFernetKeyRotatorTest {
 
             final GetSecretValueResult secretValueResult = new GetSecretValueResult();
             secretValueResult.setSecretBinary(ByteBuffer.wrap(stream.toByteArray()));
-            given(secretsManager.getSecretVersionStage("secret", "version", CURRENT)).willReturn(secretValueResult);
+            given(secretsManager.getSecretStage("secret", CURRENT)).willReturn(secretValueResult);
 
             // when
             rotator.createSecret("secret", "version");
@@ -116,7 +116,7 @@ public class MultiFernetKeyRotatorTest {
             final GetSecretValueResult secretValueResult = new GetSecretValueResult();
             secretValueResult.setSecretBinary(ByteBuffer.wrap(stream.toByteArray()));
 
-            given(secretsManager.getSecretVersionStage("secret", "version", PENDING)).willReturn(secretValueResult);
+            given(secretsManager.getSecretVersion("secret", "version", PENDING)).willReturn(secretValueResult);
 
             // when
             rotator.testSecret("secret", "version");

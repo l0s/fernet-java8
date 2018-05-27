@@ -33,7 +33,12 @@ import com.macasaet.fernet.Token;
 import com.macasaet.fernet.Validator;
 
 /**
- * This rotator can be used when an array of Fernet keys is stored in AWSCURRENT. 
+ * <p>This rotator can be used when an array of Fernet keys is stored in AWSCURRENT.</p> 
+ *
+ * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:<br />
+ * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre></p>
+ *
+ * TODO: document required permissions and provide sample role
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
@@ -58,8 +63,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult current = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
-                CURRENT);
+        final GetSecretValueResult current = getSecretsManager().getSecretStage(secretId, CURRENT);
         final ByteBuffer currentSecret = current.getSecretBinary();
         if (currentSecret.remaining() % 32 != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
@@ -88,7 +92,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId,
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId,
                 clientRequestToken, PENDING);
         final ByteBuffer currentSecret = pendingSecretResult.getSecretBinary();
         if (currentSecret.remaining() % 32 != 0) {
