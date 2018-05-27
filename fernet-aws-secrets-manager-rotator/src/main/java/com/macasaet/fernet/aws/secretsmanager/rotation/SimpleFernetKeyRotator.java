@@ -17,6 +17,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 
 import com.amazonaws.services.kms.AWSKMS;
@@ -58,7 +59,12 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId, clientRequestToken,
                 PENDING);
-        final Key key = new Key(pendingSecretResult.getSecretString());
+        final ByteBuffer buffer = pendingSecretResult.getSecretBinary();
+        final byte[] signingKey = new byte[16];
+        buffer.get(signingKey);
+        final byte[] encryptionKey = new byte[16];
+        buffer.get(encryptionKey);
+        final Key key = new Key(signingKey, encryptionKey);
         final Token token = Token.generate(getRandom(), key, "");
         if (!token.isValidSignature(key)) {
             throw new IllegalStateException("Pending key is unable to create and validate a Fernet token.");
