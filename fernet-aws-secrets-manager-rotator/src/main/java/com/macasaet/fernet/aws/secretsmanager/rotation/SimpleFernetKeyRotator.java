@@ -27,9 +27,12 @@ import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
 /**
- * AWS Lambda that rotates Fernet keys. To access a key, retrieve AWSCURRENT, AWSPENDING, or AWSPREVIOUS. To validate
+ * <p>AWS Lambda that rotates Fernet keys. To access a key, retrieve AWSCURRENT, AWSPENDING, or AWSPREVIOUS. To validate
  * and decrypt a token, it will be necessary to retrieve AWSCURRENT and AWSPREVIOUS as there is no way to know which one
- * was used to generate the token.
+ * was used to generate the token.</p>
+ * 
+ * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:<br />
+ * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre></p>
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
@@ -53,7 +56,7 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersionStage(secretId, clientRequestToken,
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId, clientRequestToken,
                 PENDING);
         final Key key = new Key(pendingSecretResult.getSecretString());
         final Token token = Token.generate(getRandom(), key, "");

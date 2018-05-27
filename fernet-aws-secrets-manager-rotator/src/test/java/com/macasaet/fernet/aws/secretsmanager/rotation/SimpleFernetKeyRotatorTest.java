@@ -110,7 +110,7 @@ public class SimpleFernetKeyRotatorTest {
         secretDescription.setRotationEnabled(true);
         secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
         given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
-        given(secretsManager.getSecretVersionStage(secretId, clientRequestToken, PENDING))
+        given(secretsManager.getSecretVersion(secretId, clientRequestToken, PENDING))
                 .willThrow(new ResourceNotFoundException("no value yet"));
 
         final RotationRequest creationRequest = new RotationRequest();
