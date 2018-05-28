@@ -84,10 +84,14 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
     }
 
     public void handleRequest(final InputStream input, final OutputStream output, final Context context) throws IOException {
-        final RotationRequest request = mapper.readValue(input, RotationRequest.class);
+        final RotationRequest request = getMapper().readValue(input, RotationRequest.class);
         getLogger().debug("Processing request: {}", request);
         seed();
 
+        handleRotationRequest(request);
+    }
+
+    protected void handleRotationRequest(final RotationRequest request) {
         final String secretId = request.getSecretId();
         final String clientRequestToken = request.getClientRequestToken();
 
@@ -113,35 +117,10 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         }
         switch (request.getStep()) {
             case CREATE_SECRET:
-                getSecretsManager().assertCurrentStageExists(secretId);
-                try {
-                    getSecretsManager().getSecretVersion(secretId, clientRequestToken, PENDING);
-                    getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
-                } catch (final ResourceNotFoundException rnfe) {
-                    createSecret(secretId, clientRequestToken);
-                }
+                conditionallyCreateSecret(secretId, clientRequestToken);
                 return;
             case FINISH_SECRET:
-                String currentVersion = null;
-                for( final String versionId : versions.keySet() ) {
-                    final List<String> versionStages = versions.get(versionId);
-                    if( versionStages.contains(CURRENT.getAwsName()) ) {
-                        if( versionId.equals(clientRequestToken ) ) {
-                            // The correct version is already marked as current, return
-                            getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", versionId,
-                                    secretId);
-                            return;
-                        }
-                        currentVersion = versionId;
-                        break;
-                    }
-                }
-                if (currentVersion == null) {
-                    throw new IllegalStateException("No AWSCURRENT secret set for " + secretId + ".");
-                }
-                getSecretsManager().rotateSecret(secretId, clientRequestToken, currentVersion);
-                getLogger().info("finishSecret: Successfully set AWSCURRENT stage to version {} for secret {}.",
-                        clientRequestToken, secretId);
+                finishSecret(secretId, clientRequestToken, versions);
                 return;
             case SET_SECRET:
                 // not applicable
@@ -151,6 +130,16 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
                 return;
             default:
                 throw new IllegalArgumentException("Missing or invalid step provided");
+        }
+    }
+
+    protected void conditionallyCreateSecret(final String secretId, final String clientRequestToken) {
+        getSecretsManager().assertCurrentStageExists(secretId);
+        try {
+            getSecretsManager().getSecretVersion(secretId, clientRequestToken);
+            getLogger().warn("createSecret: Successfully retrieved secret for {}. Doing nothing.", secretId);
+        } catch (final ResourceNotFoundException rnfe) {
+            createSecret(secretId, clientRequestToken);
         }
     }
 
@@ -173,6 +162,30 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      *            a unique identifier for this rotation request
      */
     protected abstract void testSecret(String secretId, String clientRequestToken);
+
+    protected void finishSecret(final String secretId, final String clientRequestToken,
+            final Map<String, List<String>> versions) {
+        String currentVersion = null;
+        for (final String versionId : versions.keySet()) {
+            final List<String> versionStages = versions.get(versionId);
+            if( versionStages.contains(CURRENT.getAwsName()) ) {
+                if( versionId.equals(clientRequestToken ) ) {
+                    // The correct version is already marked as current, return
+                    getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", versionId,
+                            secretId);
+                    return;
+                }
+                currentVersion = versionId;
+                break;
+            }
+        }
+        if (currentVersion == null) {
+            throw new IllegalStateException("No AWSCURRENT secret set for " + secretId + ".");
+        }
+        getSecretsManager().rotateSecret(secretId, clientRequestToken, currentVersion);
+        getLogger().info("finishSecret: Successfully set AWSCURRENT stage to version {} for secret {}.",
+                clientRequestToken, secretId);
+    }
 
     /**
      * This seeds the random number generator using KMS if and only it hasn't already been seeded.
