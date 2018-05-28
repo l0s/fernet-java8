@@ -47,14 +47,14 @@ public class RotationRequest {
     }
 
     /**
-     * @return a unique identifier for this rotation operation, which will span multiple requests
+     * @return a unique identifier for this rotation operation, which will span multiple requests. This is typically a UUID.
      */
     public String getClientRequestToken() {
         return clientRequestToken;
     }
 
     /**
-     * @param clientRequestToken a unique identifier for this rotation operation, which will span multiple requests
+     * @param clientRequestToken a unique identifier for this rotation operation, which will span multiple requests. This is typically a UUID.
      */
     public void setClientRequestToken(String clientRequestToken) {
         this.clientRequestToken = clientRequestToken;

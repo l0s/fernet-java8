@@ -1,0 +1,32 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EnableLogging",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EnableRandomNumberGeneration",
+            "Effect": "Allow",
+            "Action": "kms:GenerateRandom",
+            "Resource": "*"
+        },
+        {
+            "Sid": "EnableSecretsRotation",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:PutSecretValue",
+                "secretsmanager:UpdateSecretVersionStage"
+            ],
+            "Resource": "arn:aws:secretsmanager:<region>:<accountId>:secret:<secretId>"
+        }
+    ]
+}

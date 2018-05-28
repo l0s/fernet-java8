@@ -50,15 +50,13 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
-        // TODO: there is currently no way to inject a Key generator
         final Key key = Key.generateKey(getRandom());
         getSecretsManager().putSecretValue(secretId, clientRequestToken, key, PENDING);
         getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId, clientRequestToken);
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId, clientRequestToken,
-                PENDING);
+        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId, clientRequestToken);
         final ByteBuffer buffer = pendingSecretResult.getSecretBinary();
         final byte[] signingKey = new byte[16];
         buffer.get(signingKey);

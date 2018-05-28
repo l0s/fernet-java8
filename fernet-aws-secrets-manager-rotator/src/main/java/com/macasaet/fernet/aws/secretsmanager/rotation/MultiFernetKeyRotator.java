@@ -28,9 +28,7 @@ import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.macasaet.fernet.Key;
-import com.macasaet.fernet.StringValidator;
 import com.macasaet.fernet.Token;
-import com.macasaet.fernet.Validator;
 
 /**
  * <p>This rotator can be used when an array of Fernet keys is stored in AWSCURRENT.</p> 
@@ -38,17 +36,18 @@ import com.macasaet.fernet.Validator;
  * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:<br />
  * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre></p>
  *
- * TODO: document required permissions and provide sample role
- *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
 public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
 
-    private static final Validator<String> validator = new StringValidator() {
-    };
     private int maxActiveKeys = 3;
 
+    /**
+     * @param secretsManager a utility for interacting with AWS Secrets Manager
+     * @param kms a KMS client for seeding the random number generator
+     * @param random an entropy source
+     */
     protected MultiFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms, final SecureRandom random) {
         super(secretsManager, kms, random);
         final String maxActiveKeysString = System.getenv("MAX_ACTIVE_KEYS");
@@ -78,7 +77,6 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
             final Key key = new Key(signingKey, encryptionKey);
             keys.add(key);
         }
-        // TODO currently no way to inject a key generator
         final Key keyToStage = Key.generateKey(getRandom());
         keys.add(0, keyToStage);
         final int desiredSize = getMaxActiveKeys() + 1; // max active keys + one pending
@@ -93,7 +91,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId,
-                clientRequestToken, PENDING);
+                clientRequestToken);
         final ByteBuffer currentSecret = pendingSecretResult.getSecretBinary();
         if (currentSecret.remaining() % 32 != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
@@ -104,15 +102,24 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
         final byte[] encryptionKey = new byte[16];
         currentSecret.get(encryptionKey);
         final Key candidateStagedKey = new Key(signingKey, encryptionKey);
-        // TODO currently no way to inject a token generator
-        Token.generate(getRandom(), candidateStagedKey, "").validateAndDecrypt(candidateStagedKey, validator);
+        final Token token = Token.generate(getRandom(), candidateStagedKey, "");
+        if (!token.isValidSignature(candidateStagedKey)) {
+            throw new IllegalStateException("Staged key cannot generate a valid token.");
+        }
     }
 
+    /**
+     * @return the total number of keys that can be used for decryption. The actual number of keys stored will be this value plus one.
+     */
     protected int getMaxActiveKeys() {
         return maxActiveKeys;
     }
 
+    /**
+     * @param maxActiveKeys the total number of keys that can be used for decryption. The actual number of keys stored will be this value plus one.
+     */
     protected void setMaxActiveKeys(final int maxActiveKeys) {
+        getLogger().info("Setting the maximum number of active keys to: {}.", maxActiveKeys);
         if (maxActiveKeys < 1) {
             throw new IllegalArgumentException("The maximum number of active keys must be at least 1.");
         }

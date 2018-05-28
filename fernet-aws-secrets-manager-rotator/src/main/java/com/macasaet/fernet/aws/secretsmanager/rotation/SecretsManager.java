@@ -29,6 +29,7 @@ import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
+import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
 import com.macasaet.fernet.Key;
 
@@ -39,14 +40,14 @@ import com.macasaet.fernet.Key;
  * <code>secretsmanager:GetSecretValue</code>, <code>secretsmanager:UpdateSecretVersionStage</code>, and
  * <code>secretsmanager:PutSecretValue</code>.</p>
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
- * 
+ *
  * @author Carlos Macasaet
  */
 class SecretsManager {
 
     private final AWSSecretsManager delegate;
 
-    protected SecretsManager(final AWSSecretsManager delegate) {
+    public SecretsManager(final AWSSecretsManager delegate) {
         if (delegate == null) {
             throw new IllegalArgumentException("delegate cannot be null");
         }
@@ -54,9 +55,12 @@ class SecretsManager {
     }
 
     /**
-     * This requires the permission <code>secretsmanager:GetSecretValue</code>
+     * Ensure that the given secret has an AWSCURRENT value. This requires the permission
+     * <code>secretsmanager:GetSecretValue</code>
      *
-     * @param secretId TODO
+     * @param secretId
+     *            the ARN of the secret.
+     * @throws ResourceNotFoundException if the secret doesn't exist or it has no AWSCURRENT stage
      */
     public void assertCurrentStageExists(final String secretId) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
@@ -66,10 +70,10 @@ class SecretsManager {
     }
 
     /**
-     * This requires the permission <code>secretsmanager:DescribeSecret</code>
+     * Obtain a secret's metadata. This requires the permission <code>secretsmanager:DescribeSecret</code>
      *
-     * @param secretId TODO
-     * @return TODO
+     * @param secretId the ARN of the secret
+     * @return the secret's metadata
      */
     public DescribeSecretResult describeSecret(final String secretId) {
         final DescribeSecretRequest describeSecretRequest = new DescribeSecretRequest();
@@ -78,21 +82,30 @@ class SecretsManager {
     }
 
     /**
-     * This requires the permission <code>secretsmanager:GetSecretValue</code>
+     * Retrieve a specific version of the secret. This requires the permission <code>secretsmanager:GetSecretValue</code>
      *
-     * @param secretId TODO
-     * @param clientRequestToken TODO
-     * @param stage TODO
-     * @return TODO
+     * TODO consider returning a ByteBuffer
+     *
+     * @param secretId the ARN of the secret
+     * @param clientRequestToken the version identifier of the secret
+     * @return a wrapper for the secret's value
      */
-    public GetSecretValueResult getSecretVersion(final String secretId, final String clientRequestToken,
-            final Stage stage) {
+    public GetSecretValueResult getSecretVersion(final String secretId, final String clientRequestToken) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionId(clientRequestToken);
         return getDelegate().getSecretValue(getSecretValueRequest);
     }
 
+    /**
+     * Retrieve a specific stage of the secret.
+     *
+     * TODO consider returning a ByteBuffer
+     *
+     * @param secretId the ARN of the secret
+     * @param stage the stage of the secret to retrieve
+     * @return a wrapper for the secret's value
+     */
     public GetSecretValueResult getSecretStage(final String secretId, final Stage stage) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
@@ -101,14 +114,17 @@ class SecretsManager {
     }
 
     /**
-     * This requires the permission <code>secretsmanager:UpdateSecretVersionStage</code>
+     * Rotate a secret. This requires the permission <code>secretsmanager:UpdateSecretVersionStage</code>
      *
-     * @param secretId TODO
-     * @param clientRequestToken the version ID to be made "current"
-     * @param currentVersion the current active version ID to be made "previous"
+     * @param secretId
+     *            the ARN of the secret
+     * @param clientRequestToken
+     *            the version ID to be made "current"
+     * @param currentVersion
+     *            the current active version ID to be made "previous"
      */
     public void rotateSecret(final String secretId, final String clientRequestToken,
-            String currentVersion) {
+            final String currentVersion) {
         final UpdateSecretVersionStageRequest updateSecretVersionStageRequest = new UpdateSecretVersionStageRequest();
         updateSecretVersionStageRequest.setSecretId(secretId);
         updateSecretVersionStageRequest.setVersionStage(CURRENT.getAwsName());
@@ -118,24 +134,32 @@ class SecretsManager {
     }
 
     /**
-     * This requires the permission <code>secretsmanager:PutSecretValue</code>
+     * Store a single Fernet key in a secret. This requires the permission <code>secretsmanager:PutSecretValue</code>
      *
-     * @param secretId TODO
-     * @param clientRequestToken TODO
-     * @param key TODO
-     * @param stage TODO
+     * @param secretId
+     *            the ARN of the secret
+     * @param clientRequestToken
+     *            the secret version identifier
+     * @param key
+     *            the keys to store in the secret
+     * @param stage
+     *            the keys to store in the secret
      */
     public void putSecretValue(final String secretId, final String clientRequestToken, final Key key, final Stage stage) {
         putSecretValue(secretId, clientRequestToken, singletonList(key), stage);
     }
 
     /**
-     * This requires the permission <code>secretsmanager:PutSecretValue</code>
+     * Store Fernet keys in the secret. This requires the permission <code>secretsmanager:PutSecretValue</code>
      *
-     * @param secretId TODO
-     * @param clientRequestToken TODO
-     * @param keys TODO
-     * @param stage TODO
+     * @param secretId
+     *            the ARN of the secret
+     * @param clientRequestToken
+     *            the secret version identifier
+     * @param keys
+     *            the keys to store in the secret
+     * @param stage
+     *            the keys to store in the secret
      */
     public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
             final Stage stage) {

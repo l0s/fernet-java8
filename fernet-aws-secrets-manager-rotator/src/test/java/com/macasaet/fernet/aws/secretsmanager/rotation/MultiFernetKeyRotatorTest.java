@@ -29,11 +29,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -61,6 +64,9 @@ public class MultiFernetKeyRotatorTest {
 
     @InjectMocks
     private MultiFernetKeyRotator rotator;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -116,13 +122,45 @@ public class MultiFernetKeyRotatorTest {
             final GetSecretValueResult secretValueResult = new GetSecretValueResult();
             secretValueResult.setSecretBinary(ByteBuffer.wrap(stream.toByteArray()));
 
-            given(secretsManager.getSecretVersion("secret", "version", PENDING)).willReturn(secretValueResult);
+            given(secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
 
             // when
             rotator.testSecret("secret", "version");
 
             // then (no exception)
         }
+    }
+
+    @Test
+    public final void verifyTestRejectsTooFewBytes() throws IOException {
+        // given
+        final byte[] shortArray = new byte[ 6*32 - 1 ];
+        Arrays.fill(shortArray, (byte)0);
+        final GetSecretValueResult secretValueResult = new GetSecretValueResult();
+        secretValueResult.setSecretBinary(ByteBuffer.wrap(shortArray));
+        given( secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
+
+        // when
+        thrown.expect(RuntimeException.class);
+        rotator.testSecret("secret", "version");
+
+        // then
+    }
+
+    @Test
+    public final void verifyTestRejectsTooManyBytes() throws IOException {
+        // given
+        final byte[] shortArray = new byte[ 6*32 + 1 ];
+        Arrays.fill(shortArray, (byte)0);
+        final GetSecretValueResult secretValueResult = new GetSecretValueResult();
+        secretValueResult.setSecretBinary(ByteBuffer.wrap(shortArray));
+        given( secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
+
+        // when
+        thrown.expect(RuntimeException.class);
+        rotator.testSecret("secret", "version");
+
+        // then
     }
 
 }
