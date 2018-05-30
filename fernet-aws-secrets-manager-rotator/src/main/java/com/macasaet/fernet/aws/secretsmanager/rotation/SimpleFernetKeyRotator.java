@@ -23,7 +23,6 @@ import java.security.SecureRandom;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
@@ -56,12 +55,17 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId, clientRequestToken);
-        final ByteBuffer buffer = pendingSecretResult.getSecretBinary();
+        final ByteBuffer buffer = getSecretsManager().getSecretVersion(secretId, clientRequestToken);
+        if (buffer.remaining() != 32) {
+            throw new IllegalStateException("Fernet key must be exactly 32 bytes");
+        }
         final byte[] signingKey = new byte[16];
         buffer.get(signingKey);
         final byte[] encryptionKey = new byte[16];
         buffer.get(encryptionKey);
+        if (buffer.hasRemaining()) {
+            throw new IllegalStateException("Encountered extra bytes.");
+        }
         final Key key = new Key(signingKey, encryptionKey);
         final Token token = Token.generate(getRandom(), key, "");
         if (!token.isValidSignature(key)) {

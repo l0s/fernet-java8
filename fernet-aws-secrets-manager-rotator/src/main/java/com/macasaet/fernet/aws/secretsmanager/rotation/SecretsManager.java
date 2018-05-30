@@ -84,33 +84,31 @@ class SecretsManager {
     /**
      * Retrieve a specific version of the secret. This requires the permission <code>secretsmanager:GetSecretValue</code>
      *
-     * TODO consider returning a ByteBuffer
-     *
      * @param secretId the ARN of the secret
      * @param clientRequestToken the version identifier of the secret
-     * @return a wrapper for the secret's value
+     * @return the Fernet key or keys in binary form
      */
-    public GetSecretValueResult getSecretVersion(final String secretId, final String clientRequestToken) {
+    public ByteBuffer getSecretVersion(final String secretId, final String clientRequestToken) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionId(clientRequestToken);
-        return getDelegate().getSecretValue(getSecretValueRequest);
+        final GetSecretValueResult result = getDelegate().getSecretValue(getSecretValueRequest);
+        return result.getSecretBinary();
     }
 
     /**
      * Retrieve a specific stage of the secret.
      *
-     * TODO consider returning a ByteBuffer
-     *
      * @param secretId the ARN of the secret
      * @param stage the stage of the secret to retrieve
-     * @return a wrapper for the secret's value
+     * @return the Fernet key in binary form
      */
-    public GetSecretValueResult getSecretStage(final String secretId, final Stage stage) {
+    public ByteBuffer getSecretStage(final String secretId, final Stage stage) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
         getSecretValueRequest.setSecretId(secretId);
         getSecretValueRequest.setVersionStage(stage.getAwsName());
-        return getDelegate().getSecretValue(getSecretValueRequest);
+        final GetSecretValueResult result = getDelegate().getSecretValue(getSecretValueRequest);
+        return result.getSecretBinary();
     }
 
     /**
