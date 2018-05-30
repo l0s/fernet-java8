@@ -34,7 +34,6 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
 import com.amazonaws.services.kms.model.GenerateRandomResult;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
@@ -42,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 /**
- * This is an AWS Lambda {@link RequestHandler} that rotates a Fernet key.
+ * This is an AWS Lambda {@link RequestStreamHandler} that rotates a Fernet key.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
@@ -93,7 +92,6 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     protected void handleRotationRequest(final RotationRequest request) {
         final String secretId = request.getSecretId();
-        final String clientRequestToken = request.getClientRequestToken();
 
         final DescribeSecretResult secretMetadata = getSecretsManager().describeSecret(secretId);
         if (secretMetadata.isRotationEnabled() == null || !secretMetadata.isRotationEnabled()) {
@@ -101,6 +99,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         }
         final Map<String, List<String>> versions = secretMetadata.getVersionIdsToStages();
 
+        final String clientRequestToken = request.getClientRequestToken();
         if (!versions.containsKey(clientRequestToken)) {
             throw new IllegalArgumentException("Secret version " + clientRequestToken
                     + " has no stage for rotation of secret " + secretId + ".");
@@ -168,8 +167,8 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         String currentVersion = null;
         for (final String versionId : versions.keySet()) {
             final List<String> versionStages = versions.get(versionId);
-            if( versionStages.contains(CURRENT.getAwsName()) ) {
-                if( versionId.equals(clientRequestToken ) ) {
+            if (versionStages.contains(CURRENT.getAwsName())) {
+                if (versionId.equals(clientRequestToken)) {
                     // The correct version is already marked as current, return
                     getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", versionId,
                             secretId);
@@ -197,11 +196,11 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
             synchronized (random) {
                 if (!seeded) {
                     getLogger().debug("Seeding random number generator");
-                    final byte[] bytes = new byte[512];
                     final GenerateRandomRequest request = new GenerateRandomRequest();
-                    request.setNumberOfBytes(bytes.length);
+                    request.setNumberOfBytes(512);
                     final GenerateRandomResult result = getKms().generateRandom(request);
                     final ByteBuffer randomBytes = result.getPlaintext();
+                    final byte[] bytes = new byte[randomBytes.remaining()];
                     randomBytes.get(bytes);
                     random.setSeed(bytes);
                     seeded = true;

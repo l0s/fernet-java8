@@ -42,7 +42,7 @@ public class RotationRequest {
     /**
      * @param secretId the ARN of the Secrets Manager secret in the form arn:aws:secretsmanager:{region}:{account}:secret:{secret-name}.
      */
-    public void setSecretId(String secretId) {
+    public void setSecretId(final String secretId) {
         this.secretId = secretId;
     }
 
@@ -56,7 +56,7 @@ public class RotationRequest {
     /**
      * @param clientRequestToken a unique identifier for this rotation operation, which will span multiple requests. This is typically a UUID.
      */
-    public void setClientRequestToken(String clientRequestToken) {
+    public void setClientRequestToken(final String clientRequestToken) {
         this.clientRequestToken = clientRequestToken;
     }
 
@@ -72,7 +72,7 @@ public class RotationRequest {
      * @param step the phase of the rotation process
      * @see Step
      */
-    public void setStep(Step step) {
+    public void setStep(final Step step) {
         this.step = step;
     }
 

@@ -36,7 +36,9 @@ import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -70,6 +72,9 @@ public class SimpleFernetKeyRotatorTest {
     @InjectMocks
     private SimpleFernetKeyRotator rotator;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Before
     public void setUp() throws Exception {
         mapper = new ObjectMapper();
@@ -100,7 +105,7 @@ public class SimpleFernetKeyRotatorTest {
     }
 
     @Test
-    public void verifyCreate() throws IOException {
+    public void verifyHandleRequestCreatesKey() throws IOException {
         // given
         final Context context = mock(Context.class);
         final String clientRequestToken = "clientRequestToken";
@@ -127,6 +132,103 @@ public class SimpleFernetKeyRotatorTest {
                 // then
                 verify(secretsManager).putSecretValue(eq("secretId"), eq(clientRequestToken), any(Key.class),
                         eq(PENDING));
+            }
+        }
+    }
+
+    @Test
+    public final void verifyHandleRequestTestsValidKey() throws IOException {
+        // given
+        final Context context = mock(Context.class);
+        final String clientRequestToken = "clientRequestToken";
+        final String secretId = "secretId";
+
+        final DescribeSecretResult secretDescription = new DescribeSecretResult();
+        secretDescription.setRotationEnabled(true);
+        secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
+        given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
+
+        final Key key = Key.generateKey(random);
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(32)) {
+            key.writeTo(outputStream);
+            given(secretsManager.getSecretVersion(secretId, clientRequestToken))
+                    .willReturn(ByteBuffer.wrap(outputStream.toByteArray()));
+        }
+
+        final RotationRequest testRequest = new RotationRequest();
+        testRequest.setClientRequestToken(clientRequestToken);
+        testRequest.setSecretId(secretId);
+        testRequest.setStep(Step.TEST_SECRET);
+        final byte[] testRequestBytes = mapper.writeValueAsBytes(testRequest);
+
+        try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
+            try( OutputStream output = new ByteArrayOutputStream() ) {
+                // when
+                rotator.handleRequest(input, output, context);
+
+                // then (nothing)
+            }
+        }
+    }
+
+    @Test
+    public final void verifyHandleRequestTestsInsufficientBytes() throws IOException {
+        // given
+        final Context context = mock(Context.class);
+        final String clientRequestToken = "clientRequestToken";
+        final String secretId = "secretId";
+
+        final DescribeSecretResult secretDescription = new DescribeSecretResult();
+        secretDescription.setRotationEnabled(true);
+        secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
+        given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
+
+        given(secretsManager.getSecretVersion(secretId, clientRequestToken)).willReturn(ByteBuffer.allocateDirect(31));
+
+        final RotationRequest testRequest = new RotationRequest();
+        testRequest.setClientRequestToken(clientRequestToken);
+        testRequest.setSecretId(secretId);
+        testRequest.setStep(Step.TEST_SECRET);
+        final byte[] testRequestBytes = mapper.writeValueAsBytes(testRequest);
+
+        try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
+            try( OutputStream output = new ByteArrayOutputStream() ) {
+                // when
+                thrown.expect(RuntimeException.class);
+                rotator.handleRequest(input, output, context);
+
+                // then (exception thrown)
+            }
+        }
+    }
+
+    @Test
+    public final void verifyHandleRequestTestsTooManyBytes() throws IOException {
+        // given
+        final Context context = mock(Context.class);
+        final String clientRequestToken = "clientRequestToken";
+        final String secretId = "secretId";
+
+        final DescribeSecretResult secretDescription = new DescribeSecretResult();
+        secretDescription.setRotationEnabled(true);
+        secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
+        given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
+
+        given(secretsManager.getSecretVersion(secretId, clientRequestToken)).willReturn(ByteBuffer.allocateDirect(33));
+
+        final RotationRequest testRequest = new RotationRequest();
+        testRequest.setClientRequestToken(clientRequestToken);
+        testRequest.setSecretId(secretId);
+        testRequest.setStep(Step.TEST_SECRET);
+        final byte[] testRequestBytes = mapper.writeValueAsBytes(testRequest);
+
+        try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
+            try( OutputStream output = new ByteArrayOutputStream() ) {
+                // when
+                thrown.expect(RuntimeException.class);
+                rotator.handleRequest(input, output, context);
+
+                // then (exception thrown)
             }
         }
     }

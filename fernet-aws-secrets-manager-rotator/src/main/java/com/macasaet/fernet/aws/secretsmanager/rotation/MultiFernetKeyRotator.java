@@ -26,7 +26,6 @@ import java.util.List;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
@@ -62,8 +61,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult current = getSecretsManager().getSecretStage(secretId, CURRENT);
-        final ByteBuffer currentSecret = current.getSecretBinary();
+        final ByteBuffer currentSecret = getSecretsManager().getSecretStage(secretId, CURRENT);
         if (currentSecret.remaining() % 32 != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
         }
@@ -89,10 +87,9 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
                 clientRequestToken);
     }
 
-    protected void testSecret(final String secretId, final String clientRequestToken) {
-        final GetSecretValueResult pendingSecretResult = getSecretsManager().getSecretVersion(secretId,
+    protected void testSecret(final String secretId, final String clientRequestToken) { 
+        final ByteBuffer currentSecret = getSecretsManager().getSecretVersion(secretId,
                 clientRequestToken);
-        final ByteBuffer currentSecret = pendingSecretResult.getSecretBinary();
         if (currentSecret.remaining() % 32 != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
         }

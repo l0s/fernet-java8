@@ -44,7 +44,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.macasaet.fernet.Key;
 
 /**
@@ -90,9 +89,7 @@ public class MultiFernetKeyRotatorTest {
             key1.writeTo(stream); // primary
             key2.writeTo(stream); // old key
 
-            final GetSecretValueResult secretValueResult = new GetSecretValueResult();
-            secretValueResult.setSecretBinary(ByteBuffer.wrap(stream.toByteArray()));
-            given(secretsManager.getSecretStage("secret", CURRENT)).willReturn(secretValueResult);
+            given(secretsManager.getSecretStage("secret", CURRENT)).willReturn(ByteBuffer.wrap(stream.toByteArray()));
 
             // when
             rotator.createSecret("secret", "version");
@@ -119,10 +116,7 @@ public class MultiFernetKeyRotatorTest {
             key1.writeTo(stream);
             key2.writeTo(stream);
 
-            final GetSecretValueResult secretValueResult = new GetSecretValueResult();
-            secretValueResult.setSecretBinary(ByteBuffer.wrap(stream.toByteArray()));
-
-            given(secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
+            given(secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(stream.toByteArray()));
 
             // when
             rotator.testSecret("secret", "version");
@@ -136,9 +130,7 @@ public class MultiFernetKeyRotatorTest {
         // given
         final byte[] shortArray = new byte[ 6*32 - 1 ];
         Arrays.fill(shortArray, (byte)0);
-        final GetSecretValueResult secretValueResult = new GetSecretValueResult();
-        secretValueResult.setSecretBinary(ByteBuffer.wrap(shortArray));
-        given( secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
+        given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
 
         // when
         thrown.expect(RuntimeException.class);
@@ -152,9 +144,7 @@ public class MultiFernetKeyRotatorTest {
         // given
         final byte[] shortArray = new byte[ 6*32 + 1 ];
         Arrays.fill(shortArray, (byte)0);
-        final GetSecretValueResult secretValueResult = new GetSecretValueResult();
-        secretValueResult.setSecretBinary(ByteBuffer.wrap(shortArray));
-        given( secretsManager.getSecretVersion("secret", "version")).willReturn(secretValueResult);
+        given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
 
         // when
         thrown.expect(RuntimeException.class);
