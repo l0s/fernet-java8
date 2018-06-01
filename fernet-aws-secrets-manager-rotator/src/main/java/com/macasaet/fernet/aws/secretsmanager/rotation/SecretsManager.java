@@ -101,7 +101,7 @@ class SecretsManager {
      *
      * @param secretId the ARN of the secret
      * @param stage the stage of the secret to retrieve
-     * @return the Fernet key in binary form
+     * @return the Fernet key or keys in binary form
      */
     public ByteBuffer getSecretStage(final String secretId, final Stage stage) {
         final GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest();
@@ -139,9 +139,9 @@ class SecretsManager {
      * @param clientRequestToken
      *            the secret version identifier
      * @param key
-     *            the keys to store in the secret
+     *            the key to store in the secret
      * @param stage
-     *            the keys to store in the secret
+     *            the stage with which to tag the version
      */
     public void putSecretValue(final String secretId, final String clientRequestToken, final Key key, final Stage stage) {
         putSecretValue(secretId, clientRequestToken, singletonList(key), stage);
@@ -157,7 +157,7 @@ class SecretsManager {
      * @param keys
      *            the keys to store in the secret
      * @param stage
-     *            the keys to store in the secret
+     *            the stage with which to tag the version
      */
     public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
             final Stage stage) {

@@ -22,7 +22,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-enum Stage {
+public enum Stage {
 
     CURRENT,
     PENDING,

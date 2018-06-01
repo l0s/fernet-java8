@@ -15,11 +15,19 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
-import static java.util.Collections.*;
-import static com.macasaet.fernet.aws.secretsmanager.rotation.Step.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.MockitoAnnotations.*;
-import static org.junit.Assert.*;
+import static com.macasaet.fernet.aws.secretsmanager.rotation.Step.SET_SECRET;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

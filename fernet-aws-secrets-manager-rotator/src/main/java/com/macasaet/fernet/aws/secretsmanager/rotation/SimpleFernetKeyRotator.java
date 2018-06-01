@@ -24,7 +24,6 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.macasaet.fernet.Key;
-import com.macasaet.fernet.Token;
 
 /**
  * <p>AWS Lambda that rotates Fernet keys. To access a key, retrieve AWSCURRENT, AWSPENDING, or AWSPREVIOUS. To validate
@@ -66,11 +65,7 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
         if (buffer.hasRemaining()) {
             throw new IllegalStateException("Encountered extra bytes.");
         }
-        final Key key = new Key(signingKey, encryptionKey);
-        final Token token = Token.generate(getRandom(), key, "");
-        if (!token.isValidSignature(key)) {
-            throw new IllegalStateException("Pending key is unable to create and validate a Fernet token.");
-        }
+        new Key(signingKey, encryptionKey);
         getLogger().info("testSecret: Successfully validated Fernet Key for ARN {} and version {}.", secretId, clientRequestToken);
     }
 
