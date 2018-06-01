@@ -15,7 +15,7 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 

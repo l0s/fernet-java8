@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!--
    Copyright 2017 Carlos Macasaet
 
@@ -24,18 +25,6 @@
   <packaging>jar</packaging>
   <name>Fernet Java</name>
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
-  <dependencyManagement>
-    <dependencies>
-      <!-- FIXME remove this -->
-      <dependency>
-        <groupId>com.amazonaws</groupId>
-        <artifactId>aws-java-sdk-bom</artifactId>
-        <version>1.11.318</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -82,27 +71,6 @@
     	<artifactId>embedded-redis</artifactId>
     	<version>0.6</version>
     	<scope>test</scope>
-    </dependency>
-    <!-- dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-core</artifactId>
-      <scope>test</scope>
-    </dependency -->
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-kms</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-secretsmanager</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-lambda-java-core</artifactId>
-      <version>1.2.0</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

@@ -13,7 +13,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.macasaet.fernet</groupId>
   <artifactId>fernet-java</artifactId>
@@ -103,39 +104,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <version>1.4.0</version>
-        <configuration>
-          <targetClasses>
-            <param>com.macasaet.fernet.*</param>
-          </targetClasses>
-          <targetTests>
-            <param>com.macasaet.fernet.*</param>
-          </targetTests>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>mutationCoverage</goal>
-            </goals>
-            <phase>verify</phase>
-          </execution>
-        </executions>
-	  </plugin>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-site-plugin</artifactId>
-      <version>3.7.1</version>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.maven.doxia</groupId>
-          <artifactId>doxia-module-markdown</artifactId>
-          <version>1.7</version>
-        </dependency>
-      </dependencies>
-    </plugin>
-      <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
         <version>1.6.8</version>
@@ -157,18 +125,6 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-              <goal>cpd-check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -176,6 +132,20 @@
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
           <version>1.4.0</version>
+          <configuration>
+            <avoidCallsTo>
+              <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
+              <avoidCallsTo>java.util.Random</avoidCallsTo>
+            </avoidCallsTo>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>mutationCoverage</goal>
+              </goals>
+              <phase>verify</phase>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -218,17 +188,6 @@
       <url>${project.url}</url>
     </site>
   </distributionManagement>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <configuration>
-          <skipEmptyReport>false</skipEmptyReport>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
   <profiles>
     <profile>
       <id>release</id>
