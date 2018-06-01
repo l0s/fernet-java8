@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
@@ -165,9 +166,10 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
     protected void finishSecret(final String secretId, final String clientRequestToken,
             final Map<String, List<String>> versions) {
         String currentVersion = null;
-        for (final String versionId : versions.keySet()) {
-            final List<String> versionStages = versions.get(versionId);
+        for (final Entry<String, List<String>> entry: versions.entrySet()) {
+            final List<String> versionStages = entry.getValue();
             if (versionStages.contains(CURRENT.getAwsName())) {
+                final String versionId = entry.getKey();
                 if (versionId.equals(clientRequestToken)) {
                     // The correct version is already marked as current, return
                     getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", versionId,

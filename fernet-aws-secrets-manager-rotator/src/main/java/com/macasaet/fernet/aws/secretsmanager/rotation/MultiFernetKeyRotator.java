@@ -27,7 +27,6 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.macasaet.fernet.Key;
-import com.macasaet.fernet.Token;
 
 /**
  * <p>This rotator can be used when an array of Fernet keys is stored in AWSCURRENT.</p> 
@@ -98,11 +97,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
         currentSecret.get(signingKey);
         final byte[] encryptionKey = new byte[16];
         currentSecret.get(encryptionKey);
-        final Key candidateStagedKey = new Key(signingKey, encryptionKey);
-        final Token token = Token.generate(getRandom(), candidateStagedKey, "");
-        if (!token.isValidSignature(candidateStagedKey)) {
-            throw new IllegalStateException("Staged key cannot generate a valid token.");
-        }
+        new Key(signingKey, encryptionKey);
     }
 
     /**
