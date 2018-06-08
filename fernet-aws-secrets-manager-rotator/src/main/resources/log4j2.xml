@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.amazonaws.services.lambda.runtime.log4j2.LambdaAppender">
+  <Appenders>
+    <Lambda name="Lambda">
+      <PatternLayout>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} %X{AWSRequestId} %-5p %c - %m%n</pattern>
+      </PatternLayout>
+    </Lambda>
+  </Appenders>
+  <Loggers>
+    <Logger name="com.macasaet.fernet.aws.secretsmanager" level="info" additivity="false">
+      <AppenderRef ref="Lambda" />
+    </Logger>
+    <Logger name="com.macasaet" level="warn" additivity="false">
+      <AppenderRef ref="Lambda" />
+    </Logger>
+    <Logger name="com.amazonaws" level="warn" additivity="false">
+      <AppenderRef ref="Lambda" />
+    </Logger>
+    <Root level="error">
+      <AppenderRef ref="Lambda" />
+    </Root>
+  </Loggers>
+</Configuration>

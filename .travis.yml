@@ -10,7 +10,7 @@ env:
 deploy:
   provider: pages
   skip_cleanup: true
-  local_dir: target/site
+  local_dir: target/staging
   github_token: $GITHUB_TOKEN
   on:
     tags: true
@@ -22,5 +22,6 @@ addons:
 cache:
   directories:
     - $HOME/.m2
-    - target/pmd
-    - $HOME/.sonar
+    - fernet-java8/target/pmd
+    - fernet-aws-secrets-manager-rotator/target/pmd
+    - $HOME/.sonar/cache

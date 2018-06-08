@@ -42,6 +42,9 @@ under the License.
     <exclude name="ClassNamingConventions" />
     <exclude name="DefaultPackage" />
     <exclude name="CommentDefaultAccessModifier" />
+    <exclude name="OnlyOneReturn" />
+    <exclude name="AvoidFinalLocalVariable" />
+    <exclude name="AtLeastOneConstructor" />
   </rule>
   <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
   <rule ref="category/java/design.xml/SimplifiedTernary"/>

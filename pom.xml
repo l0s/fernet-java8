@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
    Copyright 2017 Carlos Macasaet
 
@@ -5,7 +6,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +14,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.macasaet.fernet</groupId>
-  <artifactId>fernet-java8</artifactId>
-  <packaging>jar</packaging>
-  <version>1.1.4-SNAPSHOT</version>
-  <name>Fernet Java</name>
+  <artifactId>fernet-java</artifactId>
+  <version>1.2.0-SNAPSHOT</version>
+  <name>Fernet Java - Parent</name>
+  <packaging>pom</packaging>
   <url>https://l0s.github.io/fernet-java8/</url>
   <inceptionYear>2017</inceptionYear>
   <description>A Java implementation of the Fernet encrypted token specification.</description>
@@ -49,120 +50,59 @@
     <pmd.version>6.3.0</pmd.version>
     <sonar.organization>l0s-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <dependency.locations.enabled>false</dependency.locations.enabled>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.mockito</groupId>
-    	<artifactId>mockito-all</artifactId>
-    	<version>1.10.19</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.glassfish.jersey.containers</groupId>
-    	<artifactId>jersey-container-servlet-core</artifactId>
-    	<version>2.25.1</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>com.google.protobuf</groupId>
-    	<artifactId>protobuf-java</artifactId>
-    	<version>3.3.1</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>javax.servlet</groupId>
-    	<artifactId>javax.servlet-api</artifactId>
-    	<version>4.0.1</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    	<version>2.9.5</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>redis.clients</groupId>
-    	<artifactId>jedis</artifactId>
-    	<version>2.9.0</version>
-    	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>com.github.kstyrc</groupId>
-    	<artifactId>embedded-redis</artifactId>
-    	<version>0.6</version>
-    	<scope>test</scope>
-    </dependency>
-  </dependencies>
   <scm>
-  	<url>https://github.com/l0s/fernet-java8</url>
+    <url>https://github.com/l0s/fernet-java8</url>
     <connection>scm:git:ssh://github.com/l0s/fernet-java8.git</connection>
     <developerConnection>scm:git:git@github.com:l0s/fernet-java8.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <ciManagement>
-  	<system>Travis CI</system>
-  	<url>https://travis-ci.org/l0s/fernet-java8/</url>
+    <system>Travis CI</system>
+    <url>https://travis-ci.org/l0s/fernet-java8/</url>
   </ciManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+          <version>2.18.3</version>
+          <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.21.0</version>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.7.1</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-module-markdown</artifactId>
+            <version>1.7</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>execution</id>
+            <phase>site</phase>
+            <goals>
+              <goal>attach-descriptor</goal>
+              <goal>site</goal>
+              <goal>stage</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-failsafe-plugin</artifactId>
-	    <version>2.21.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-	  </plugin>
-      <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <version>1.4.0</version>
-        <configuration>
-          <targetClasses>
-            <param>com.macasaet.fernet.*</param>
-          </targetClasses>
-          <targetTests>
-            <param>com.macasaet.fernet.*</param>
-          </targetTests>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>mutationCoverage</goal>
-            </goals>
-            <phase>verify</phase>
-          </execution>
-        </executions>
-	  </plugin>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-site-plugin</artifactId>
-      <version>3.7.1</version>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.maven.doxia</groupId>
-          <artifactId>doxia-module-markdown</artifactId>
-          <version>1.7</version>
-        </dependency>
-      </dependencies>
-    </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -185,21 +125,28 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-              <goal>cpd-check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.pitest</groupId>
+          <artifactId>pitest-maven</artifactId>
+          <version>1.4.0</version>
+          <configuration>
+            <avoidCallsTo>
+              <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
+              <avoidCallsTo>java.util.Random</avoidCallsTo>
+            </avoidCallsTo>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>mutationCoverage</goal>
+              </goals>
+              <phase>verify</phase>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
@@ -207,7 +154,7 @@
           <configuration>
             <analysisCache>true</analysisCache>
             <rulesets>
-              <ruleset>${project.basedir}/src/main/config/pmd-ruleset.xml</ruleset>
+              <ruleset>${maven.multiModuleProjectDirectory}/src/main/config/pmd-ruleset.xml</ruleset>
             </rulesets>
           </configuration>
           <dependencies>
@@ -226,29 +173,6 @@
       </plugins>
     </pluginManagement>
   </build>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <version>1.2.0</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <configuration>
-          <skipEmptyReport>false</skipEmptyReport>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -258,6 +182,11 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+    <site>
+      <id>site</id>
+      <name>Site</name>
+      <url>${project.url}</url>
+    </site>
   </distributionManagement>
   <profiles>
     <profile>
@@ -311,4 +240,8 @@
       </build>
     </profile>
   </profiles>
+  <modules>
+    <module>fernet-java8</module>
+    <module>fernet-aws-secrets-manager-rotator</module>
+  </modules>
 </project>

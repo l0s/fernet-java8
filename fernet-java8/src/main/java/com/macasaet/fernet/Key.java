@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64.Encoder;
 import java.util.Random;
 
@@ -68,7 +69,7 @@ public class Key {
      * @param encryptionKey
      *            a 128-bit (16 byte) key for encrypting and decrypting token contents.
      */
-    protected Key(final byte[] signingKey, final byte[] encryptionKey) {
+    public Key(final byte[] signingKey, final byte[] encryptionKey) {
         if (signingKey == null || signingKey.length != signingKeyBytes) {
             throw new IllegalArgumentException("Signing key must be 128 bits");
         }
@@ -134,46 +135,6 @@ public class Key {
             // this should not happen as I/O is to memory only
             throw new IllegalStateException(e.getMessage(), e);
         }
-    }
-
-    protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
-            final byte[] cipherText, final ByteArrayOutputStream byteStream)
-        throws IOException {
-        try (DataOutputStream dataStream = new DataOutputStream(byteStream)) {
-            dataStream.writeByte(version);
-            dataStream.writeLong(timestamp.getEpochSecond());
-            dataStream.write(initializationVector.getIV());
-            dataStream.write(cipherText);
-
-            try {
-                final Mac mac = Mac.getInstance(getSigningAlgorithm());
-                mac.init(getSigningKeySpec());
-                return mac.doFinal(byteStream.toByteArray());
-            } catch (final InvalidKeyException ike) {
-                // this should not happen because we control the signing key
-                // algorithm and pre-validate the length
-                throw new IllegalStateException("Unable to initialise HMAC with shared secret: " + ike.getMessage(),
-                        ike);
-            } catch (final NoSuchAlgorithmException nsae) {
-                // this should not happen as implementors are required to
-                // provide the HmacSHA256 algorithm.
-                throw new IllegalStateException(nsae.getMessage(), nsae);
-            }
-        }
-    }
-
-    /**
-     * @return an HMAC SHA-256 key for signing the token
-     */
-    protected SecretKeySpec getSigningKeySpec() {
-        return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
-    }
-
-    /**
-     * @return the AES key for encrypting and decrypting the token payload
-     */
-    protected SecretKeySpec getEncryptionKeySpec() {
-        return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
     }
 
     /**
@@ -250,6 +211,67 @@ public class Key {
     public void writeTo(final OutputStream outputStream) throws IOException {
         outputStream.write(getSigningKey());
         outputStream.write(getEncryptionKey());
+    }
+
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(getSigningKey());
+        result = prime * result + Arrays.hashCode(getEncryptionKey());
+        return result;
+    }
+
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Key)) {
+            return false;
+        }
+        final Key other = (Key) obj;
+
+        return Arrays.equals(getSigningKey(), other.getSigningKey())
+                && Arrays.equals(getEncryptionKey(), other.getEncryptionKey());
+    }
+
+    protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
+            final byte[] cipherText, final ByteArrayOutputStream byteStream)
+        throws IOException {
+        try (DataOutputStream dataStream = new DataOutputStream(byteStream)) {
+            dataStream.writeByte(version);
+            dataStream.writeLong(timestamp.getEpochSecond());
+            dataStream.write(initializationVector.getIV());
+            dataStream.write(cipherText);
+    
+            try {
+                final Mac mac = Mac.getInstance(getSigningAlgorithm());
+                mac.init(getSigningKeySpec());
+                return mac.doFinal(byteStream.toByteArray());
+            } catch (final InvalidKeyException ike) {
+                // this should not happen because we control the signing key
+                // algorithm and pre-validate the length
+                throw new IllegalStateException("Unable to initialise HMAC with shared secret: " + ike.getMessage(),
+                        ike);
+            } catch (final NoSuchAlgorithmException nsae) {
+                // this should not happen as implementors are required to
+                // provide the HmacSHA256 algorithm.
+                throw new IllegalStateException(nsae.getMessage(), nsae);
+            }
+        }
+    }
+
+    /**
+     * @return an HMAC SHA-256 key for signing the token
+     */
+    protected SecretKeySpec getSigningKeySpec() {
+        return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
+    }
+
+    /**
+     * @return the AES key for encrypting and decrypting the token payload
+     */
+    protected SecretKeySpec getEncryptionKeySpec() {
+        return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
     }
 
     protected byte[] getSigningKey() {

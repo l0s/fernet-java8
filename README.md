@@ -111,7 +111,7 @@ It is also used by
 ### Mutation Testing and Test Coverage
 
 This project uses PITest to evaluate test coverage and test effectiveness.
-The latest report is available [here](https://l0s.github.io/fernet-java8/pit-reports/).
+The latest report is available [here](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/).
 To generate a report for a local build, run:
 
     mvn clean install site
