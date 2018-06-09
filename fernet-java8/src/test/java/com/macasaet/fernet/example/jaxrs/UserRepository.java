@@ -19,7 +19,7 @@ import java.util.Map;
 
 import javax.inject.Singleton;
 
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Example of how to incorporate external storage into a Fernet token creation and validation scheme.
