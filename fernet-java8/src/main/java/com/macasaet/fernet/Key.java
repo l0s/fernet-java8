@@ -146,17 +146,21 @@ public class Key {
      * @see #decrypt(byte[], IvParameterSpec)
      */
     public byte[] encrypt(final byte[] payload, final IvParameterSpec initializationVector) {
+        final SecretKeySpec encryptionKeySpec = getEncryptionKeySpec();
         try {
             final Cipher cipher = Cipher.getInstance(cipherTransformation);
-            cipher.init(ENCRYPT_MODE, getEncryptionKeySpec(), initializationVector);
+            cipher.init(ENCRYPT_MODE, encryptionKeySpec, initializationVector);
             return cipher.doFinal(payload);
         } catch (final NoSuchAlgorithmException | NoSuchPaddingException e) {
             // these should not happen as we use an algorithm (AES) and padding (PKCS5) that are guaranteed to exist
-            throw new IllegalStateException("Unable to access cipher: " + e.getMessage(), e);
+            throw new IllegalStateException("Unable to access cipher " + cipherTransformation + ": " + e.getMessage(), e);
         } catch (final InvalidKeyException | InvalidAlgorithmParameterException e) {
             // this should not happen as the key is validated ahead of time and
             // we use an algorithm guaranteed to exist
-            throw new IllegalStateException("Unable to initialise cipher: " + e.getMessage(), e);
+            throw new IllegalStateException(
+                    "Unable to initialise encryption cipher with algorithm " + encryptionKeySpec.getAlgorithm()
+                            + " and format " + encryptionKeySpec.getFormat() + ": " + e.getMessage(),
+                    e);
         } catch (final IllegalBlockSizeException | BadPaddingException e) {
             // these should not happen as we control the block size and padding
             throw new IllegalStateException("Unable to encrypt data: " + e.getMessage(), e);
@@ -242,7 +246,7 @@ public class Key {
             dataStream.writeLong(timestamp.getEpochSecond());
             dataStream.write(initializationVector.getIV());
             dataStream.write(cipherText);
-    
+
             try {
                 final Mac mac = Mac.getInstance(getSigningAlgorithm());
                 mac.init(getSigningKeySpec());
