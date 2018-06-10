@@ -31,8 +31,8 @@ import com.macasaet.fernet.Key;
 /**
  * <p>This rotator can be used when an array of Fernet keys is stored in AWSCURRENT.</p> 
  *
- * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:<br />
- * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre></p>
+ * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:</p>
+ * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre>
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet

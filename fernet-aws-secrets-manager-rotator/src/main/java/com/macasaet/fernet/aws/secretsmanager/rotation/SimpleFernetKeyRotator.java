@@ -30,8 +30,8 @@ import com.macasaet.fernet.Key;
  * and decrypt a token, it will be necessary to retrieve AWSCURRENT and AWSPREVIOUS as there is no way to know which one
  * was used to generate the token.</p>
  * 
- * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:<br />
- * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre></p>
+ * <p>Grant AWS Secrets Manager permission to execute the Lambda using this:</p>
+ * <pre>aws lambda add-permission --function-name arn:aws:lambda:{region}:{accountId}:function:{functionName} --principal secretsmanager.amazonaws.com --action lambda:InvokeFunction --statement-id SecretsManagerAccess</pre>
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
