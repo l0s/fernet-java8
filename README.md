@@ -33,14 +33,14 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>1.1.3</version>
+      <version>1.2.0</version>
     </dependency>
 
 For more details, see: 
-[The Central Repository](https://search.maven.org/#artifactdetails%7Ccom.macasaet.fernet%7Cfernet-java8%7C1.0.0%7Cjar)
+[The Central Repository](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.macasaet.fernet%22%20AND%20a%3A%22fernet-java8%22)
 
 If you use a dependency manager system or build system other than Maven, see
-[Dependency Information](https://l0s.github.io/fernet-java8/dependency-info.html).
+[Dependency Information](https://l0s.github.io/fernet-java8/fernet-java8/dependency-info.html).
 
 Alternatively, you can just download the latest
 [jar](https://github.com/l0s/fernet-java8/releases) and add it to your
@@ -81,17 +81,17 @@ pointer to a domain object (e.g. a username), you can implement your own
 ### Storing Sensitive Data on the Client
 
 For an example of how to securely store sensitive data on the client (e.g. browser cookie), see the classes in
-[src/test/java](https://github.com/l0s/fernet-java8/tree/master/src/test/java/com/macasaet/fernet/example/autofill). The class 
-[AutofillExample](https://github.com/l0s/fernet-java8/blob/master/src/test/java/com/macasaet/fernet/example/autofill/AutofillExample.java) 
+[src/test/java](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill). The class 
+[AutofillExample](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill/AutofillExample.java) 
 shows a full end-to-end example.
 
 ### JAX-RS
 
 For an example of how to use Fernet Tokens to secure a REST API implemented
 using  JAX-RS or Jersey, see the classes in
-[src/test/java](https://github.com/l0s/fernet-java8/tree/master/src/test/java/com/macasaet/fernet/example/jaxrs).
+[src/test/java](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/jaxrs).
 The test class
-[JaxRsTest](https://github.com/l0s/fernet-java8/blob/master/src/test/java/com/macasaet/fernet/example/jaxrs/JaxRsTest.java)
+[JaxRsIT](https://github.com/l0s/fernet-java8/blob/master/fernet-java8/src/test/java/com/macasaet/fernet/example/jaxrs/JaxRsIT.java)
 shows a full end-to-end example. It includes an example of integrating with
 external storage.
 
@@ -111,7 +111,7 @@ It is also used by
 ### Mutation Testing and Test Coverage
 
 This project uses PITest to evaluate test coverage and test effectiveness.
-The latest report is available [here](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/).
+The latest report is available [here](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/index.html).
 To generate a report for a local build, run:
 
     mvn clean install site
