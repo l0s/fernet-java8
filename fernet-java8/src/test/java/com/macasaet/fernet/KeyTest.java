@@ -18,6 +18,7 @@ package com.macasaet.fernet;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.encryptionKeyBytes;
 import static com.macasaet.fernet.Constants.signingKeyBytes;
+import static nl.jqno.equalsverifier.Warning.STRICT_INHERITANCE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -29,6 +30,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 /**
  * Unit tests for the {@link Key} class.
@@ -172,6 +175,15 @@ public class KeyTest {
 
         // then
         assertEquals("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=", result);
+    }
+
+    @Test
+    public final void verifyEqualityContract() {
+        // given
+        final EqualsVerifier<Key> verifier = EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE);
+
+        // when / then
+        verifier.verify();
     }
 
 }
