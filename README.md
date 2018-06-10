@@ -82,7 +82,7 @@ pointer to a domain object (e.g. a username), you can implement your own
 
 For an example of how to securely store sensitive data on the client (e.g. browser cookie), see the classes in
 [src/test/java](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill). The class 
-[AutofillExample](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill/AutofillExample.java) 
+[AutofillExample](https://github.com/l0s/fernet-java8/blob/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill/AutofillExampleIT.java) 
 shows a full end-to-end example.
 
 ### JAX-RS
