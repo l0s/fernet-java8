@@ -95,6 +95,13 @@ The test class
 shows a full end-to-end example. It includes an example of integrating with
 external storage.
 
+### AWS Secrets Manager
+
+For details on how to store Fernet keys using AWS Secrets Manager, see
+the submodule
+[fernet-aws-secrets-manager-rotator](https://github.com/l0s/fernet-java8/tree/master/fernet-aws-secrets-manager-rotator).
+It includes a Lambda Function to enable key rotation.
+
 ## Why Fernet, Why not JWT?
 
 Valid concerns have been raised about the JWT specification:
