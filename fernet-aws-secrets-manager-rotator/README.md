@@ -1,7 +1,6 @@
 # AWS Secrets Manager Fernet Key Rotator Lambda
 
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-aws-secrets-manager-rotator.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-aws-secrets-manager-rotator)
-[![Sonar](https://sonarcloud.io/api/project_badges/measure?project=com.macasaet.fernet%3Afernet-aws-secrets-manager-rotator&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.macasaet.fernet%3Afernet-aws-secrets-manager-rotator)
 
 This module provides two schemes for storing Fernet secret keys in AWS
 Secrets Manager, "Simple" and "Multi".
@@ -109,9 +108,12 @@ to instantiate each key.
 
 [PIT Mutation Testing  Report](https://l0s.github.io/fernet-java8/fernet-aws-secrets-manager-rotator/pit-reports/index.html)
 
+[SonarCloud Code Quality](https://sonarcloud.io/dashboard?id=com.macasaet.fernet%3Afernet-aws-secrets-manager-rotator)
+
 ## References
 
 [AWS Secrets Manager Documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html)
+
 [Rotating
 Secrets](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html)
 
