@@ -243,5 +243,6 @@
   <modules>
     <module>fernet-java8</module>
     <module>fernet-aws-secrets-manager-rotator</module>
+    <module>fernet-jersey-auth</module>
   </modules>
 </project>
