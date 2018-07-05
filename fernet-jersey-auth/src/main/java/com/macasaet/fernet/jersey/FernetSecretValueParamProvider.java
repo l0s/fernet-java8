@@ -74,7 +74,7 @@ class FernetSecretValueParamProvider<T> implements ValueParamProvider {
     }
 
     public Function<ContainerRequest, T> getValueProvider(final Parameter parameter) {
-        return (request) -> {
+        return request -> {
             if (parameter.isAnnotationPresent(FernetSecret.class)) {
                 final Collection<? extends Key> keys = getKeySupplier().get();
                 final Token xAuthorizationToken = getHeaderUtility().getXAuthorizationToken(request);

@@ -59,7 +59,7 @@ public class TokenInjectionIT extends JerseyTest {
         final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
         // when
-        final String result = target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        final String result = target("secrets").request().header("Authorization", "Fernet " + tokenString).get(String.class);
 
         // then
         assertEquals("42", result);
@@ -79,7 +79,7 @@ public class TokenInjectionIT extends JerseyTest {
 
         // when
         thrown.expect(NotAuthorizedException.class);
-        target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        target("secrets").request().header("Authorization", "Fernet\t" + tokenString).get(String.class);
 
         // then (nothing)
     }
@@ -115,7 +115,7 @@ public class TokenInjectionIT extends JerseyTest {
 
         // when
         thrown.expect(NotAuthorizedException.class);
-        target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        target("secrets").request().header("Authorization", "Fernet " + tokenString).get(String.class);
 
         // then (nothing)
     }

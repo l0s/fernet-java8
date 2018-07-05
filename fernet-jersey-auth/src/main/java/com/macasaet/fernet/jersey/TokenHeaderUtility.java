@@ -42,7 +42,7 @@ class TokenHeaderUtility {
         String authorizationString = request.getHeaderString("Authorization");
         if (authorizationString != null && !"".equals(authorizationString)) {
             authorizationString = authorizationString.trim();
-            final String[] components = authorizationString.split(" "); // TODO match all whitespace
+            final String[] components = authorizationString.split("\\s");
             if (components.length != 2) {
                 throw new WebApplicationException(status(UNAUTHORIZED).entity("mal-formed RFC2617 header").build());
             }

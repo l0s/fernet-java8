@@ -45,7 +45,7 @@ class FernetTokenValueParamProvider implements ValueParamProvider {
     private final TokenHeaderUtility tokenHeaderUtility = new TokenHeaderUtility();
 
     public Function<ContainerRequest, Token> getValueProvider(final Parameter parameter) {
-        return (request) -> {
+        return request -> {
             if (parameter.getRawType().equals(Token.class) && parameter.isAnnotationPresent(FernetToken.class)) {
                 final Token xAuthorizationToken = getTokenHeaderUtility().getXAuthorizationToken(request);
                 if (xAuthorizationToken != null) {
