@@ -32,7 +32,10 @@ import com.macasaet.fernet.Token;
 import com.macasaet.fernet.jaxrs.FernetToken;
 
 /**
- * 
+ * {@link ValueParamProvider} that generates a Fernet {@link Token} from a REST request's auth header.
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ *
  * @see https://stackoverflow.com/a/50980611/914887
  * @author Carlos Macasaet
  */

@@ -21,15 +21,18 @@ import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 
 /**
- * TODO document
+ * {@link org.glassfish.jersey.internal.inject.Binder Binder} that configures Fernet payload injection.
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
  * @see com.macasaet.fernet.jaxrs.FernetSecret
+ * @see FernetSecretFeature
  */
-public class FernetSecretBinder extends AbstractBinder {
+class FernetSecretBinder extends AbstractBinder {
 
     protected void configure() {
-        bind(FernetPayloadValueParamProvider.class)
+        bind(FernetSecretValueParamProvider.class)
             .to(ValueParamProvider.class)
             .in(Singleton.class);
     }

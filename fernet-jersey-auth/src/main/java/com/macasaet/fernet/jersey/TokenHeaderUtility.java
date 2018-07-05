@@ -24,8 +24,20 @@ import org.glassfish.jersey.server.ContainerRequest;
 
 import com.macasaet.fernet.Token;
 
+/**
+ * This is a utility class for extracting Fernet tokens from HTTP headers.
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ * @author Carlos Macasaet
+ */
 class TokenHeaderUtility {
 
+    /**
+     * Extract a Fernet token from an RFC2617 Authorization header.
+     *
+     * @param request a REST request which may or may not include an RFC2617 Authorization header.
+     * @return a Fernet token or null if no RFC2617 Authorization header is provided.
+     */
     public Token getAuthorizationToken(final ContainerRequest request) {
         String authorizationString = request.getHeaderString("Authorization");
         if (authorizationString != null && !"".equals(authorizationString)) {
@@ -45,6 +57,12 @@ class TokenHeaderUtility {
         return null;
     }
 
+    /**
+     * Extract a Fernet token from an X-Authorization header.
+     *
+     * @param request a REST request which may or may not include an X-Authorization header.
+     * @return a Fernet token or null if no X-Authorization header is provided.
+     */
     public Token getXAuthorizationToken(final ContainerRequest request) {
         final String xAuthorizationString = request.getHeaderString("X-Authorization");
         if (xAuthorizationString != null && !"".equals(xAuthorizationString)) {

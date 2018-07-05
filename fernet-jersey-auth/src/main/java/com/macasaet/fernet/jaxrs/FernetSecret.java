@@ -24,7 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * TODO document how to use this with examples
+ * Use this annotation on a Resource Method Parameter in order to inject the payload of a Fernet token. The Fernet token
+ * should be passed in the Authorization header with the scheme set to "Fernet" (RFC2617) or directly in the
+ * X-Authorization header.
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
  * @see com.macasaet.fernet.jersey.FernetSecretBinder

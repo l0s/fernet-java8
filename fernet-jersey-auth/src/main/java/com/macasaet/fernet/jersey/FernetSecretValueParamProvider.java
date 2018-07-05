@@ -36,17 +36,33 @@ import com.macasaet.fernet.Token;
 import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.jaxrs.FernetSecret;
 
+/**
+ * A {@link ValueParamProvider} to configure a Jersey JAX-RS application to inject
+ * Fernet token payloads into Resource Method Parameters. Your application will need to provide a custom
+ * {@link Validator} implementation that extracts the payload from the token and a {@link Supplier} that provides valid
+ * Fernet keys.
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ *
+ * @author Carlos Macasaet
+ * @param <T>
+ *            The type of payload that is stored in the Fernet Tokens and will be injected into the JAX-RS Resource.
+ * @see FernetSecretValueParamProvider#FernetPayloadValueParamProvider(Validator, Supplier)
+ */
 @Singleton
-class FernetPayloadValueParamProvider<T> implements ValueParamProvider {
+class FernetSecretValueParamProvider<T> implements ValueParamProvider {
 
     private final TokenHeaderUtility headerUtility = new TokenHeaderUtility();
     private final Validator<T> validator;
     private final Supplier<Collection<Key>> keySupplier;
 
+    /**
+     * @param validator custom token verifier and payload extractor
+     * @param keySupplier a method to provide Fernet keys
+     */
     @Inject
-    public FernetPayloadValueParamProvider(final Validator<T> validator,
+    public FernetSecretValueParamProvider(final Validator<T> validator,
             final Supplier<Collection<Key>> keySupplier) {
-        System.out.println("-- FernetPayloadValueParamProvider( " + validator + ", " + keySupplier + " )" );
         if (validator == null) {
             throw new IllegalArgumentException("validator cannot be null");
         }
@@ -58,9 +74,7 @@ class FernetPayloadValueParamProvider<T> implements ValueParamProvider {
     }
 
     public Function<ContainerRequest, T> getValueProvider(final Parameter parameter) {
-        System.out.println("-- getValueProvider( " + parameter + " )" );
         return (request) -> {
-            System.out.println("-- provideValue( " + request + ", " + parameter + " )" );
             if (parameter.isAnnotationPresent(FernetSecret.class)) {
                 final Collection<? extends Key> keys = getKeySupplier().get();
                 final Token xAuthorizationToken = getHeaderUtility().getXAuthorizationToken(request);

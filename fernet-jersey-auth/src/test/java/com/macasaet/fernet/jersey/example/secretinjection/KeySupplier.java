@@ -13,19 +13,25 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.jersey.payloadinjection;
+package com.macasaet.fernet.jersey.example.secretinjection;
 
-import java.util.function.Function;
+import static java.util.Collections.singleton;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 import javax.inject.Singleton;
 
-import com.macasaet.fernet.Validator;
+import com.macasaet.fernet.Key;
 
 @Singleton
-public class CustomTokenValidator implements Validator<Session> {
+public class KeySupplier implements Supplier<Collection<? extends Key>> {
 
-    public Function<byte[], Session> getTransformer() {
-        return (bytes) -> new Session(); // FIXME this is a stub
+    private static final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
+
+    public Collection<? extends Key> get() {
+        // alternatively, get this from a datastore or secure key storage like AWS Secrets Manager, AWS KMS, or HashiCorp Vault
+        return singleton(key);
     }
 
 }

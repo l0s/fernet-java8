@@ -62,6 +62,12 @@
         <version>${jersey.version}</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-json-jackson</artifactId>
+        <version>${jersey.version}</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
   <distributionManagement>
     <site>
@@ -71,8 +77,7 @@
   </distributionManagement>
   <build>
     <plugins>
-      <!-- TODO enable this -->
-      <!-- plugin>
+      <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
         <configuration>
@@ -90,12 +95,12 @@
             <phase>verify</phase>
           </execution>
         </executions>
-      </plugin -->
+      </plugin>
     </plugins>
   </build>
   <reporting>
     <plugins>
-      <!-- TODO enable plugin>
+      <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
         <reportSets>
@@ -105,7 +110,7 @@
             </reports>
           </reportSet>
         </reportSets>
-      </plugin -->
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>

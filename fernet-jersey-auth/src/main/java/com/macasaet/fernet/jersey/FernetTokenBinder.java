@@ -21,11 +21,16 @@ import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 
 /**
+ * {@link org.glassfish.jersey.internal.inject.Binder Binder} that configures injection of Fernet
+ * {@link com.macasaet.fernet.Token Tokens} into Resource method parameters.
+ *
  * TODO consider creating a feature
- * TODO document
+ *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
  * @see com.macasaet.fernet.jaxrs.FernetToken
+ * @see com.macasaet.fernet.Token
  */
 public class FernetTokenBinder extends AbstractBinder {
 

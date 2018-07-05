@@ -13,13 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.example.jaxrs;
+package com.macasaet.fernet.jersey.example.common;
 
+import static java.util.Collections.unmodifiableMap;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Singleton;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Example of how to incorporate external storage into a Fernet token creation and validation scheme.
@@ -31,10 +32,15 @@ import com.google.common.collect.ImmutableMap;
 @Singleton
 public class UserRepository {
 
-	private Map<String, User> datastore =
-			ImmutableMap.of("alice", new User("1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=", true),
-					"bob", new User("98UXS8DlhmSuc6-PtTnFNV7cJGluRn1z4By-W_IMs4Q=", true),
-					"mallory", new User("Lpei3NWxhPsyc5NrJp6zkbHj4P_bji6Z7GsY0JSAUb8=", false));
+    private Map<String, User> datastore;
+
+    {
+        final Map<String, User> map = new HashMap<>();
+        map.put("alice", new User("1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=", true));
+        map.put("bob", new User("98UXS8DlhmSuc6-PtTnFNV7cJGluRn1z4By-W_IMs4Q=", true));
+        map.put("mallory", new User("Lpei3NWxhPsyc5NrJp6zkbHj4P_bji6Z7GsY0JSAUb8=", false));
+        datastore = unmodifiableMap(map);
+    }
 
 	public User findUser(final String username) {
 		return datastore.get(username);

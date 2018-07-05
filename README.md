@@ -85,15 +85,19 @@ For an example of how to securely store sensitive data on the client (e.g. brows
 [AutofillExample](https://github.com/l0s/fernet-java8/blob/master/fernet-java8/src/test/java/com/macasaet/fernet/example/autofill/AutofillExampleIT.java) 
 shows a full end-to-end example.
 
-### JAX-RS
+### JAX-RS / JSR 311
 
-For an example of how to use Fernet Tokens to secure a REST API implemented
-using  JAX-RS or Jersey, see the classes in
-[src/test/java](https://github.com/l0s/fernet-java8/tree/master/fernet-java8/src/test/java/com/macasaet/fernet/example/jaxrs).
-The test class
-[JaxRsIT](https://github.com/l0s/fernet-java8/blob/master/fernet-java8/src/test/java/com/macasaet/fernet/example/jaxrs/JaxRsIT.java)
-shows a full end-to-end example. It includes an example of integrating with
-external storage.
+For details on how to use Fernet tokens to secure JAX-RS endpoints, see
+the
+[fernet-jersey-auth](https://github.com/l0s/fernet-java8/tree/master/fernet-jersey-auth)
+submodule. If you're using the Jersey implementation of JAX-RS, you can
+use that module directly.
+[TokenInjectionIT](https://github.com/l0s/fernet-java8/blob/master/fernet-jersey-auth/src/test/java/com/macasaet/fernet/jersey/example/tokeninjection/TokenInjectionIT.java)
+contains an example of injecting a Fernet token into an endpoint
+parameter.
+[SecretInjectionIT](https://github.com/l0s/fernet-java8/blob/master/fernet-jersey-auth/src/test/java/com/macasaet/fernet/jersey/example/secretinjection/SecretInjectionIT.java)
+contains an example of injecting a Fernet token payload into an
+endpoint parameter.
 
 ### AWS Secrets Manager
 

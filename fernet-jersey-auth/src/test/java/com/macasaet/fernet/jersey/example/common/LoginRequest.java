@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.example.jaxrs;
+package com.macasaet.fernet.jersey.example.common;
 
 /**
  * User credentials for requesting a session token. In order to prevent
@@ -29,7 +29,11 @@ public class LoginRequest {
 	private String username;
 	private String singleRoundPasswordHash;
 
+	public LoginRequest() {
+	}
+
 	public LoginRequest(String username, String singleRoundPasswordHash) {
+	    this();
 		setUsername(username);
 		setSingleRoundPasswordHash(singleRoundPasswordHash);
 	}
