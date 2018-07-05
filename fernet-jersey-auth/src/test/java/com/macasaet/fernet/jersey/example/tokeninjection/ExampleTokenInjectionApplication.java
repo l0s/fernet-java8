@@ -22,7 +22,6 @@ import javax.ws.rs.core.GenericType;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.internal.inject.Binder;
-import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.macasaet.fernet.Key;
@@ -34,7 +33,11 @@ import com.macasaet.fernet.jersey.example.common.UserRepository;
 import com.macasaet.fernet.jersey.example.secretinjection.CustomTokenValidator;
 import com.macasaet.fernet.jersey.example.secretinjection.KeySupplier;
 
-
+/**
+ * TODO documentation
+ *
+ * @author Carlos Macasaet
+ */
 public class ExampleTokenInjectionApplication extends ResourceConfig {
 
     private final Binder fernetConfigurationBinder = new AbstractBinder() {
@@ -46,8 +49,6 @@ public class ExampleTokenInjectionApplication extends ResourceConfig {
     };
 
     public ExampleTokenInjectionApplication() {
-        register(LoggingFeature.class);
-        property(LoggingFeature.LOGGING_FEATURE_LOGGER_NAME_SERVER, "FINE");
         register(fernetConfigurationBinder);
         register(new FernetTokenBinder());
         register(AuthenticationResource.class);

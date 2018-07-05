@@ -80,7 +80,7 @@ public class SecretInjectionIT extends JerseyTest {
 
         // when
         thrown.expect(NotAuthorizedException.class);
-        target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        target("secrets").request().header("Authorization", "Fernet " + tokenString).get(String.class);
 
         // then (nothing)
     }

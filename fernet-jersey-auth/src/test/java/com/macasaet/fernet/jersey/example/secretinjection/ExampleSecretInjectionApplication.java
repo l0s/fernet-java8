@@ -41,6 +41,7 @@ import com.macasaet.fernet.jersey.example.common.UserRepository;
  *
  * @see FernetSecretFeature
  * @see com.macasaet.fernet.jaxrs.FernetSecret
+ * @param <T> the payload type. This is needed for injection to work.
  * @author Carlos Macasaet
  */
 public class ExampleSecretInjectionApplication<T> extends ResourceConfig {

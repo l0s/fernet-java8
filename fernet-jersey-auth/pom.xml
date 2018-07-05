@@ -24,9 +24,9 @@
 
   <groupId>com.macasaet.fernet.jersey</groupId>
   <artifactId>fernet-jersey-auth</artifactId>
-  <!-- TODO description -->
+  <description>Jersey integration for Fernet token validation</description>
 
-  <name>Fernet Jersey / JAX-RS Authentication</name>
+  <name>Fernet Java - Jersey / JAX-RS Authentication</name>
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
 
   <properties>
@@ -120,4 +120,5 @@
       </plugin>
     </plugins>
   </reporting>
+  <inceptionYear>2018</inceptionYear>
 </project>
