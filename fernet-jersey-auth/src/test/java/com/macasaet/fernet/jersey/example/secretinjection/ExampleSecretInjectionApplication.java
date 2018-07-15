@@ -17,11 +17,14 @@ package com.macasaet.fernet.jersey.example.secretinjection;
 
 import java.util.Collection;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.GenericType;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.internal.inject.Binder;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.macasaet.fernet.Key;
@@ -55,6 +58,7 @@ public class ExampleSecretInjectionApplication<T> extends ResourceConfig {
         }
     };
     public ExampleSecretInjectionApplication() {
+        register(new LoggingFeature(Logger.getLogger("SecretInjectionApplication"), Verbosity.PAYLOAD_ANY));
         register(FernetSecretFeature.class);
         register(fernetParameterBinder);
         register(AuthenticationResource.class);

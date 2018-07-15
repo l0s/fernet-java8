@@ -15,8 +15,6 @@
  */
 package com.macasaet.fernet.jersey;
 
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.glassfish.jersey.server.spi.internal.ValueParamProvider.Priority.NORMAL;
 
 import java.util.Collection;
@@ -25,7 +23,7 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.NotAuthorizedException;
 
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
@@ -85,7 +83,7 @@ class FernetSecretValueParamProvider<T> implements ValueParamProvider {
                 if (authorizationToken != null) {
                     return getValidator().validateAndDecrypt(keys, authorizationToken);
                 }
-                throw new WebApplicationException(status(UNAUTHORIZED).entity("missing auth header").build());
+                throw new NotAuthorizedException("Bearer error=\"invalid_token\", error_description=\"no token found in Authorization or X-Authorization header\"");
             }
             throw new IllegalStateException("misconfigured annotation");
         };

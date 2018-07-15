@@ -15,32 +15,25 @@
  */
 package com.macasaet.fernet.jaxrs.exception;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
-
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import com.macasaet.fernet.PayloadValidationException;
-import com.macasaet.fernet.TokenValidationException;
+import com.macasaet.fernet.IllegalTokenException;
 
 /**
- * An {@link ExceptionMapper} that translates Fernet token validation exceptions into HTTP semantics.
+ * An {@link ExceptionMapper} that translates Fernet token creation exceptions into HTTP semantics.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
  */
 @Provider
-public class TokenValidationExceptionMapper implements ExceptionMapper<TokenValidationException> {
+public class IllegalTokenExceptionMapper implements ExceptionMapper<IllegalTokenException> {
 
-    public Response toResponse(final TokenValidationException exception) {
-        if (exception instanceof PayloadValidationException) {
-            return Response.status(FORBIDDEN).entity("Request could not be validated.").type(TEXT_PLAIN_TYPE).build();
-        }
-        return new NotAuthorizedException("Bearer error=\"invalid_token\"").getResponse();
+    public Response toResponse(final IllegalTokenException exception) {
+        return new NotAuthorizedException("Bearer error=\"invalid_token\", error_description=\"mal-formed token\"").getResponse();
     }
 
 }

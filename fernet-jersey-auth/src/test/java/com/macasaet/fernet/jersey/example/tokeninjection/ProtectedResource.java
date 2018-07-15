@@ -16,11 +16,9 @@
 package com.macasaet.fernet.jersey.example.tokeninjection;
 
 import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
@@ -73,7 +71,7 @@ public class ProtectedResource {
             // access to the data requested
             return user.getSecret();
         } catch (final TokenValidationException tve) {
-            throw new NotAuthorizedException(Response.status(Status.UNAUTHORIZED).entity("Invalid token"), tve);
+            throw new ForbiddenException("Invalid token.");
         }
     }
 

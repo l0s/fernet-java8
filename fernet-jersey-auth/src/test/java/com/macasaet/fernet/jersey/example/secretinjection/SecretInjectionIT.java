@@ -17,9 +17,15 @@ package com.macasaet.fernet.jersey.example.secretinjection;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import java.util.Random;
 
+import javax.crypto.spec.IvParameterSpec;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -27,23 +33,43 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
+import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.jersey.example.common.LoginRequest;
 import com.macasaet.fernet.jersey.example.common.User;
 
-
 public class SecretInjectionIT extends JerseyTest {
+
+    private static final Matcher<NotAuthorizedException> notAuthorisedMatcher = new CustomTypeSafeMatcher<NotAuthorizedException>("NotAuthorizedException") {
+        protected boolean matchesSafely(final NotAuthorizedException item) {
+            final List<Object> challenges = item.getChallenges();
+            if (challenges == null || challenges.size() != 1) {
+                return false;
+            }
+            final Object challenge = challenges.get(0);
+            if (challenge == null) {
+                return false;
+            }
+            final String challengeString = challenge.toString();
+            return challengeString.startsWith("Bearer");
+        }
+    };
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     protected Application configure() {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
         enable(TestProperties.LOG_TRAFFIC);
+
         return new ExampleSecretInjectionApplication<User>();
     }
 
@@ -79,8 +105,8 @@ public class SecretInjectionIT extends JerseyTest {
         final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
         // when
-        thrown.expect(NotAuthorizedException.class);
-        target("secrets").request().header("Authorization", "Fernet " + tokenString).get(String.class);
+        thrown.expect(ForbiddenException.class);
+        target("secrets").request().header("Authorization", "Bearer " + tokenString).get(String.class);
 
         // then (nothing)
     }
@@ -115,8 +141,55 @@ public class SecretInjectionIT extends JerseyTest {
         final String tokenString = forgedToken.serialise();
 
         // when
-        thrown.expect(NotAuthorizedException.class);
+        thrown.expect(notAuthorisedMatcher);
         target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+    }
+
+    @Test
+    public final void verifyMissingTokenReturnsNotAuthorized() {
+        // given
+        
+
+        // when
+        thrown.expect(notAuthorisedMatcher);
+        target("secrets").request().get(String.class);
+
+        // then (nothing)
+    }
+
+    @Test
+    public final void verifyInvalidTokenReturnsNotAuthorized() throws UnsupportedEncodingException {
+        // given
+        final Random random = new SecureRandom();
+        final Key key = Key.generateKey(random);
+        final byte[] plainText = "this is a valid token".getBytes("UTF-8");
+        final Token validToken = Token.generate(random, key, plainText);
+        final byte[] cipherText = key.encrypt(plainText, validToken.getInitializationVector());
+        final Token invalidToken = new Token(validToken.getVersion(), validToken.getTimestamp(),
+                validToken.getInitializationVector(), cipherText, key.sign(validToken.getVersion(),
+                        validToken.getTimestamp(), validToken.getInitializationVector(), cipherText)) {
+
+            public byte getVersion() {
+                return (byte) (validToken.getVersion() + 1);
+            }
+
+            public Instant getTimestamp() {
+                return validToken.getTimestamp().plus(Duration.ofDays(365));
+            }
+
+            public IvParameterSpec getInitializationVector() {
+                final byte[] validVector = super.getInitializationVector().getIV();
+                final byte[] invalidVector = new byte[validVector.length + 1];
+                System.arraycopy(validVector, 0, invalidVector, 0, validVector.length);
+                invalidVector[validVector.length] = 0;
+                return new IvParameterSpec(invalidVector);
+            }
+
+        };
+
+        // when
+        thrown.expect(notAuthorisedMatcher);
+        target("secrets").request().header("Authorization", "Bearer " + invalidToken.serialise()).get(String.class);
 
         // then (nothing)
     }

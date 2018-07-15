@@ -4,12 +4,12 @@ This library provides annotations and Jersey integration so that REST endpoints 
 
 ## Client usage
 
-Clients should pass Fernet tokens in either the `X-Authorization` header or using the `Authorization` header with the scheme "Fernet" (RFC 2617). Examples:
+Clients should pass Fernet tokens in either the `X-Authorization` header or using the `Authorization` header with the scheme "Bearer" (RFC 6750). Examples:
 
     curl --header 'X-Authorization: gAAAAABbPXSD3PW756Xpct7qRrvk-aVayPc1MMJPyNzO-uisHWWZfQWVoLZ0GQVSSGqLS5yTdEe0BAHTw2ZpAsnDpFB80UC-MA==' \
         https://api.example.com/resource/endpoint?parameter=value
 
-    curl --header 'Authorization: Fernet gAAAAABbPXSD3PW756Xpct7qRrvk-aVayPc1MMJPyNzO-uisHWWZfQWVoLZ0GQVSSGqLS5yTdEe0BAHTw2ZpAsnDpFB80UC-MA==' \
+    curl --header 'Authorization: Bearer gAAAAABbPXSD3PW756Xpct7qRrvk-aVayPc1MMJPyNzO-uisHWWZfQWVoLZ0GQVSSGqLS5yTdEe0BAHTw2ZpAsnDpFB80UC-MA==' \
         https://api.example.com/resource/endpoint?parameter=value
 
 ## Server-side implementation

@@ -19,15 +19,14 @@
   <parent>
     <artifactId>fernet-java</artifactId>
     <groupId>com.macasaet.fernet</groupId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.macasaet.fernet.jersey</groupId>
   <artifactId>fernet-jersey-auth</artifactId>
-  <description>Jersey integration for Fernet token validation</description>
-
   <name>Fernet Java - Jersey / JAX-RS Authentication</name>
+  <description>Jersey integration for Fernet token validation</description>
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
+  <inceptionYear>2018</inceptionYear>
 
   <properties>
     <jersey.version>2.27</jersey.version>
@@ -68,6 +67,18 @@
         <version>${jersey.version}</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>1.7.25</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.3</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
   <distributionManagement>
     <site>
@@ -76,16 +87,21 @@
     </site>
   </distributionManagement>
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
         <configuration>
-            <avoidCallsTo>
-                <avoidCallsTo>org.apache.logging</avoidCallsTo>
-                <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
-                <avoidCallsTo>java.util.Random</avoidCallsTo>
-            </avoidCallsTo>
+          <avoidCallsTo>
+            <avoidCallsTo>org.apache.logging</avoidCallsTo>
+            <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
+            <avoidCallsTo>java.util.Random</avoidCallsTo>
+          </avoidCallsTo>
         </configuration>
         <executions>
           <execution>
@@ -120,5 +136,4 @@
       </plugin>
     </plugins>
   </reporting>
-  <inceptionYear>2018</inceptionYear>
 </project>

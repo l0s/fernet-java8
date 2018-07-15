@@ -15,10 +15,7 @@
  */
 package com.macasaet.fernet.jersey;
 
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.NotAuthorizedException;
 
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -32,11 +29,13 @@ import com.macasaet.fernet.Token;
  */
 class TokenHeaderUtility {
 
+    private static final String authenticationType = "Bearer";
+
     /**
-     * Extract a Fernet token from an RFC2617 Authorization header.
+     * Extract a Fernet token from an RFC6750 Authorization header.
      *
-     * @param request a REST request which may or may not include an RFC2617 Authorization header.
-     * @return a Fernet token or null if no RFC2617 Authorization header is provided.
+     * @param request a REST request which may or may not include an RFC6750 Authorization header.
+     * @return a Fernet token or null if no RFC6750 Authorization header is provided.
      */
     public Token getAuthorizationToken(final ContainerRequest request) {
         String authorizationString = request.getHeaderString("Authorization");
@@ -44,12 +43,11 @@ class TokenHeaderUtility {
             authorizationString = authorizationString.trim();
             final String[] components = authorizationString.split("\\s");
             if (components.length != 2) {
-                throw new WebApplicationException(status(UNAUTHORIZED).entity("mal-formed RFC2617 header").build());
+                throw new NotAuthorizedException(authenticationType);
             }
             final String scheme = components[0];
-            if (!"Fernet".equalsIgnoreCase(scheme)) {
-                throw new WebApplicationException(
-                        status(UNAUTHORIZED).entity("unrecognised RFC2617 authorization scheme").build());
+            if (!authenticationType.equalsIgnoreCase(scheme)) {
+                throw new NotAuthorizedException(authenticationType);
             }
             final String tokenString = components[1];
             return Token.fromString(tokenString);

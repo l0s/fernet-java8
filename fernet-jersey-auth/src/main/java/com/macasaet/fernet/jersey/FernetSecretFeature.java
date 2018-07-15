@@ -18,6 +18,7 @@ package com.macasaet.fernet.jersey;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
+import com.macasaet.fernet.jaxrs.exception.IllegalTokenExceptionMapper;
 import com.macasaet.fernet.jaxrs.exception.TokenValidationExceptionMapper;
 
 /**
@@ -36,7 +37,8 @@ public class FernetSecretFeature implements Feature {
     public boolean configure(final FeatureContext context) {
         context.register(new FernetSecretBinder());
         context.register(TokenValidationExceptionMapper.class);
-        return false;
+        context.register(IllegalTokenExceptionMapper.class);
+        return true;
     }
 
 }
