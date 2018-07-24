@@ -13,16 +13,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.example.jaxrs;
+package com.macasaet.fernet.jersey.example.common;
 
 import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -43,8 +45,7 @@ import com.macasaet.fernet.Token;
 @Path("session")
 public class AuthenticationResource {
 
-	@Inject
-	Random random = new SecureRandom();
+	private Random random = new SecureRandom();
 
 	/**
 	 * This is the secret key. There is no need to share it with the client. The
@@ -55,7 +56,7 @@ public class AuthenticationResource {
 	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
 
 	@Inject
-	UserRepository repository;
+	private UserRepository repository;
 
 	/**
 	 * This is an example of an endpoint that generates a new Fernet token. The
@@ -69,7 +70,8 @@ public class AuthenticationResource {
 	 * @return a Fernet token
 	 */
 	@POST
-	@Produces("text/plain")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public String createSession(final LoginRequest request) {
 		final User user = repository.findUser(request.getUsername());
 		if (user.isPasswordCorrect(request.getSingleRoundPasswordHash())) {

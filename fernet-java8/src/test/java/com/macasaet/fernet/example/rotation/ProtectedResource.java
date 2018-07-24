@@ -89,7 +89,7 @@ public class ProtectedResource {
             final Token token = Token.generate(random, primaryKey, username);
             return token.serialise();
         }
-        throw new NotAuthorizedException("Basic realm=\"secrets\"");
+        throw new NotAuthorizedException("Bearer realm=\"secrets\"");
     }
 
     protected RedisKeyRepository getKeyRepository() {

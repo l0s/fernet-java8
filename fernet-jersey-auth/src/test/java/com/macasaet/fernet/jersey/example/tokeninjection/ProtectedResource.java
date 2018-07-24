@@ -13,20 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.macasaet.fernet.example.jaxrs;
-
-import java.util.function.Function;
-import java.util.function.Predicate;
+package com.macasaet.fernet.jersey.example.tokeninjection;
 
 import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 
 import com.macasaet.fernet.Key;
-import com.macasaet.fernet.StringObjectValidator;
 import com.macasaet.fernet.Token;
+import com.macasaet.fernet.TokenValidationException;
 import com.macasaet.fernet.Validator;
+import com.macasaet.fernet.jaxrs.FernetToken;
+import com.macasaet.fernet.jersey.example.common.User;
 
 /**
  * This is an example of a resource that is protected by Fernet tokens. In order
@@ -47,24 +46,14 @@ public class ProtectedResource {
 	 */
 	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
 
-	@Inject
-	UserRepository repository;
-
 	/**
 	 * This is an example of a domain-specific token validator. It delegates to
 	 * an external data store to convert the payload into an object. In
 	 * addition, it applies domain-specific business rules to evaluate the
 	 * deserialised payload.
 	 */
-    final Validator<User> validator = new StringObjectValidator<User>() {
-        public Function<String, User> getStringTransformer() {
-            return repository::findUser;
-        }
-
-        public Predicate<User> getObjectValidator() {
-            return User::isTrustworthy;
-        }
-    };
+    @Inject
+    private Validator<User> validator;
 
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
@@ -74,15 +63,16 @@ public class ProtectedResource {
      * @return the secret information
      */
     @GET
-    public String getSecret(@HeaderParam("X-Auth-Token") final String authHeader) {
-        // first, validate the token
-        // if the token is valid, proceed to return the requested data
-        final Token token = Token.fromString(authHeader);
-        final User user = token.validateAndDecrypt(key, validator);
-        // if the token is invalid, an exception will be thrown and the next line will not be executed
-        // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
-        // access to the data requested
-        return user.getSecret();
+    public String getSecret(@FernetToken final Token token) {
+        try {
+            final User user = token.validateAndDecrypt(key, validator);
+            // if the token is invalid, an exception will be thrown and the next line will not be executed
+            // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
+            // access to the data requested
+            return user.getSecret();
+        } catch (final TokenValidationException tve) {
+            throw new ForbiddenException("Invalid token.");
+        }
     }
 
 }

@@ -103,7 +103,7 @@ public interface Validator<T> {
         final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
         final T object = getTransformer().apply(plainText);
         if (!getObjectValidator().test(object)) {
-            throw new TokenValidationException("Invalid token contents.");
+            throw new PayloadValidationException("Invalid Fernet token payload.");
         }
         return object;
     }
