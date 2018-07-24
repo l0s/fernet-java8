@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
  * @author Carlos Macasaet
- * @see com.macasaet.fernet.jersey.FernetSecretBinder
+ * @see com.macasaet.fernet.jersey.FernetSecretFeature
  */
 @Target({PARAMETER, FIELD})
 @Retention(RUNTIME)
