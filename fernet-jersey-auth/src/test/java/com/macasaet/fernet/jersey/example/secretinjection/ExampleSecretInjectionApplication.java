@@ -50,7 +50,6 @@ import com.macasaet.fernet.jersey.example.common.UserRepository;
 public class ExampleSecretInjectionApplication<T> extends ResourceConfig {
 
     private final Binder fernetParameterBinder = new AbstractBinder() {
-        // TODO perhaps make an abstract class? implementors supply key supplier and validator
         protected void configure() {
             bind(UserRepository.class).to(UserRepository.class);
             bind(CustomTokenValidator.class).to(new GenericType<Validator<T>>(){});

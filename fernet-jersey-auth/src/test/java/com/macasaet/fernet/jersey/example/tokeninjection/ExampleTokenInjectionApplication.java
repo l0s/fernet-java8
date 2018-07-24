@@ -26,7 +26,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Validator;
-import com.macasaet.fernet.jersey.FernetTokenBinder;
+import com.macasaet.fernet.jersey.FernetTokenFeature;
 import com.macasaet.fernet.jersey.example.common.AuthenticationResource;
 import com.macasaet.fernet.jersey.example.common.User;
 import com.macasaet.fernet.jersey.example.common.UserRepository;
@@ -34,8 +34,12 @@ import com.macasaet.fernet.jersey.example.secretinjection.CustomTokenValidator;
 import com.macasaet.fernet.jersey.example.secretinjection.KeySupplier;
 
 /**
- * TODO documentation
+ * <p>This is an example Jersey application configuration that enables injection of a Fernet token.
  *
+ * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
+ *
+ * @see com.macasaet.fernet.jersey.FernetTokenFeature
+ * @see com.macasaet.fernet.jaxrs.FernetToken
  * @author Carlos Macasaet
  */
 public class ExampleTokenInjectionApplication extends ResourceConfig {
@@ -50,7 +54,7 @@ public class ExampleTokenInjectionApplication extends ResourceConfig {
 
     public ExampleTokenInjectionApplication() {
         register(fernetConfigurationBinder);
-        register(new FernetTokenBinder());
+        register(FernetTokenFeature.class);
         register(AuthenticationResource.class);
         register(ProtectedResource.class);
     }

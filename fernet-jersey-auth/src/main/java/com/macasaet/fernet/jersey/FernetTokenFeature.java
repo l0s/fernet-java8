@@ -15,14 +15,13 @@
  */
 package com.macasaet.fernet.jersey;
 
-import javax.inject.Singleton;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 
-import org.glassfish.jersey.internal.inject.AbstractBinder;
-import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
+import com.macasaet.fernet.jaxrs.exception.IllegalTokenExceptionMapper;
 
 /**
- * {@link org.glassfish.jersey.internal.inject.Binder Binder} that configures injection of Fernet
- * {@link com.macasaet.fernet.Token Tokens} into Resource method parameters.
+ * {@link Feature} that enables Fernet token injection into Resource method parameters.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  *
@@ -30,12 +29,12 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
  * @see com.macasaet.fernet.jaxrs.FernetToken
  * @see com.macasaet.fernet.Token
  */
-class FernetTokenBinder extends AbstractBinder {
+public class FernetTokenFeature implements Feature {
 
-    protected void configure() {
-        bind(FernetTokenValueParamProvider.class)
-            .to(ValueParamProvider.class)
-            .in(Singleton.class);
+    public boolean configure(final FeatureContext context) {
+        context.register(new FernetTokenBinder());
+        context.register(IllegalTokenExceptionMapper.class);
+        return true;
     }
 
 }

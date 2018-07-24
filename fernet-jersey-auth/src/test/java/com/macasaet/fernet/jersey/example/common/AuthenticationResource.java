@@ -53,7 +53,7 @@ public class AuthenticationResource {
 	 * tokens need not share the same infrastructure as long as they both have
 	 * access to the same key.
 	 */
-	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc="); // TODO key repository
+	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
 
 	@Inject
 	private UserRepository repository;
