@@ -50,7 +50,7 @@ import com.macasaet.fernet.jaxrs.FernetSecret;
 @Singleton
 class FernetSecretValueParamProvider<T> implements ValueParamProvider {
 
-    private final TokenHeaderUtility headerUtility = new TokenHeaderUtility();
+    private final TokenHeaderUtility headerUtility;
     private final Validator<T> validator;
     private final Supplier<Collection<Key>> keySupplier;
 
@@ -61,14 +61,28 @@ class FernetSecretValueParamProvider<T> implements ValueParamProvider {
     @Inject
     public FernetSecretValueParamProvider(final Validator<T> validator,
             final Supplier<Collection<Key>> keySupplier) {
+        this(validator, keySupplier, new TokenHeaderUtility());
+    }
+
+    /**
+     * @param validator custom token verifier and payload extractor
+     * @param keySupplier a method to provide Fernet keys
+     * @param headerUtility a helper for parsing tokens from auth headers
+     */
+    protected FernetSecretValueParamProvider(final Validator<T> validator, final Supplier<Collection<Key>> keySupplier,
+            final TokenHeaderUtility headerUtility) {
         if (validator == null) {
             throw new IllegalArgumentException("validator cannot be null");
         }
         if (keySupplier == null) {
             throw new IllegalArgumentException("keySupplier cannot be null");
         }
+        if (headerUtility == null) {
+            throw new IllegalArgumentException("headerUtility cannot be null");
+        }
         this.validator = validator;
         this.keySupplier = keySupplier;
+        this.headerUtility = headerUtility;
     }
 
     public Function<ContainerRequest, T> getValueProvider(final Parameter parameter) {

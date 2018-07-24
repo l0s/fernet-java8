@@ -15,14 +15,12 @@
  */
 package com.macasaet.fernet.jersey;
 
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.glassfish.jersey.server.spi.internal.ValueParamProvider.Priority.NORMAL;
 
 import java.util.function.Function;
 
 import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.NotAuthorizedException;
 
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
@@ -42,7 +40,18 @@ import com.macasaet.fernet.jaxrs.FernetToken;
 @Singleton
 class FernetTokenValueParamProvider implements ValueParamProvider {
 
-    private final TokenHeaderUtility tokenHeaderUtility = new TokenHeaderUtility();
+    private final TokenHeaderUtility tokenHeaderUtility;
+
+    public FernetTokenValueParamProvider() {
+        this(new TokenHeaderUtility());
+    }
+
+    protected FernetTokenValueParamProvider(final TokenHeaderUtility tokenHeaderUtility) {
+        if (tokenHeaderUtility == null) {
+            throw new IllegalArgumentException("tokenHeaderUtility cannot be null");
+        }
+        this.tokenHeaderUtility = tokenHeaderUtility;
+    }
 
     public Function<ContainerRequest, Token> getValueProvider(final Parameter parameter) {
         return request -> {
@@ -55,7 +64,7 @@ class FernetTokenValueParamProvider implements ValueParamProvider {
                 if (authorizationToken != null) {
                     return authorizationToken;
                 }
-                throw new WebApplicationException(status(UNAUTHORIZED).entity("missing auth header").build());
+                throw new NotAuthorizedException("Bearer error=\"invalid_token\", error_description=\"no token found in Authorization or X-Authorization header\"");
             }
             throw new IllegalStateException("misconfigured annotation");
         };
