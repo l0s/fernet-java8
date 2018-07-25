@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Use this annotation on a Resource Method Parameter in order to inject a Fernet {@link com.macasaet.fernet.Token
- * Token}. The Fernet token should be passed in the Authorization header with the scheme set to "Fernet" (RFC2617) or
+ * Token}. The Fernet token should be passed in the Authorization header with the scheme set to "Bearer" (RFC6750) or
  * directly in the X-Authorization header.
  *
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
