@@ -49,6 +49,7 @@ public interface StringObjectValidator<T> extends Validator<T> {
         return bytes -> new String(bytes, getCharset());
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     default Function<byte[], T> getTransformer() {
         return getStringCreator().andThen(getStringTransformer());
     }

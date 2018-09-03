@@ -47,6 +47,14 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @author Carlos Macasaet
  */
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
+/*
+ * TooManyMethods can be avoided by making the following API-breaking changes:
+ * * remove the static `generate` methods and introduce a `TokenFactory`
+ * * remove the public `validateAndDecrypt` methods since they are already available in the `Validator` interface
+ * 
+ * AvoidDuplicateLiterals is from the method-level @SuppressWarnings annotations
+ */
 public class Token {
 
     private final byte version;
@@ -72,7 +80,7 @@ public class Token {
      * @param hmac
      *            the signature of the token
      */
-    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+    @SuppressWarnings({"PMD.ArrayIsStoredDirectly", "PMD.CyclomaticComplexity"})
     protected Token(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final byte[] hmac) {
         if (version != supportedVersion) {
@@ -181,6 +189,7 @@ public class Token {
      * @return the decrypted, deserialised payload of this token
      * @throws TokenValidationException if <em>key</em> was NOT used to generate this token
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
         return validator.validateAndDecrypt(key, this);
     }
@@ -193,12 +202,13 @@ public class Token {
      * @return the decrypted, deserialised payload of this token
      * @throws TokenValidationException if none of the keys were used to generate this token
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator)
         throws TokenValidationException {
         return validator.validateAndDecrypt(keys, this);
     }
 
-    @SuppressWarnings("PMD.ConfusingTernary")
+    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter"})
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
             final Instant latestValidInstant) throws TokenValidationException {
         if (getVersion() != (byte) 0x80) {
@@ -216,6 +226,7 @@ public class Token {
     /**
      * @return the Base 64 URL encoding of this token in the form Version | Timestamp | IV | Ciphertext | HMAC
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public String serialise() {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 tokenStaticBytes + getCipherText().length)) {
@@ -235,6 +246,7 @@ public class Token {
      * @throws IOException
      *             if data cannot be written to the underlying stream
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public void writeTo(final OutputStream outputStream) throws IOException {
         try (DataOutputStream dataStream = new DataOutputStream(outputStream)) {
             dataStream.writeByte(getVersion());

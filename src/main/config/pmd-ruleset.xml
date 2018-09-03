@@ -42,9 +42,9 @@ under the License.
     <exclude name="AvoidFinalLocalVariable" />
     <exclude name="FieldNamingConventions" />
   </rule>
-  <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
-  <rule ref="category/java/design.xml/SimplifiedTernary"/>
-  <rule ref="category/java/design.xml/UselessOverridingMethod"/>
+  <rule ref="category/java/design.xml">
+    <exclude name="ExcessiveImports" />
+  </rule>
   <rule ref="category/java/errorprone.xml" />
   <rule ref="category/java/multithreading.xml/AvoidThreadGroup"/>
   <rule ref="category/java/multithreading.xml/DontCallThreadRun"/>
