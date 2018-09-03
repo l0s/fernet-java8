@@ -46,9 +46,7 @@ under the License.
     <exclude name="ExcessiveImports" />
   </rule>
   <rule ref="category/java/errorprone.xml" />
-  <rule ref="category/java/multithreading.xml/AvoidThreadGroup"/>
-  <rule ref="category/java/multithreading.xml/DontCallThreadRun"/>
-  <rule ref="category/java/multithreading.xml/DoubleCheckedLocking"/>
+  <rule ref="category/java/multithreading.xml" />
   <rule ref="category/java/performance.xml/BigIntegerInstantiation"/>
   <rule ref="category/java/performance.xml/BooleanInstantiation"/>
 </ruleset>
