@@ -47,6 +47,5 @@ under the License.
   </rule>
   <rule ref="category/java/errorprone.xml" />
   <rule ref="category/java/multithreading.xml" />
-  <rule ref="category/java/performance.xml/BigIntegerInstantiation"/>
-  <rule ref="category/java/performance.xml/BooleanInstantiation"/>
+  <rule ref="category/java/performance.xml" />
 </ruleset>

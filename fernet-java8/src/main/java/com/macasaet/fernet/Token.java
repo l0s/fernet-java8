@@ -279,10 +279,10 @@ public class Token {
     }
 
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder(107);
         builder.append("Token [version=").append(String.format("0x%x", new BigInteger(1, new byte[] {getVersion()})))
                 .append(", timestamp=").append(getTimestamp())
-                .append(", hmac=").append(encoder.encodeToString(getHmac())).append("]");
+                .append(", hmac=").append(encoder.encodeToString(getHmac())).append(']');
         return builder.toString();
     }
 
