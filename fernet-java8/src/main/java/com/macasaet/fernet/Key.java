@@ -268,7 +268,7 @@ public class Key {
     /**
      * @return an HMAC SHA-256 key for signing the token
      */
-    protected SecretKeySpec getSigningKeySpec() {
+    protected java.security.Key getSigningKeySpec() {
         return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
     }
 
@@ -279,10 +279,22 @@ public class Key {
         return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
     }
 
+    /**
+     * Warning: Modifying the returned byte array will write through to this object.
+     *
+     * @return the raw underlying signing key bytes
+     */
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     protected byte[] getSigningKey() {
         return signingKey;
     }
 
+    /**
+     * Warning: Modifying the returned byte array will write through to this object.
+     *
+     * @return the raw underlying encryption key bytes
+     */
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     protected byte[] getEncryptionKey() {
         return encryptionKey;
     }

@@ -26,13 +26,9 @@ under the License.
     These are the custom PMD rules for the Fernet Java library.
   </description>
   <rule ref="category/java/security.xml" />
-  <rule ref="category/java/bestpractices.xml/AvoidUsingHardCodedIP"/>
-  <rule ref="category/java/bestpractices.xml/CheckResultSet"/>
-  <rule ref="category/java/bestpractices.xml/UnusedImports"/>
-  <rule ref="category/java/bestpractices.xml/UnusedFormalParameter"/>
-  <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
-  <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
-  <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
+  <rule ref="category/java/bestpractices.xml">
+    <exclude name="MissingOverride" />
+  </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="VariableNamingConventions" />
     <exclude name="LongVariable" />
