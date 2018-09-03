@@ -79,7 +79,7 @@ public class Token {
         this.hmac = hmac;
     }
 
-    @SuppressWarnings("PMD.PrematureDeclaration")
+    @SuppressWarnings({"PMD.PrematureDeclaration", "PMD.DataflowAnomalyAnalysis"})
     protected static Token fromBytes(final byte[] bytes) throws IllegalTokenException {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");
