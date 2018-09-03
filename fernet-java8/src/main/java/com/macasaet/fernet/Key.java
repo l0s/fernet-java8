@@ -56,6 +56,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Carlos Macasaet
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class Key {
 
     private final byte[] signingKey;
@@ -145,6 +146,7 @@ public class Key {
      * @return the AES-encrypted payload. The length will always be a multiple of 16 (128 bits).
      * @see #decrypt(byte[], IvParameterSpec)
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public byte[] encrypt(final byte[] payload, final IvParameterSpec initializationVector) {
         final SecretKeySpec encryptionKeySpec = getEncryptionKeySpec();
         try {
@@ -175,6 +177,7 @@ public class Key {
      * @return the decrypted payload
      * @see Key#encrypt(byte[], IvParameterSpec)
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(getCipherTransformation());
@@ -194,6 +197,7 @@ public class Key {
     /**
      * @return the Base 64 URL representation of this Fernet key
      */
+    @SuppressWarnings("PMD.LawOfDemeter")
     public String serialise() {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
             writeTo(byteStream);
@@ -217,6 +221,7 @@ public class Key {
         outputStream.write(getEncryptionKey());
     }
 
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -225,6 +230,7 @@ public class Key {
         return result;
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -238,6 +244,7 @@ public class Key {
                 && Arrays.equals(getEncryptionKey(), other.getEncryptionKey());
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final ByteArrayOutputStream byteStream)
         throws IOException {
@@ -267,7 +274,7 @@ public class Key {
     /**
      * @return an HMAC SHA-256 key for signing the token
      */
-    protected SecretKeySpec getSigningKeySpec() {
+    protected java.security.Key getSigningKeySpec() {
         return new SecretKeySpec(getSigningKey(), getSigningAlgorithm());
     }
 
@@ -278,10 +285,22 @@ public class Key {
         return new SecretKeySpec(getEncryptionKey(), getEncryptionAlgorithm());
     }
 
+    /**
+     * Warning: Modifying the returned byte array will write through to this object.
+     *
+     * @return the raw underlying signing key bytes
+     */
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     protected byte[] getSigningKey() {
         return signingKey;
     }
 
+    /**
+     * Warning: Modifying the returned byte array will write through to this object.
+     *
+     * @return the raw underlying encryption key bytes
+     */
+    @SuppressWarnings("PMD.MethodReturnsInternalArray")
     protected byte[] getEncryptionKey() {
         return encryptionKey;
     }

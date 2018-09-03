@@ -146,7 +146,7 @@ public class KeyTest {
         final Key key = new Key("AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=");
 
         // when
-        final SecretKeySpec result = key.getSigningKeySpec();
+        final java.security.Key result = key.getSigningKeySpec();
 
         // then
         assertEquals("HmacSHA256", result.getAlgorithm());

@@ -99,7 +99,4 @@ class Constants {
      */
     static final int minimumTokenBytes = tokenStaticBytes + cipherTextBlockSize;
 
-    private Constants() {
-    }
-
 }
