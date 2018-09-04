@@ -106,7 +106,7 @@ public class Token {
     }
 
     @SuppressWarnings({"PMD.PrematureDeclaration", "PMD.DataflowAnomalyAnalysis"})
-    protected static Token fromBytes(final byte[] bytes) throws IllegalTokenException {
+    protected static Token fromBytes(final byte[] bytes) {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");
         }
@@ -149,7 +149,7 @@ public class Token {
      * @throws IllegalTokenException
      *             if the input string cannot be a valid token irrespective of key or timestamp
      */
-    public static Token fromString(final String string) throws IllegalTokenException {
+    public static Token fromString(final String string) {
         return fromBytes(decoder.decode(string));
     }
 
@@ -190,7 +190,7 @@ public class Token {
      * @throws TokenValidationException if <em>key</em> was NOT used to generate this token
      */
     @SuppressWarnings("PMD.LawOfDemeter")
-    public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) throws TokenValidationException {
+    public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) {
         return validator.validateAndDecrypt(key, this);
     }
 
@@ -203,14 +203,13 @@ public class Token {
      * @throws TokenValidationException if none of the keys were used to generate this token
      */
     @SuppressWarnings("PMD.LawOfDemeter")
-    public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator)
-        throws TokenValidationException {
+    public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator) {
         return validator.validateAndDecrypt(keys, this);
     }
 
     @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter"})
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
-            final Instant latestValidInstant) throws TokenValidationException {
+            final Instant latestValidInstant) {
         if (getVersion() != (byte) 0x80) {
             throw new TokenValidationException("Invalid version");
         } else if (!getTimestamp().isAfter(earliestValidInstant)) {

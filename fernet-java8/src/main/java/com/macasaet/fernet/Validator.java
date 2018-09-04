@@ -99,7 +99,7 @@ public interface Validator<T> {
      * @throws TokenValidationException if the token is invalid.
      */
     @SuppressWarnings("PMD.LawOfDemeter")
-    default T validateAndDecrypt(final Key key, final Token token) throws TokenValidationException {
+    default T validateAndDecrypt(final Key key, final Token token) {
         final Instant now = Instant.now(getClock());
         final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
         final T object = getTransformer().apply(plainText);
@@ -124,8 +124,7 @@ public interface Validator<T> {
      *             if the token was not generated using any of the supplied keys.
      */
     @SuppressWarnings("PMD.LawOfDemeter")
-    default T validateAndDecrypt(final Collection<? extends Key> keys, final Token token)
-        throws TokenValidationException {
+    default T validateAndDecrypt(final Collection<? extends Key> keys, final Token token) {
         final Key key =
                 keys.parallelStream()
                 .filter(token::isValidSignature)
