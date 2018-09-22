@@ -1,5 +1,7 @@
 # Fernet Java - Jersey JAX-RS Integration
 
+[![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=fernet-jersey-auth%2Fpom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=fernet-jersey-auth%2Fpom.xml)
+
 This library provides annotations and Jersey integration so that REST endpoints can be secured by Fernet authenticated, encrypted tokens.
 
 ## Client usage
