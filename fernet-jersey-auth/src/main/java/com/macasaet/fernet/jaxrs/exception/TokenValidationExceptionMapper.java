@@ -16,6 +16,7 @@
 package com.macasaet.fernet.jaxrs.exception;
 
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
+import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 
 import javax.ws.rs.NotAuthorizedException;
@@ -34,11 +35,12 @@ import com.macasaet.fernet.TokenValidationException;
  * @author Carlos Macasaet
  */
 @Provider
+@SuppressWarnings("PMD.LawOfDemeter")
 public class TokenValidationExceptionMapper implements ExceptionMapper<TokenValidationException> {
 
     public Response toResponse(final TokenValidationException exception) {
         if (exception instanceof PayloadValidationException) {
-            return Response.status(FORBIDDEN).entity("Request could not be validated.").type(TEXT_PLAIN_TYPE).build();
+            return status(FORBIDDEN).entity("Request could not be validated.").type(TEXT_PLAIN_TYPE).build();
         }
         return new NotAuthorizedException("Bearer error=\"invalid_token\"").getResponse();
     }

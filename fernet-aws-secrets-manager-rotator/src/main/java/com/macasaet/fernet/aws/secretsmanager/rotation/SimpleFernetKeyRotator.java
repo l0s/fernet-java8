@@ -36,7 +36,10 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@SuppressWarnings("PMD.LawOfDemeter")
 public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
+
+    private static final int fernetKeySize = 32;
 
     protected SimpleFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms, final SecureRandom random) {
         super(secretsManager, kms, random);
@@ -55,8 +58,8 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final ByteBuffer buffer = getSecretsManager().getSecretVersion(secretId, clientRequestToken);
-        if (buffer.remaining() != 32) {
-            throw new IllegalStateException("Fernet key must be exactly 32 bytes");
+        if (buffer.remaining() != fernetKeySize) {
+            throw new IllegalStateException("Fernet key must be exactly " + fernetKeySize + " bytes");
         }
         final byte[] signingKey = new byte[16];
         buffer.get(signingKey);

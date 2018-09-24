@@ -29,6 +29,7 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
  * @see com.macasaet.fernet.jaxrs.FernetSecret
  * @see FernetSecretFeature
  */
+@SuppressWarnings("PMD.LawOfDemeter")
 class FernetSecretBinder extends AbstractBinder {
 
     protected void configure() {

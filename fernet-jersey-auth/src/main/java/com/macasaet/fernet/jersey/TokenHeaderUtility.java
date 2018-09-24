@@ -37,6 +37,7 @@ class TokenHeaderUtility {
      * @param request a REST request which may or may not include an RFC6750 Authorization header.
      * @return a Fernet token or null if no RFC6750 Authorization header is provided.
      */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     public Token getAuthorizationToken(final ContainerRequest request) {
         String authorizationString = request.getHeaderString("Authorization");
         if (authorizationString != null && !"".equals(authorizationString)) {
