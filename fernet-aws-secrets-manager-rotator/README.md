@@ -1,6 +1,7 @@
 # AWS Secrets Manager Fernet Key Rotator Lambda
 
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-aws-secrets-manager-rotator.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-aws-secrets-manager-rotator)
+[![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=fernet-aws-secrets-manager-rotator/pom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=fernet-aws-secrets-manager-rotator/pom.xml)
 
 This module provides two schemes for storing Fernet secret keys in AWS
 Secrets Manager, "Simple" and "Multi".

@@ -180,9 +180,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         final Entry<? extends String, ?> currentEntry = versions.entrySet().stream().filter(entry -> {
             final Collection<? extends String> versionStages = entry.getValue();
             return versionStages.contains(CURRENT.getAwsName() );
-        }).findFirst().orElseThrow(() -> {
-            return new IllegalStateException("No AWSCURRENT secret set for " + secretId + ".");
-        });
+        }).findFirst().orElseThrow(() -> new IllegalStateException("No AWSCURRENT secret set for " + secretId + "."));
         final String currentVersion = currentEntry.getKey();
         if (currentVersion.equalsIgnoreCase(clientRequestToken)) {
             // The correct version is already marked as current, return
