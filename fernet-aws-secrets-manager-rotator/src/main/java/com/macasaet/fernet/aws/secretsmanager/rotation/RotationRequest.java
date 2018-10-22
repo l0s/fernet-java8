@@ -77,14 +77,14 @@ public class RotationRequest {
     }
 
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("RotationRequest [SecretId=");
-        builder.append(getSecretId());
-        builder.append(", ClientRequestToken=");
-        builder.append(getClientRequestToken());
-        builder.append(", Step=");
-        builder.append(getStep());
-        builder.append("]");
+        final StringBuilder builder = new StringBuilder(256);
+        builder.append("RotationRequest [SecretId=")
+            .append(getSecretId())
+            .append(", ClientRequestToken=")
+            .append(getClientRequestToken())
+            .append(", Step=")
+            .append(getStep())
+            .append(']');
         return builder.toString();
     }
 

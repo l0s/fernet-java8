@@ -37,8 +37,10 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@SuppressWarnings("PMD.LawOfDemeter")
 public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
 
+    private static final int fernetKeySize = 32;
     private int maxActiveKeys = 3;
 
     /**
@@ -59,12 +61,13 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
                 new SecureRandom());
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     protected void createSecret(final String secretId, final String clientRequestToken) {
         final ByteBuffer currentSecret = getSecretsManager().getSecretStage(secretId, CURRENT);
-        if (currentSecret.remaining() % 32 != 0) {
+        if (currentSecret.remaining() % fernetKeySize != 0) {
             throw new IllegalStateException("There must be a multiple of 32 bytes.");
         }
-        final int numKeys = currentSecret.remaining() / 32;
+        final int numKeys = currentSecret.remaining() / fernetKeySize;
         List<Key> keys = new ArrayList<>(numKeys + 1);
         while (currentSecret.hasRemaining()) {
             final byte[] signingKey = new byte[16];
@@ -89,8 +92,8 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     protected void testSecret(final String secretId, final String clientRequestToken) { 
         final ByteBuffer currentSecret = getSecretsManager().getSecretVersion(secretId,
                 clientRequestToken);
-        if (currentSecret.remaining() % 32 != 0) {
-            throw new IllegalStateException("There must be a multiple of 32 bytes.");
+        if (currentSecret.remaining() % fernetKeySize != 0) {
+            throw new IllegalStateException("There must be a multiple of " + fernetKeySize + " bytes.");
         }
         // first key will become the staged key
         final byte[] signingKey = new byte[16];
@@ -110,6 +113,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     /**
      * @param maxActiveKeys the total number of keys that can be used for decryption. The actual number of keys stored will be this value plus one.
      */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     protected void setMaxActiveKeys(final int maxActiveKeys) {
         getLogger().info("Setting the maximum number of active keys to: {}.", maxActiveKeys);
         if (maxActiveKeys < 1) {

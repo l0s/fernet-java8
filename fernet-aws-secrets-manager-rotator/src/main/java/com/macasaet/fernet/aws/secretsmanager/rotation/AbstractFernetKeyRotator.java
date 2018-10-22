@@ -23,10 +23,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,6 +49,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.BeanMembersShouldSerialize"})
 abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     private final Logger logger = LogManager.getLogger(getClass());
@@ -56,7 +59,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
     private final AWSKMS kms;
     private final SecureRandom random;
 
-    private volatile boolean seeded = false;
+    private final AtomicBoolean seeded = new AtomicBoolean(false);
 
     protected AbstractFernetKeyRotator(final SecretsManager secretsManager, final AWSKMS kms,
             final SecureRandom random) {
@@ -93,18 +96,8 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     protected void handleRotationRequest(final RotationRequest request) {
         final String secretId = request.getSecretId();
-
-        final DescribeSecretResult secretMetadata = getSecretsManager().describeSecret(secretId);
-        if (secretMetadata.isRotationEnabled() == null || !secretMetadata.isRotationEnabled()) {
-            throw new IllegalArgumentException("Secret " + secretId + " is not enabled for rotation.");
-        }
-        final Map<String, List<String>> versions = secretMetadata.getVersionIdsToStages();
-
-        final String clientRequestToken = request.getClientRequestToken();
-        if (!versions.containsKey(clientRequestToken)) {
-            throw new IllegalArgumentException("Secret version " + clientRequestToken
-                    + " has no stage for rotation of secret " + secretId + ".");
-        }
+        final Map<String, List<String>> versions = getAndValidateVersions(secretId);
+        final String clientRequestToken = getAndValidateClientRequestToken(request, secretId, versions);
 
         final List<String> stages = versions.get(clientRequestToken);
         if (stages.contains(CURRENT.getAwsName())) {
@@ -131,6 +124,24 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
             default:
                 throw new IllegalArgumentException("Missing or invalid step provided");
         }
+    }
+
+    protected Map<String, List<String>> getAndValidateVersions(final String secretId) {
+        final DescribeSecretResult secretMetadata = getSecretsManager().describeSecret(secretId);
+        if (secretMetadata.isRotationEnabled() == null || !secretMetadata.isRotationEnabled()) {
+            throw new IllegalArgumentException("Secret " + secretId + " is not enabled for rotation.");
+        }
+        return secretMetadata.getVersionIdsToStages();
+    }
+
+    protected String getAndValidateClientRequestToken(final RotationRequest request, final String secretId,
+            final Map<String, List<String>> versions) {
+        final String retval = request.getClientRequestToken();
+        if (!versions.containsKey(retval)) {
+            throw new IllegalArgumentException("Secret version " + retval
+                    + " has no stage for rotation of secret " + secretId + ".");
+        }
+        return retval;
     }
 
     protected void conditionallyCreateSecret(final String secretId, final String clientRequestToken) {
@@ -163,26 +174,21 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      */
     protected abstract void testSecret(String secretId, String clientRequestToken);
 
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     protected void finishSecret(final String secretId, final String clientRequestToken,
             final Map<String, List<String>> versions) {
-        String currentVersion = null;
-        for (final Entry<String, List<String>> entry: versions.entrySet()) {
-            final List<String> versionStages = entry.getValue();
-            if (versionStages.contains(CURRENT.getAwsName())) {
-                final String versionId = entry.getKey();
-                if (versionId.equals(clientRequestToken)) {
-                    // The correct version is already marked as current, return
-                    getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", versionId,
-                            secretId);
-                    return;
-                }
-                currentVersion = versionId;
-                break;
-            }
+        final Entry<? extends String, ?> currentEntry = versions.entrySet().stream().filter(entry -> {
+            final Collection<? extends String> versionStages = entry.getValue();
+            return versionStages.contains(CURRENT.getAwsName() );
+        }).findFirst().orElseThrow(() -> new IllegalStateException("No AWSCURRENT secret set for " + secretId + "."));
+        final String currentVersion = currentEntry.getKey();
+        if (currentVersion.equalsIgnoreCase(clientRequestToken)) {
+            // The correct version is already marked as current, return
+            getLogger().warn("finishSecret: Version {} already marked as AWSCURRENT for {}", currentVersion,
+                    secretId);
+            return;
         }
-        if (currentVersion == null) {
-            throw new IllegalStateException("No AWSCURRENT secret set for " + secretId + ".");
-        }
+
         getSecretsManager().rotateSecret(secretId, clientRequestToken, currentVersion);
         getLogger().info("finishSecret: Successfully set AWSCURRENT stage to version {} for secret {}.",
                 clientRequestToken, secretId);
@@ -194,9 +200,9 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      * This requires the permission: <code>kms:GenerateRandom</code>
      */
     protected void seed() {
-        if (!seeded) {
+        if (!seeded.get()) {
             synchronized (random) {
-                if (!seeded) {
+                if (!seeded.get()) {
                     getLogger().debug("Seeding random number generator");
                     final GenerateRandomRequest request = new GenerateRandomRequest();
                     request.setNumberOfBytes(512);
@@ -205,7 +211,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
                     final byte[] bytes = new byte[randomBytes.remaining()];
                     randomBytes.get(bytes);
                     random.setSeed(bytes);
-                    seeded = true;
+                    seeded.set(true);
                     getLogger().debug("Seeded random number generator");
                 }
             }

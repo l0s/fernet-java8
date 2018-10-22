@@ -19,7 +19,7 @@
   <parent>
     <groupId>com.macasaet.fernet</groupId>
     <artifactId>fernet-java</artifactId>
-    <version>1.3.2-SNAPSHOT</version>
+    <version>1.3.3-SNAPSHOT</version>
   </parent>
   <artifactId>fernet-aws-secrets-manager-rotator</artifactId>
   <name>Fernet Java - AWS Secrets Manager Rotation Lambda</name>
@@ -33,7 +33,7 @@
       <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-bom</artifactId>
-        <version>1.11.409</version>
+        <version>1.11.423</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -153,6 +153,18 @@
               <goal>mutationCoverage</goal>
             </goals>
             <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+              <goal>cpd-check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
