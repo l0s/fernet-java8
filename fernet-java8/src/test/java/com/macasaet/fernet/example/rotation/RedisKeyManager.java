@@ -15,7 +15,6 @@
  */
 package com.macasaet.fernet.example.rotation;
 
-import java.io.IOException;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -75,8 +74,6 @@ public class RedisKeyManager {
                 transaction.lpush("fernet_keys", newStaged.serialise());
                 transaction.ltrim("fernet_keys", 0, getMaxActiveKeys() - 1);
                 transaction.exec();
-            } catch (final IOException ioe) {
-                throw new RuntimeException("Unable to rotate keys: " + ioe.getMessage(), ioe);
             }
         }
     }
