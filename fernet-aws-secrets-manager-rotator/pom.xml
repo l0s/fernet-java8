@@ -27,7 +27,7 @@
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
   <properties>
     <log4j.version>2.8.2</log4j.version>
-    <jackson.version>2.9.7</jackson.version>
+    <jackson.version>2.9.8</jackson.version>
   </properties>
   <dependencyManagement>
     <dependencies>
