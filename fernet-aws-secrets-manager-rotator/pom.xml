@@ -139,6 +139,10 @@
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-xray-recorder-sdk-aws-sdk</artifactId>
     </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
   </dependencies>
   <distributionManagement>
     <site>
