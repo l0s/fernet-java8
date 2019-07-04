@@ -32,8 +32,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Random;
@@ -307,7 +307,7 @@ public class Token {
     public boolean isValidSignature(final Key key) {
         final byte[] computedHmac = key.sign(getVersion(), getTimestamp(), getInitializationVector(),
                 getCipherText());
-        return Arrays.equals(getHmac(), computedHmac);
+        return MessageDigest.isEqual(getHmac(), computedHmac);
     }
 
     protected Encoder getEncoder() {

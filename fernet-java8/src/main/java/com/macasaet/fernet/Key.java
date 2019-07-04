@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -240,8 +241,8 @@ public class Key {
         }
         final Key other = (Key) obj;
 
-        return Arrays.equals(getSigningKey(), other.getSigningKey())
-                && Arrays.equals(getEncryptionKey(), other.getEncryptionKey());
+        return MessageDigest.isEqual(getSigningKey(), other.getSigningKey())
+                && MessageDigest.isEqual(getEncryptionKey(), other.getEncryptionKey());
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
