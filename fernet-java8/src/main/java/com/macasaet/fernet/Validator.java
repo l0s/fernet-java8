@@ -98,12 +98,13 @@ public interface Validator<T> {
      * @return the deserialised contents of the token
      * @throws TokenValidationException if the token is invalid.
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
+    @SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
     default T validateAndDecrypt(final Key key, final Token token) {
         final Instant now = Instant.now(getClock());
         final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
         final T object = getTransformer().apply(plainText);
         if (!getObjectValidator().test(object)) {
+            for (int i = plainText.length; --i >= 0; plainText[i] = 0);
             throw new PayloadValidationException("Invalid Fernet token payload.");
         }
         return object;

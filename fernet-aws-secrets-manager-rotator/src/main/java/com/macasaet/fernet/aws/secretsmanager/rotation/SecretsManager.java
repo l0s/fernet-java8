@@ -55,6 +55,10 @@ class SecretsManager {
         this.delegate = delegate;
     }
 
+    public void shutdown() {
+        getDelegate().shutdown();
+    }
+
     /**
      * Ensure that the given secret has an AWSCURRENT value. This requires the permission
      * <code>secretsmanager:GetSecretValue</code>
@@ -163,7 +167,19 @@ class SecretsManager {
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
             final Stage stage) {
-        final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest();
+        final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest() {
+
+            private static final long serialVersionUID = 5157192273322960990L;
+
+            protected void finalize() throws Throwable {
+                // zero out the secret prior to making memory available to other applications
+                final ByteBuffer secret = getSecretBinary();
+                secret.clear();
+                for (int i = secret.capacity(); --i >= 0; secret.put((byte) 0));
+
+                super.finalize();
+            }
+        };
         putSecretValueRequest.setSecretId(secretId);
         putSecretValueRequest.setClientRequestToken(clientRequestToken);
         putSecretValueRequest.setVersionStages(singletonList(stage.getAwsName()));
@@ -173,6 +189,9 @@ class SecretsManager {
             }
             final ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
             putSecretValueRequest.setSecretBinary(buffer);
+            
+            outputStream.reset();
+            for (int i = keys.size(); --i >= 0; outputStream.write(0));
         } catch (final IOException ioe) {
             // this really should not happen as I/O is to memory only
             throw new IllegalStateException(ioe.getMessage(), ioe);

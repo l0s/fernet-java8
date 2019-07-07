@@ -56,35 +56,49 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
         }
     }
 
+    /**
+     * @param random an entropy source
+     */
+    protected MultiFernetKeyRotator(final SecureRandom random) {
+        this(new SecretsManager(AWSSecretsManagerClientBuilder.standard()
+                .withRequestHandlers(new MemoryOverwritingRequestHandler(random)).build()),
+                AWSKMSClientBuilder.defaultClient(), random);
+    }
+
     public MultiFernetKeyRotator() {
-        this(new SecretsManager(AWSSecretsManagerClientBuilder.defaultClient()), AWSKMSClientBuilder.defaultClient(),
-                new SecureRandom());
+        this(new SecureRandom());
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     protected void createSecret(final String secretId, final String clientRequestToken) {
         final ByteBuffer currentSecret = getSecretsManager().getSecretStage(secretId, CURRENT);
-        if (currentSecret.remaining() % fernetKeySize != 0) {
-            throw new IllegalStateException("There must be a multiple of 32 bytes.");
-        }
-        final int numKeys = currentSecret.remaining() / fernetKeySize;
-        List<Key> keys = new ArrayList<>(numKeys + 1);
-        while (currentSecret.hasRemaining()) {
-            final byte[] signingKey = new byte[16];
-            currentSecret.get(signingKey);
-            final byte[] encryptionKey = new byte[16];
-            currentSecret.get(encryptionKey);
-            final Key key = new Key(signingKey, encryptionKey);
-            keys.add(key);
-        }
-        final Key keyToStage = Key.generateKey(getRandom());
-        keys.add(0, keyToStage);
-        final int desiredSize = getMaxActiveKeys() + 1; // max active keys + one pending
-        if (keys.size() > desiredSize) {
-            keys = keys.subList(0, desiredSize);
-        }
+        try {
+            if (currentSecret.remaining() % fernetKeySize != 0) {
+                throw new IllegalStateException("There must be a multiple of 32 bytes.");
+            }
+            final int numKeys = currentSecret.remaining() / fernetKeySize;
+            List<Key> keys = new ArrayList<>(numKeys + 1);
+            while (currentSecret.hasRemaining()) {
+                final byte[] signingKey = new byte[16];
+                currentSecret.get(signingKey);
+                final byte[] encryptionKey = new byte[16];
+                currentSecret.get(encryptionKey);
+                final Key key = new Key(signingKey, encryptionKey);
+                keys.add(key);
+                wipe(signingKey);
+                wipe(encryptionKey);
+            }
+            final Key keyToStage = Key.generateKey(getRandom());
+            keys.add(0, keyToStage);
+            final int desiredSize = getMaxActiveKeys() + 1; // max active keys + one pending
+            if (keys.size() > desiredSize) {
+                keys = keys.subList(0, desiredSize);
+            }
 
-        getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, PENDING);
+            getSecretsManager().putSecretValue(secretId, clientRequestToken, keys, PENDING);
+        } finally {
+            wipe(currentSecret);
+        }
         getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId,
                 clientRequestToken);
     }
@@ -92,15 +106,21 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
     protected void testSecret(final String secretId, final String clientRequestToken) { 
         final ByteBuffer currentSecret = getSecretsManager().getSecretVersion(secretId,
                 clientRequestToken);
-        if (currentSecret.remaining() % fernetKeySize != 0) {
-            throw new IllegalStateException("There must be a multiple of " + fernetKeySize + " bytes.");
+        try {
+            if (currentSecret.remaining() % fernetKeySize != 0) {
+                throw new IllegalStateException("There must be a multiple of " + fernetKeySize + " bytes.");
+            }
+            // first key will become the staged key
+            final byte[] signingKey = new byte[16];
+            currentSecret.get(signingKey);
+            final byte[] encryptionKey = new byte[16];
+            currentSecret.get(encryptionKey);
+            new Key(signingKey, encryptionKey);
+            wipe(signingKey);
+            wipe(encryptionKey);
+        } finally {
+            wipe(currentSecret);
         }
-        // first key will become the staged key
-        final byte[] signingKey = new byte[16];
-        currentSecret.get(signingKey);
-        final byte[] encryptionKey = new byte[16];
-        currentSecret.get(encryptionKey);
-        new Key(signingKey, encryptionKey);
     }
 
     /**

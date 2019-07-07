@@ -83,11 +83,17 @@ public class AbstractFernetKeyRotatorTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+
+        final GenerateRandomResult randomResult = mock(GenerateRandomResult.class);
+        given(randomResult.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
+        given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(randomResult);
+
         rotator = new AbstractFernetKeyRotator(mapper, secretsManager, kms, random) {
             protected void testSecret(String secretId, String clientRequestToken) {
             }
 
             protected void createSecret(String secretId, String clientRequestToken) {
+                getRandom().nextLong();
             }
         };
         rotator = spy(rotator);
@@ -120,29 +126,6 @@ public class AbstractFernetKeyRotatorTest {
                 assertEquals("secret", result.getSecretId());
                 assertEquals("token", result.getClientRequestToken());
                 assertEquals(SET_SECRET, result.getStep());
-            }
-        }
-    }
-
-    @Test
-    public final void verifyHandleRequestSeedsRandomNumberGenerator() throws IOException {
-        // given
-        final Context context = mock(Context.class);
-        final String inputString = "{"
-          + "\"SecretId\": \"secret\","
-          + "\"ClientRequestToken\": \"token\","
-          + "\"Step\": \"setSecret\""
-          + "}";
-        doNothing().when(rotator).handleRotationRequest(any(RotationRequest.class));
-        doNothing().when(rotator).seed();
-
-        try (ByteArrayInputStream input = new ByteArrayInputStream(inputString.getBytes("UTF-8"))) {
-            try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                // when
-                rotator.handleRequest(input, output, context);
-
-                // then
-                verify(rotator).seed();
             }
         }
     }

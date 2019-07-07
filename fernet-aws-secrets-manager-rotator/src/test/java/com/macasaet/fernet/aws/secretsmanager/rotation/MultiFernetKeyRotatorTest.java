@@ -20,8 +20,10 @@ import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -44,6 +46,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 
 import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.model.GenerateRandomRequest;
+import com.amazonaws.services.kms.model.GenerateRandomResult;
 import com.macasaet.fernet.Key;
 
 /**
@@ -71,6 +75,10 @@ public class MultiFernetKeyRotatorTest {
     public void setUp() throws Exception {
         initMocks(this);
         rotator.setMaxActiveKeys(2);
+
+        final GenerateRandomResult value = mock(GenerateRandomResult.class);
+        given(value.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
+        given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(value);
     }
 
     @After
