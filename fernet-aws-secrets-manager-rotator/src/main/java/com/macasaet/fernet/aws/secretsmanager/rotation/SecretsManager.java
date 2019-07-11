@@ -20,6 +20,7 @@ import static java.util.Collections.singletonList;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 
@@ -153,6 +154,24 @@ class SecretsManager {
     }
 
     /**
+     * Custom implementation that makes a best effort to clear out the secret before making the memory available to
+     * other applications.
+     */
+    protected static class EphemeralPutSecretValueRequest extends PutSecretValueRequest {
+
+        private static final long serialVersionUID = 4855892986865735446L;
+
+        protected void finalize() throws Throwable {
+            // zero out the secret prior to making memory available to other applications
+            final ByteBuffer secret = getSecretBinary();
+            ((Buffer)secret).clear();
+            for (int i = secret.capacity(); --i >= 0; secret.put((byte) 0));
+
+            super.finalize();
+        }
+    }
+
+    /**
      * Store Fernet keys in the secret. This requires the permission <code>secretsmanager:PutSecretValue</code>
      *
      * @param secretId
@@ -167,19 +186,7 @@ class SecretsManager {
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
             final Stage stage) {
-        final PutSecretValueRequest putSecretValueRequest = new PutSecretValueRequest() {
-
-            private static final long serialVersionUID = 5157192273322960990L;
-
-            protected void finalize() throws Throwable {
-                // zero out the secret prior to making memory available to other applications
-                final ByteBuffer secret = getSecretBinary();
-                secret.clear();
-                for (int i = secret.capacity(); --i >= 0; secret.put((byte) 0));
-
-                super.finalize();
-            }
-        };
+        final PutSecretValueRequest putSecretValueRequest = new EphemeralPutSecretValueRequest();
         putSecretValueRequest.setSecretId(secretId);
         putSecretValueRequest.setClientRequestToken(clientRequestToken);
         putSecretValueRequest.setVersionStages(singletonList(stage.getAwsName()));

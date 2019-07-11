@@ -15,6 +15,7 @@
  */
 package com.macasaet.fernet.aws.secretsmanager.rotation;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -65,7 +66,7 @@ class MemoryOverwritingRequestHandler extends RequestHandler2 {
         final ByteBuffer buffer = putRequest.getSecretBinary();
         final byte[] bytes = new byte[buffer.capacity()];
         getRandom().nextBytes(bytes);
-        buffer.clear();
+        ((Buffer)buffer).clear();
         buffer.put(bytes);
     }
 

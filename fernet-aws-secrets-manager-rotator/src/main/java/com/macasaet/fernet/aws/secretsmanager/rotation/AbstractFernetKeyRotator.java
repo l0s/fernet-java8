@@ -21,6 +21,7 @@ import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Collection;
@@ -244,7 +245,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      * @param secret secret data that is no longer needed
      */
     protected void wipe(final ByteBuffer secret) {
-        secret.clear();
+        ((Buffer)secret).clear();
         final byte[] random = new byte[secret.capacity()];
         getRandom().nextBytes(random);
         secret.put(random);
