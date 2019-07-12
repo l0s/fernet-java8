@@ -245,6 +245,14 @@ public class Key {
                 && MessageDigest.isEqual(getEncryptionKey(), other.getEncryptionKey());
     }
 
+    protected void finalize() throws Throwable {
+        // zero out the secrets before making the memory available to other applications
+        for (int i = signingKey.length; --i >= 0; signingKey[i] = 0);
+        for (int i = encryptionKey.length; --i >= 0; encryptionKey[i] = 0);
+
+        super.finalize();
+    }
+
     @SuppressWarnings("PMD.LawOfDemeter")
     protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final ByteArrayOutputStream byteStream)

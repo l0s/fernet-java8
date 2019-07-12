@@ -21,6 +21,7 @@ import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Collection;
@@ -86,12 +87,23 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         this.random = random;
     }
 
+    @SuppressWarnings("PMD.DoNotCallGarbageCollectionExplicitly")
     public void handleRequest(final InputStream input, final OutputStream output, final Context context) throws IOException {
         final RotationRequest request = getMapper().readValue(input, RotationRequest.class);
         getLogger().debug("Processing request: {}", request);
-        seed();
 
         handleRotationRequest(request);
+
+        // Since performance is not a concern for this Lambda, recommend that the JVM reclaim memory that may contain
+        // secret data.
+        System.gc();
+    }
+
+    protected void finalize() throws Throwable {
+        getKms().shutdown();
+        getSecretsManager().shutdown();
+
+        super.finalize();
     }
 
     protected void handleRotationRequest(final RotationRequest request) {
@@ -218,6 +230,27 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         }
     }
 
+    /**
+     * Overwrite the data in the byte array prior to returning memory to the system.
+     *
+     * @param secretBytes secret data that is no longer needed
+     */
+    protected void wipe(final byte[] secretBytes) {
+        getRandom().nextBytes(secretBytes);
+    }
+
+    /**
+     * Overwrite the data in the byte buffer prior to returning memory to the system.
+     *
+     * @param secret secret data that is no longer needed
+     */
+    protected void wipe(final ByteBuffer secret) {
+        ((Buffer)secret).clear();
+        final byte[] random = new byte[secret.capacity()];
+        getRandom().nextBytes(random);
+        secret.put(random);
+    }
+
     protected SecretsManager getSecretsManager() {
         return secretsManager;
     }
@@ -227,6 +260,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
     }
 
     protected Random getRandom() {
+        seed();
         return random;
     }
 

@@ -25,7 +25,14 @@ under the License.
   <description>
     These are the custom PMD rules for the Fernet Java library.
   </description>
-  <rule ref="category/pom/errorprone.xml" />
+  <rule ref="category/java/errorprone.xml">
+    <exclude name="LoggerIsNotStaticFinal" />
+  </rule>
+  <rule ref="category/java/errorprone.xml/AssignmentInOperand">
+    <properties>
+      <property name="allowFor" value="true" />
+    </properties>
+  </rule>
   <rule ref="category/java/security.xml" />
   <rule ref="category/java/bestpractices.xml">
     <exclude name="MissingOverride" />
@@ -44,12 +51,14 @@ under the License.
     <exclude name="FieldNamingConventions" />
     <exclude name="AtLeastOneConstructor" />
   </rule>
+  <rule ref="category/java/codestyle.xml/ControlStatementBraces">
+    <properties>
+      <property name="allowEmptyLoop" value="true" />
+    </properties>
+  </rule>
   <rule ref="category/java/design.xml">
     <exclude name="ExcessiveImports" />
     <exclude name="DataClass" />
-  </rule>
-  <rule ref="category/java/errorprone.xml">
-    <exclude name="LoggerIsNotStaticFinal" />
   </rule>
   <rule ref="category/java/multithreading.xml" />
   <rule ref="category/java/performance.xml" />
