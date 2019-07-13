@@ -20,10 +20,10 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 import javax.crypto.spec.IvParameterSpec;
@@ -71,7 +71,7 @@ public class TokenTest {
     @Test
     public void testGenerate() {
         // given
-        final Random deterministicRandom = new Random() {
+        final SecureRandom deterministicRandom = new SecureRandom() {
             private static final long serialVersionUID = 3075400891983079965L;
 
             public void nextBytes(final byte[] bytes) {
@@ -91,7 +91,7 @@ public class TokenTest {
     @Test
     public void testGenerateEmptyToken() {
         // given
-        final Random deterministicRandom = new Random() {
+        final SecureRandom deterministicRandom = new SecureRandom() {
             private static final long serialVersionUID = 3075400891983079965L;
 
             public void nextBytes(final byte[] bytes) {
@@ -111,7 +111,7 @@ public class TokenTest {
     @Test
     public void testDecryptKey() {
         // given
-        final Random deterministicRandom = new Random() {
+        final SecureRandom deterministicRandom = new SecureRandom() {
             private static final long serialVersionUID = 3075400891983079965L;
 
             public void nextBytes(final byte[] bytes) {
@@ -150,7 +150,7 @@ public class TokenTest {
     @Test
     public final void verifyExceptionThrownWhenKeyNoLongerInRotation() {
         // given
-        final Random random = new Random();
+        final SecureRandom random = new SecureRandom();
         final Token token = Token.generate(random, Key.generateKey(random), "Don't wait too long to decrypt this!");
 
         final List<? extends Key> decryptionKeys =
@@ -166,7 +166,7 @@ public class TokenTest {
     @Test
     public final void verifyKeyInRotationCanDecryptToken() {
         // given
-        final Random random = new Random();
+        final SecureRandom random = new SecureRandom();
         final List<? extends Key> decryptionKeys =
                 IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
         final Token token = Token.generate(random, decryptionKeys.get(8), "Don't wait too long to decrypt this!");

@@ -17,7 +17,6 @@ package com.macasaet.fernet.aws.secretsmanager.bootstrap;
 
 import java.io.FileOutputStream;
 import java.security.SecureRandom;
-import java.util.Random;
 
 import com.macasaet.fernet.Key;
 
@@ -30,7 +29,7 @@ import com.macasaet.fernet.Key;
 public class CreateMultiKey {
 
     public static final void main(final String... arguments) throws Exception {
-        final Random random = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
 
         try (FileOutputStream outputStream = new FileOutputStream("multi-key")) {
             for (int i = 3; --i >= 0;) {

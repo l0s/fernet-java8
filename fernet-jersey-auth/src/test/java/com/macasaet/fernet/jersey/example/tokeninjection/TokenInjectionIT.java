@@ -18,7 +18,6 @@ package com.macasaet.fernet.jersey.example.tokeninjection;
 import static org.junit.Assert.assertEquals;
 
 import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -111,7 +110,7 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifyFailedForgery() {
         // given
-        final Random random = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
         final Key invalidKey = Key.generateKey(random);
         final Token forgedToken = Token.generate(random, invalidKey, "alice");
         final String tokenString = forgedToken.serialise();

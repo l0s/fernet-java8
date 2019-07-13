@@ -37,10 +37,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
-import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -107,7 +107,7 @@ public class Key {
      *            source of entropy
      * @return a new shared secret key
      */
-    public static Key generateKey(final Random random) {
+    public static Key generateKey(final SecureRandom random) {
         final byte[] signingKey = new byte[signingKeyBytes];
         random.nextBytes(signingKey);
         final byte[] encryptionKey = new byte[encryptionKeyBytes];

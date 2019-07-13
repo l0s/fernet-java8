@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
@@ -259,7 +258,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         return kms;
     }
 
-    protected Random getRandom() {
+    protected SecureRandom getRandom() {
         seed();
         return random;
     }
