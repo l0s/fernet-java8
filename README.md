@@ -33,7 +33,7 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>1.3.4</version>
+      <version>1.4.0</version>
     </dependency>
 
 For more details, see: 
