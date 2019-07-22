@@ -45,9 +45,14 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
         super(secretsManager, kms, random);
     }
 
+    protected SimpleFernetKeyRotator(final SecureRandom random) {
+        this(new SecretsManager(AWSSecretsManagerClientBuilder.standard()
+                .withRequestHandlers(new MemoryOverwritingRequestHandler(random)).build()),
+                AWSKMSClientBuilder.defaultClient(), random);
+    }
+
     public SimpleFernetKeyRotator() {
-        this(new SecretsManager(AWSSecretsManagerClientBuilder.defaultClient()), AWSKMSClientBuilder.defaultClient(),
-                new SecureRandom());
+        this(new SecureRandom());
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
@@ -58,17 +63,23 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
 
     protected void testSecret(final String secretId, final String clientRequestToken) {
         final ByteBuffer buffer = getSecretsManager().getSecretVersion(secretId, clientRequestToken);
-        if (buffer.remaining() != fernetKeySize) {
-            throw new IllegalStateException("Fernet key must be exactly " + fernetKeySize + " bytes");
+        try {
+            if (buffer.remaining() != fernetKeySize) {
+                throw new IllegalStateException("Fernet key must be exactly " + fernetKeySize + " bytes");
+            }
+            final byte[] signingKey = new byte[16];
+            buffer.get(signingKey);
+            final byte[] encryptionKey = new byte[16];
+            buffer.get(encryptionKey);
+            if (buffer.hasRemaining()) {
+                throw new IllegalStateException("Encountered extra bytes.");
+            }
+            new Key(signingKey, encryptionKey);
+            wipe(signingKey);
+            wipe(encryptionKey);
+        } finally {
+            wipe(buffer);
         }
-        final byte[] signingKey = new byte[16];
-        buffer.get(signingKey);
-        final byte[] encryptionKey = new byte[16];
-        buffer.get(encryptionKey);
-        if (buffer.hasRemaining()) {
-            throw new IllegalStateException("Encountered extra bytes.");
-        }
-        new Key(signingKey, encryptionKey);
         getLogger().info("testSecret: Successfully validated Fernet Key for ARN {} and version {}.", secretId, clientRequestToken);
     }
 

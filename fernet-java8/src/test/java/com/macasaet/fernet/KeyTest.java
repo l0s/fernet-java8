@@ -18,6 +18,7 @@ package com.macasaet.fernet;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.encryptionKeyBytes;
 import static com.macasaet.fernet.Constants.signingKeyBytes;
+import static nl.jqno.equalsverifier.Warning.ALL_FIELDS_SHOULD_BE_USED;
 import static nl.jqno.equalsverifier.Warning.STRICT_INHERITANCE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -181,7 +182,7 @@ public class KeyTest {
     @Test
     public final void verifyEqualityContract() {
         // given
-        final EqualsVerifierApi<Key> verifier = EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE);
+        final EqualsVerifierApi<Key> verifier = EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE).suppress(ALL_FIELDS_SHOULD_BE_USED);
 
         // when / then
         verifier.verify();

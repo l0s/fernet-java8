@@ -35,7 +35,11 @@ public interface StringValidator extends Validator<String> {
     }
 
     default Function<byte[], String> getTransformer() {
-        return bytes -> new String(bytes, getCharset());
+        return bytes -> {
+            final String retval = new String(bytes, getCharset());
+            for (int i = bytes.length; --i >= 0; bytes[i] = 0);
+            return retval;
+        };
     }
 
 }

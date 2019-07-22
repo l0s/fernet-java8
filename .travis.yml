@@ -17,7 +17,7 @@ jdk:
   - openjdk8
   - openjdk10
   - openjdk11
-dist: trusty
+dist: xenial
 script: mvn org.jacoco:jacoco-maven-plugin:prepare-agent clean install sonar:sonar site
 env:
   matrix:
