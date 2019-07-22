@@ -18,7 +18,6 @@ package com.macasaet.fernet;
 import static org.junit.Assert.assertEquals;
 
 import java.security.SecureRandom;
-import java.util.Random;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,7 +34,7 @@ public class EndToEndTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    private Random random = new SecureRandom();
+    private SecureRandom random = new SecureRandom();
     private Validator<String> validator = new StringValidator() {
     };
 

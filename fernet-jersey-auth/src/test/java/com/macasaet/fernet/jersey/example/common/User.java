@@ -21,7 +21,6 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
-import java.util.Random;
 
 /**
  * This is an example of a POJO that may be used for both authentication and authorisation.
@@ -32,7 +31,7 @@ import java.util.Random;
  */
 public class User {
 
-	private static final Random random = new SecureRandom();
+	private static final SecureRandom random = new SecureRandom();
 	private static final Encoder encoder = Base64.getUrlEncoder();
 	private static final Decoder decoder = Base64.getUrlDecoder();
 

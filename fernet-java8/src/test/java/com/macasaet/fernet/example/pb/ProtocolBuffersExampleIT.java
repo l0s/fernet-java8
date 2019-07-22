@@ -16,7 +16,7 @@
 package com.macasaet.fernet.example.pb;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -28,7 +28,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,7 +64,7 @@ import com.macasaet.fernet.example.pb.Example.Session.Builder;
 public class ProtocolBuffersExampleIT {
 
     final Charset charset = StandardCharsets.UTF_8;
-    final Random random = new SecureRandom();
+    final SecureRandom random = new SecureRandom();
     final Key key = Key.generateKey(random);
 
     private Validator<Session> validator = new Validator<Session>() {

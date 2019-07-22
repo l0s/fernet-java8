@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import javax.ws.rs.NotAuthorizedException;
 
@@ -38,7 +38,7 @@ import com.macasaet.fernet.Token;
 public class TokenHeaderUtilityTest {
 
     private TokenHeaderUtility utility;
-    private Random random;
+    private SecureRandom random;
     
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -46,7 +46,7 @@ public class TokenHeaderUtilityTest {
     @Before
     public void setUp() throws Exception {
         utility = new TokenHeaderUtility();
-        random = new Random();
+        random = new SecureRandom();
     }
 
     @After

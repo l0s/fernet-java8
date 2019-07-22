@@ -22,7 +22,6 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.ws.rs.ForbiddenException;
@@ -135,7 +134,7 @@ public class SecretInjectionIT extends JerseyTest {
     @Test
     public final void verifyFailedForgery() {
         // given
-        final Random random = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
         final Key invalidKey = Key.generateKey(random);
         final Token forgedToken = Token.generate(random, invalidKey, "alice");
         final String tokenString = forgedToken.serialise();
@@ -160,7 +159,7 @@ public class SecretInjectionIT extends JerseyTest {
     @Test
     public final void verifyInvalidTokenReturnsNotAuthorized() throws UnsupportedEncodingException {
         // given
-        final Random random = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
         final Key key = Key.generateKey(random);
         final byte[] plainText = "this is a valid token".getBytes("UTF-8");
         final Token validToken = Token.generate(random, key, plainText);

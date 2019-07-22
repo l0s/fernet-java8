@@ -17,7 +17,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import com.amazonaws.Request;
 import com.amazonaws.Response;
@@ -35,9 +35,9 @@ import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
  */
 class MemoryOverwritingRequestHandler extends RequestHandler2 {
 
-    private final Random random;
+    private final SecureRandom random;
 
-    public MemoryOverwritingRequestHandler(final Random random) {
+    public MemoryOverwritingRequestHandler(final SecureRandom random) {
         super();
         if (random == null) {
             throw new IllegalArgumentException("random cannot be null");
@@ -70,7 +70,7 @@ class MemoryOverwritingRequestHandler extends RequestHandler2 {
         buffer.put(bytes);
     }
 
-    protected Random getRandom() {
+    protected SecureRandom getRandom() {
         return random;
     }
 

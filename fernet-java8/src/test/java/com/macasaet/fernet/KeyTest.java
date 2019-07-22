@@ -24,8 +24,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -106,7 +106,7 @@ public class KeyTest {
     @Test
     public void testGenerateKey() {
         // given
-        final Random deterministicRandom = new Random() {
+        final SecureRandom deterministicRandom = new SecureRandom() {
 
             private static final long serialVersionUID = 6548702184401342900L;
 

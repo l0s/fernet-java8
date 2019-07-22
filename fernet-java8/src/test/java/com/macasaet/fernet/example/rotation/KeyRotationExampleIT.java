@@ -20,7 +20,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,7 +61,7 @@ public class KeyRotationExampleIT {
     @Before
     public void setUp() throws IOException {
         initMocks(this);
-        final Random random = new SecureRandom();
+        final SecureRandom random = new SecureRandom();
         redisServer = new RedisServer();
         redisServer.start();
 

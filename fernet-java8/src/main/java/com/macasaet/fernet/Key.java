@@ -37,10 +37,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
-import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -107,7 +107,7 @@ public class Key {
      *            source of entropy
      * @return a new shared secret key
      */
-    public static Key generateKey(final Random random) {
+    public static Key generateKey(final SecureRandom random) {
         final byte[] signingKey = new byte[signingKeyBytes];
         random.nextBytes(signingKey);
         final byte[] encryptionKey = new byte[encryptionKeyBytes];
@@ -172,17 +172,21 @@ public class Key {
 
     /**
      * <p>Decrypt the payload of a Fernet token.</p>
-     * 
-     * <p>WARNING: For internal use only. This method will be removed from the public API in future releases.</p>
      *
-     * @param cipherText the padded encrypted payload of a token. The length <em>must</em> be a multiple of 16 (128 bits).
-     * @param initializationVector the random bytes used in the AES encryption of the token
+     * <p>Warning: Do not call this unless the cipher text has first been verified. Attempting to decrypt a cipher text
+     * that has been tampered with will leak whether or not the padding is correct and this can be used to decrypt
+     * stolen cipher text.</p>
+     *
+     * @param cipherText
+     *            the verified padded encrypted payload of a token. The length <em>must</em> be a multiple of 16 (128
+     *            bits).
+     * @param initializationVector
+     *            the random bytes used in the AES encryption of the token
      * @return the decrypted payload
      * @see Key#encrypt(byte[], IvParameterSpec)
      */
-    @Deprecated
     @SuppressWarnings("PMD.LawOfDemeter")
-    public byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
+    protected byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(getCipherTransformation());
             cipher.init(DECRYPT_MODE, getEncryptionKeySpec(), initializationVector);
