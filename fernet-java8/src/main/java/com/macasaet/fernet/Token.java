@@ -209,7 +209,7 @@ public class Token {
         return validator.validateAndDecrypt(keys, this);
     }
 
-    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter"})
+    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter", "deprecation"})
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
             final Instant latestValidInstant) {
         if (getVersion() != (byte) 0x80) {

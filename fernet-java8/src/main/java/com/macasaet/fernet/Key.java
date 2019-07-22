@@ -171,13 +171,16 @@ public class Key {
     }
 
     /**
-     * Decrypt the payload of a Fernet token.
+     * <p>Decrypt the payload of a Fernet token.</p>
+     * 
+     * <p>WARNING: For internal use only. This method will be removed from the public API in future releases.</p>
      *
      * @param cipherText the padded encrypted payload of a token. The length <em>must</em> be a multiple of 16 (128 bits).
      * @param initializationVector the random bytes used in the AES encryption of the token
      * @return the decrypted payload
      * @see Key#encrypt(byte[], IvParameterSpec)
      */
+    @Deprecated
     @SuppressWarnings("PMD.LawOfDemeter")
     public byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
         try {
