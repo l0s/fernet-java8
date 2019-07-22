@@ -15,7 +15,7 @@
  */
 package com.macasaet.fernet.example.rotation;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import javax.inject.Inject;
 
@@ -35,7 +35,7 @@ import redis.clients.jedis.Transaction;
  */
 public class RedisKeyManager {
 
-    private final Random random;
+    private final SecureRandom random;
     private final JedisPool pool;
     private final RedisKeyRepository repository;
 
@@ -47,7 +47,7 @@ public class RedisKeyManager {
      * @param repository utility for retrieving keys
      */
     @Inject
-    public RedisKeyManager(final Random random, final JedisPool pool, final RedisKeyRepository repository) {
+    public RedisKeyManager(final SecureRandom random, final JedisPool pool, final RedisKeyRepository repository) {
         if (random == null) {
             throw new IllegalArgumentException("random cannot be null");
         }
@@ -93,7 +93,7 @@ public class RedisKeyManager {
         return repository;
     }
 
-    protected Random getRandom() {
+    protected SecureRandom getRandom() {
         return random;
     }
 

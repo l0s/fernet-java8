@@ -15,7 +15,7 @@
  */
 package com.macasaet.fernet.example.rotation;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -40,7 +40,7 @@ import com.macasaet.fernet.Validator;
 public class ProtectedResource {
 
     private final RedisKeyRepository keyRepository;
-    private final Random random;
+    private final SecureRandom random;
 
     private final Validator<String> validator = new StringValidator() {
     };
@@ -50,7 +50,7 @@ public class ProtectedResource {
      * @param random a source of entropy for generating new tokens
      */
     @Inject
-    public ProtectedResource(final RedisKeyRepository keyRepository, final Random random) {
+    public ProtectedResource(final RedisKeyRepository keyRepository, final SecureRandom random) {
         if (keyRepository == null) {
             throw new IllegalArgumentException("keyRepository cannot be null");
         }

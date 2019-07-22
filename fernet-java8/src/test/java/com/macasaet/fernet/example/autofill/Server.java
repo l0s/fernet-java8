@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAmount;
-import java.util.Random;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,7 +41,7 @@ public class Server {
 
     private final Clock clock;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final Random random = new SecureRandom();
+    private final SecureRandom random = new SecureRandom();
 
     // this encapsulates a signing key and symmetric encryption key
     // server-side components may share this

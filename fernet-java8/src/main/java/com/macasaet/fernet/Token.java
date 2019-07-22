@@ -33,10 +33,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64.Encoder;
 import java.util.Collection;
-import java.util.Random;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -163,7 +163,7 @@ public class Token {
      * @param plainText the payload to embed in the token
      * @return a unique Fernet token
      */
-    public static Token generate(final Random random, final Key key, final String plainText) {
+    public static Token generate(final SecureRandom random, final Key key, final String plainText) {
         return generate(random, key, plainText.getBytes(charset));
     }
 
@@ -175,7 +175,7 @@ public class Token {
      * @param payload the unencrypted data to embed in the token
      * @return a unique Fernet token
      */
-    public static Token generate(final Random random, final Key key, final byte[] payload) {
+    public static Token generate(final SecureRandom random, final Key key, final byte[] payload) {
         final IvParameterSpec initializationVector = generateInitializationVector(random);
         final byte[] cipherText = key.encrypt(payload, initializationVector);
         final Instant timestamp = Instant.now();
@@ -287,11 +287,11 @@ public class Token {
         return builder.toString();
     }
 
-    protected static IvParameterSpec generateInitializationVector(final Random random) {
+    protected static IvParameterSpec generateInitializationVector(final SecureRandom random) {
         return new IvParameterSpec(generateInitializationVectorBytes(random));
     }
 
-    protected static byte[] generateInitializationVectorBytes(final Random random) {
+    protected static byte[] generateInitializationVectorBytes(final SecureRandom random) {
         final byte[] retval = new byte[initializationVectorBytes];
         random.nextBytes(retval);
         return retval;

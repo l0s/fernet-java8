@@ -16,7 +16,6 @@
 package com.macasaet.fernet.jersey.example.common;
 
 import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -45,7 +44,7 @@ import com.macasaet.fernet.Token;
 @Path("session")
 public class AuthenticationResource {
 
-	private Random random = new SecureRandom();
+	private SecureRandom random = new SecureRandom();
 
 	/**
 	 * This is the secret key. There is no need to share it with the client. The
