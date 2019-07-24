@@ -33,7 +33,7 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>1.4.0</version>
+      <version>1.4.1</version>
     </dependency>
 
 For more details, see: 
@@ -52,7 +52,11 @@ Note that this library requires Java 8 or higher.
 
 Create a new key:
 
-    final Key key = Key.generateKey(random);
+    final Key key = Key.generateKey();
+
+or
+
+    final Key key = Key.generateKey(customRandom);
 
 Deserialise an existing key:
 
@@ -60,7 +64,11 @@ Deserialise an existing key:
 
 Create a token:
 
-    final Token token = Token.generate(random, key, "secret message");
+    final Token token = Token.generate(key, "secret message");
+
+or
+
+    final Token token = Token.generate(customRandom, key, "secret message");
 
 Deserialise an existing token:
 
