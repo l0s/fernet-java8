@@ -50,7 +50,7 @@ import javax.crypto.spec.IvParameterSpec;
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 /*
  * TooManyMethods can be avoided by making the following API-breaking changes:
- * * remove the static `generate` methods and introduce a `TokenFactory`
+ * * remove the static `generate` methods and introduce a `TokenFactory` or `TokenBuilder`
  * * remove the public `validateAndDecrypt` methods since they are already available in the `Validator` interface
  * 
  * AvoidDuplicateLiterals is from the method-level @SuppressWarnings annotations
@@ -158,6 +158,17 @@ public class Token {
     /**
      * Convenience method to generate a new Fernet token with a string payload.
      *
+     * @param key the secret key for encrypting <em>plainText</em> and signing the token
+     * @param plainText the payload to embed in the token
+     * @return a unique Fernet token
+     */
+    public static Token generate(final Key key, final String plainText) {
+        return generate(new SecureRandom(), key, plainText);
+    }
+
+    /**
+     * Convenience method to generate a new Fernet token with a string payload.
+     *
      * @param random a source of entropy for your application
      * @param key the secret key for encrypting <em>plainText</em> and signing the token
      * @param plainText the payload to embed in the token
@@ -165,6 +176,17 @@ public class Token {
      */
     public static Token generate(final SecureRandom random, final Key key, final String plainText) {
         return generate(random, key, plainText.getBytes(charset));
+    }
+
+    /**
+     * Convenience method to generate a new Fernet token.
+     *
+     * @param key the secret key for encrypting <em>payload</em> and signing the token
+     * @param payload the unencrypted data to embed in the token
+     * @return a unique Fernet token
+     */
+    public static Token generate(final Key key, final byte[] payload) {
+        return generate(new SecureRandom(), key, payload);
     }
 
     /**
