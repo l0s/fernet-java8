@@ -61,9 +61,10 @@ public class TokenBuilder {
     public Token build(final byte[] plainBytes) {
         final Instant timestamp = Instant.now(getClock());
         final IvParameterSpec initializationVector = generateInitializationVector();
-        final byte[] cipherText = getKey().encrypt(plainBytes, initializationVector);
-        final byte[] hmac = getKey().sign(supportedVersion, timestamp, initializationVector, cipherText);
-        return new Token(supportedVersion, timestamp, generateInitializationVector(), cipherText, hmac);
+        final Key key = getKeySupplier().get();
+        final byte[] cipherText = key.encrypt(plainBytes, initializationVector);
+        final byte[] hmac = key.sign(supportedVersion, timestamp, initializationVector, cipherText);
+        return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
     }
 
     public Token build(final String plainText) {
@@ -86,10 +87,6 @@ public class TokenBuilder {
 
     protected void setEntropySource(SecureRandom entropySource) {
         this.entropySource = entropySource;
-    }
-
-    protected Key getKey() {
-        return getKeySupplier().get();
     }
 
     protected Supplier<Key> getKeySupplier() {
