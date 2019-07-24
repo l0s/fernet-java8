@@ -57,7 +57,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Carlos Macasaet
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public class Key {
 
     private final byte[] signingKey;
@@ -98,6 +98,15 @@ public class Key {
      */
     public Key(final String string) {
         this(decoder.decode(string));
+    }
+
+    /**
+     * Generate a random key
+     *
+     * @return a new shared secret key
+     */
+    public static Key generateKey() {
+        return generateKey(new SecureRandom());
     }
 
     /**

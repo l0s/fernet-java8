@@ -19,6 +19,7 @@ import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -176,6 +177,32 @@ public class TokenTest {
 
         // then
         assertEquals("Don't wait too long to decrypt this!", result);
+    }
+
+    @Test
+    public final void verifyTextTokenGenerationWithDefaultEntropySource() {
+        // given
+        final Key key = Key.generateKey();
+
+        // when
+        final Token result = Token.generate(key, "message");
+
+        // then
+        final String message = result.validateAndDecrypt(key, new StringValidator() {
+        });
+        assertEquals("message", message);
+    }
+
+    @Test
+    public final void verifyTokenGenerationWithDefaultEntropySource() {
+        // given
+        final Key key = Key.generateKey();
+
+        // when
+        final Token result = Token.generate(key, new byte[] {1, 1, 2, 3, 5, 8, 13, 21});
+
+        // then
+        assertTrue(result.isValidSignature(key));
     }
 
 }
