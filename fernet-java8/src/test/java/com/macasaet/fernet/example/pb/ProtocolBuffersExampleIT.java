@@ -49,6 +49,7 @@ import org.mockito.Captor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
+import com.macasaet.fernet.TokenFactory;
 import com.macasaet.fernet.TokenValidationException;
 import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.example.pb.Example.Session;
@@ -67,6 +68,7 @@ public class ProtocolBuffersExampleIT {
     final SecureRandom random = new SecureRandom();
     final Key key = Key.generateKey(random);
 
+    private final TokenFactory<Session> tokenFactory = new TokenFactory<>(Session::toByteArray, () -> key);
     private Validator<Session> validator = new Validator<Session>() {
         public Function<byte[], Session> getTransformer() {
             return bytes -> {
@@ -102,7 +104,7 @@ public class ProtocolBuffersExampleIT {
         builder.setStartTime(Instant.now().getEpochSecond());
         servletResponse.addHeader("Location", "/api/sessions/" + sessionId);
         final Session session = builder.build();
-        final Token token = Token.generate(random, key, session.toByteArray());
+        final Token token = tokenFactory.generateToken(session);
         return token.serialise();
     }
 
@@ -138,7 +140,7 @@ public class ProtocolBuffersExampleIT {
         builder.setLastRenewalTime(Instant.now().getEpochSecond());
         final Session updatedSession = builder.build();
         // store the updated session in a new Fernet token
-        final Token retval = Token.generate(random, key, updatedSession.toByteArray());
+        final Token retval = tokenFactory.generateToken(updatedSession);
         return retval.serialise();
     }
 

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
+import com.macasaet.fernet.TokenFactory;
 import com.macasaet.fernet.Validator;
 
 /**
@@ -53,6 +54,14 @@ public class Server {
     // this way, if a token is stolen, it will only be useful for a limited time
     private final Duration timeToLive = Duration.ofHours(24);
 
+    private final Function<Customer, byte[]> serialiser = customer -> {
+        try {
+            return mapper.writeValueAsBytes(customer);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    };
+    private final TokenFactory<Customer> factory;
     // the validator implements our custom logic for deciding whether or not to accept a token (secure envelope)
     // and if so, converting the payload into a domain object
     private final Validator<Customer> validator = new Validator<Customer>() {
@@ -78,6 +87,7 @@ public class Server {
 
     public Server(final Clock clock) {
         this.clock = clock;
+        factory = new TokenFactory<>(clock, random, serialiser, () -> key);
     }
 
     /**
@@ -108,8 +118,7 @@ public class Server {
         // We could reduce this by using a binary format like Thrift or Protocol Buffers instead of JSON. Client code
         // will not be able to extract the payload so it does not need to be taken into consideration when choosing the
         // serialisation format.
-        final byte[] tokenPayload = mapper.writeValueAsBytes(customer);
-        final Token token = Token.generate(random, key, tokenPayload);
+        final Token token = factory.generateToken(customer);
         final Response retval = new Response();
         retval.secureEnvelope = token.serialise();
         retval.expirationDateTime = genExpiration();
@@ -128,17 +137,14 @@ public class Server {
      *            an encrypted packet containing the customer's sensitive information
      * @return meta data to allow the client to register the customer for another notification type without having to
      *         solicit the sensitive information again.
-     * @throws JsonProcessingException
      */
-    public Response register(final String notificationType, final String secureEnvelope)
-        throws JsonProcessingException {
+    public Response register(final String notificationType, final String secureEnvelope) {
         final Token token = Token.fromString(secureEnvelope); // throws exception if it cannot be a token
         final Customer customer = token.validateAndDecrypt(key, validator); // throws exception if the token was forged
                                                                             // or is expired
         register(notificationType, customer);
-        final byte[] tokenPayload = mapper.writeValueAsBytes(customer);
-        final Token updatedToken = Token.generate(random, key, tokenPayload); // extend the TTL by generating a new
-                                                                              // token
+        final Token updatedToken = factory.generateToken(customer); // extend the TTL by generating a new
+                                                                    // token
         final Response retval = new Response();
         retval.secureEnvelope = updatedToken.serialise();
         retval.expirationDateTime = genExpiration(); // update the expiration date

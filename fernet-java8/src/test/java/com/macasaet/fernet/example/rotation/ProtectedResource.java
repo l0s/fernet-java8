@@ -24,9 +24,9 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
-import com.macasaet.fernet.Key;
 import com.macasaet.fernet.StringValidator;
 import com.macasaet.fernet.Token;
+import com.macasaet.fernet.TokenBuilder;
 import com.macasaet.fernet.TokenValidationException;
 import com.macasaet.fernet.Validator;
 
@@ -40,8 +40,8 @@ import com.macasaet.fernet.Validator;
 public class ProtectedResource {
 
     private final RedisKeyRepository keyRepository;
-    private final SecureRandom random;
 
+    private final TokenBuilder tokenBuilder;
     private final Validator<String> validator = new StringValidator() {
     };
 
@@ -58,7 +58,7 @@ public class ProtectedResource {
             throw new IllegalArgumentException("random cannot be null");
         }
         this.keyRepository = keyRepository;
-        this.random = random;
+        tokenBuilder = new TokenBuilder().withEntropySource(random).withKeySupplier(getKeyRepository()::getPrimaryKey);
     }
 
     /**
@@ -84,9 +84,7 @@ public class ProtectedResource {
     @Path("token")
     public String issueToken(final String username, final String password) {
         if ("username".equals(username) && "password".equals(password)) {
-            // might be nice to have Token.generate(repository, payload)
-            final Key primaryKey = getKeyRepository().getPrimaryKey();
-            final Token token = Token.generate(random, primaryKey, username);
+            final Token token = tokenBuilder.build(username);
             return token.serialise();
         }
         throw new NotAuthorizedException("Bearer realm=\"secrets\"");
