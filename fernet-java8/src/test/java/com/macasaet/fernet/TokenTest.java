@@ -20,6 +20,11 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
+import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
+import static org.mutabilitydetector.unittesting.AllowedReason.provided;
+import static org.mutabilitydetector.unittesting.MutabilityAssert.assertInstancesOf;
+import static org.mutabilitydetector.unittesting.MutabilityMatchers.areImmutable;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -203,6 +208,14 @@ public class TokenTest {
 
         // then
         assertTrue(result.isValidSignature(key));
+    }
+
+    @Test
+    public final void verifyImmutable() {
+        assertInstancesOf(Token.class, areImmutable(),
+                allowingForSubclassing(),
+                provided(IvParameterSpec.class).isAlsoImmutable(),
+                assumingFields("cipherText", "hmac").areNotModifiedAndDoNotEscape());
     }
 
 }

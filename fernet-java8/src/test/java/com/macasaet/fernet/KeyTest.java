@@ -23,6 +23,10 @@ import static nl.jqno.equalsverifier.Warning.STRICT_INHERITANCE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
+import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
+import static org.mutabilitydetector.unittesting.MutabilityAssert.assertInstancesOf;
+import static org.mutabilitydetector.unittesting.MutabilityMatchers.areImmutable;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -186,6 +190,13 @@ public class KeyTest {
 
         // when / then
         verifier.verify();
+    }
+
+    @Test
+    public final void verifyImmutable() {
+        assertInstancesOf(Key.class, areImmutable(),
+                allowingForSubclassing(),
+                assumingFields("signingKey", "encryptionKey").areNotModifiedAndDoNotEscape());
     }
 
 }
