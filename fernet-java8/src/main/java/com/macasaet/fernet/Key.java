@@ -83,11 +83,14 @@ public class Key {
     }
 
     /**
-     * @param concatenatedKeys
-     *            an array of 32 bytes of which the first 16 is the signing key and the last 16 is the
-     *            encryption/decryption key
+     * Create a Key from a payload containing the signing and encryption
+     * key.
+     *
+     * @param concatenatedKeys an array of 32 bytes of which the first 16 is
+     *                         the signing key and the last 16 is the
+     *                         encryption/decryption key
      */
-    protected Key(final byte[] concatenatedKeys) {
+    public Key(final byte[] concatenatedKeys) {
         this(copyOfRange(concatenatedKeys, 0, signingKeyBytes),
                 copyOfRange(concatenatedKeys, signingKeyBytes, fernetKeyBytes));
     }

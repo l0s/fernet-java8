@@ -105,8 +105,18 @@ public class Token {
         this.hmac = hmac;
     }
 
+    /**
+     * Read a Token from bytes. This does NOT validate that the token was
+     * generated using a valid {@link Key}.
+     *
+     * @param bytes a Fernet token in the form Version | Timestamp | IV |
+     *              Ciphertext | HMAC
+     * @return a new Token
+     * @throws IllegalTokenException if the input string cannot be a valid
+     *                               token irrespective of key or timestamp.
+     */
     @SuppressWarnings({"PMD.PrematureDeclaration", "PMD.DataflowAnomalyAnalysis"})
-    protected static Token fromBytes(final byte[] bytes) {
+    public static Token fromBytes(final byte[] bytes) {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");
         }
