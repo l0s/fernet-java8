@@ -183,7 +183,6 @@ class SecretsManager {
      * @param stage
      *            the stage with which to tag the version
      */
-    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public void putSecretValue(final String secretId, final String clientRequestToken, final Collection<? extends Key> keys,
             final Stage stage) {
         final PutSecretValueRequest putSecretValueRequest = new EphemeralPutSecretValueRequest();
