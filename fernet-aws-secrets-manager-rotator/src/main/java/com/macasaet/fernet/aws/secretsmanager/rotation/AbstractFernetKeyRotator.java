@@ -86,16 +86,11 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         this.random = random;
     }
 
-    @SuppressWarnings("PMD.DoNotCallGarbageCollectionExplicitly")
     public void handleRequest(final InputStream input, final OutputStream output, final Context context) throws IOException {
         final RotationRequest request = getMapper().readValue(input, RotationRequest.class);
         getLogger().debug("Processing request: {}", request);
 
         handleRotationRequest(request);
-
-        // Since performance is not a concern for this Lambda, recommend that the JVM reclaim memory that may contain
-        // secret data.
-        System.gc();
     }
 
     protected void finalize() throws Throwable {

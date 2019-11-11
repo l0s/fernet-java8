@@ -19,6 +19,7 @@ import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.CURRENT;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -159,6 +160,44 @@ public class MultiFernetKeyRotatorTest {
         rotator.testSecret("secret", "version");
 
         // then
+    }
+
+    @Test
+    public final void verifyCreateClearsIntermediateSecret() {
+        // given
+        final byte[] secretBytes = new byte[32];
+        random.nextBytes(secretBytes);
+        final int originalHashCode = Arrays.hashCode(secretBytes);
+        final ByteBuffer secretByteBuffer = ByteBuffer.wrap(secretBytes);
+        assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
+        given(secretsManager.getSecretStage("secretId", CURRENT)).willReturn(secretByteBuffer);
+
+        // when
+        rotator.createSecret("secretId", "clientRequestToken");
+
+        // then
+        final byte[] modifiedBytes = secretByteBuffer.array();
+        assertEquals(32, modifiedBytes.length);
+        assertNotEquals(originalHashCode, Arrays.hashCode(secretBytes));
+    }
+
+    @Test
+    public final void verifyTestClearsIntermediateSecret() {
+        // given
+        final byte[] secretBytes = new byte[32];
+        for (byte i = 32; --i >= 0; secretBytes[i] = i);
+        final int originalHashCode = Arrays.hashCode(secretBytes);
+        final ByteBuffer secretByteBuffer = ByteBuffer.wrap(secretBytes);
+        assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
+        given(secretsManager.getSecretVersion("secretId", "clientRequestToken")).willReturn(secretByteBuffer);
+
+        // when
+        rotator.testSecret("secretId", "clientRequestToken");
+
+        // then
+        final byte[] modifiedBytes = secretByteBuffer.array();
+        assertEquals(32, modifiedBytes.length);
+        assertNotEquals(originalHashCode, Arrays.hashCode(secretBytes));
     }
 
 }

@@ -45,9 +45,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.amazonaws.AmazonWebServiceRequest;
-import com.amazonaws.DefaultRequest;
-import com.amazonaws.Request;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretRequest;
 import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
@@ -56,10 +53,7 @@ import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.amazonaws.services.secretsmanager.model.PutSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.amazonaws.services.secretsmanager.model.UpdateSecretVersionStageRequest;
-import com.amazonaws.xray.AWSXRayRecorder;
-import com.amazonaws.xray.handlers.TracingHandler;
 import com.macasaet.fernet.Key;
-import com.macasaet.fernet.aws.secretsmanager.rotation.SecretsManager.EphemeralPutSecretValueRequest;
 
 /**
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
@@ -236,20 +230,6 @@ public class SecretsManagerTest {
         request.setVersionStages(singleton("AWSPREVIOUS"));
         request.setSecretBinary(ByteBuffer.wrap((expected + expected).getBytes("UTF-8")));
         verify(delegate).putSecretValue(eq(request));
-    }
-
-    @Test
-    public final void verifyTracingHandlerHandlesCustomRequest() {
-        // given
-        final AWSXRayRecorder recorder = mock(AWSXRayRecorder.class);
-        final TracingHandler handler = new TracingHandler(recorder);
-        final AmazonWebServiceRequest originalRequest = new EphemeralPutSecretValueRequest();
-        final Request<PutSecretValueRequest> request = new DefaultRequest<>(originalRequest, "Secrets Manager");
-
-        // when
-        handler.beforeRequest(request);
-
-        // then (no exceptions)
     }
 
 }

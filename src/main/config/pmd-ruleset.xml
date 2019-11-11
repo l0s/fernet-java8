@@ -59,6 +59,7 @@ under the License.
   <rule ref="category/java/design.xml">
     <exclude name="ExcessiveImports" />
     <exclude name="DataClass" />
+    <exclude name="LoosePackageCoupling" />
   </rule>
   <rule ref="category/java/multithreading.xml" />
   <rule ref="category/java/performance.xml" />

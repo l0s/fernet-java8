@@ -17,6 +17,8 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -32,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.junit.After;
@@ -231,6 +234,24 @@ public class SimpleFernetKeyRotatorTest {
                 // then (exception thrown)
             }
         }
+    }
+
+    @Test
+    public final void verifyTestClearsIntermediateSecret() {
+        // given
+        final byte[] secretBytes = new byte[32];
+        for (byte i = 32; --i >= 0; secretBytes[i] = i);
+        final ByteBuffer secretByteBuffer = ByteBuffer.wrap(secretBytes);
+        assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
+        given(secretsManager.getSecretVersion("secretId", "clientRequestToken")).willReturn(secretByteBuffer);
+
+        // when
+        rotator.testSecret("secretId", "clientRequestToken");
+
+        // then
+        final byte[] modifiedBytes = secretByteBuffer.array();
+        assertEquals(32, modifiedBytes.length);
+        for (int i = modifiedBytes.length; --i >= 0; assertEquals(0, modifiedBytes[i]));
     }
 
 }
