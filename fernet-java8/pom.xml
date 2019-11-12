@@ -19,7 +19,7 @@
   <parent>
     <groupId>com.macasaet.fernet</groupId>
     <artifactId>fernet-java</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3-SNAPSHOT</version>
   </parent>
   <artifactId>fernet-java8</artifactId>
   <packaging>jar</packaging>
