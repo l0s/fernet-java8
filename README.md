@@ -33,7 +33,7 @@ If you use Maven, you can add it to your project object model using:
     <dependency>
       <groupId>com.macasaet.fernet</groupId>
       <artifactId>fernet-java8</artifactId>
-      <version>1.4.1</version>
+      <version>1.4.2</version>
     </dependency>
 
 For more details, see: 
@@ -86,6 +86,17 @@ If you choose to store structured data in the token (e.g. JSON), or a
 pointer to a domain object (e.g. a username), you can implement your own
 `Validator<T>` that returns the type of POJO your application expects.
 
+Use a custom time-to-live:
+
+    final Validator<String> validator = new StringValidator() {
+      public TemporalAmount getTimeToLive() {
+        return Duration.ofHours(4);
+      }
+    };
+
+The default time-to-live is 60 seconds, but in this example, it's
+overridden to 4 hours.
+
 ### Storing Sensitive Data on the Client
 
 For an example of how to securely store sensitive data on the client (e.g. browser cookie), see the classes in
@@ -113,17 +124,6 @@ For details on how to store Fernet keys using AWS Secrets Manager, see
 the submodule
 [fernet-aws-secrets-manager-rotator](https://github.com/l0s/fernet-java8/tree/master/fernet-aws-secrets-manager-rotator).
 It includes a Lambda Function to enable key rotation.
-
-## Why Fernet, Why not JWT?
-
-Valid concerns have been raised about the JWT specification:
-* [No Way, JOSE! Javascript Object Signing and Encryption is a Bad Standard That Everyone Should Avoid](https://paragonie.com/blog/2017/03/jwt-json-web-tokens-is-bad-standard-that-everyone-should-avoid)
-* [JSON Web Tokens should be avoided](https://news.ycombinator.com/item?id=13865459)
-
-In addition, Fernet has been available in Python's
-[cryptography](https://github.com/pyca/cryptography) package for some time.
-It is also used by
-[Keystone, the OpenStack identity service](https://docs.openstack.org/keystone/latest/admin/identity-fernet-token-faq.html).
 
 ## Development
 
