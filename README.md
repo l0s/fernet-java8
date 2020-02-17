@@ -133,11 +133,11 @@ This project uses PITest to evaluate test coverage and test effectiveness.
 The latest report is available [here](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/index.html).
 To generate a report for a local build, run:
 
-    mvn clean install site
+    ./mvnw clean install site
 
 ### Releasing to The Central Repository
 
-    mvn --batch-mode -Prelease clean release:clean release:prepare release:perform
+    ./mvnw --batch-mode -Prelease clean release:clean release:prepare release:perform
 
 ## Prior Art
 
