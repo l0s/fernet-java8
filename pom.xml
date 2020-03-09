@@ -48,7 +48,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <pmd.version>6.20.0</pmd.version>
-    <jackson.version>2.10.2</jackson.version>
+    <jackson.version>2.10.3</jackson.version>
     <sonar.organization>l0s-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <dependency.locations.enabled>false</dependency.locations.enabled>
