@@ -22,7 +22,7 @@ dist: bionic
 install:
   # disable (erroneous) mirrors in settings.xml
   - xmlstarlet edit --inplace --delete "//mirrors" "${TRAVIS_HOME}/.m2/settings.xml"
-script: ./mvnw --threads 2 org.jacoco:jacoco-maven-plugin:prepare-agent clean install sonar:sonar site
+script: ./mvnw org.jacoco:jacoco-maven-plugin:prepare-agent clean install sonar:sonar site
 env:
   jobs:
     secure: AVFhPadriChDFAi6WzcifaEmjXaIdNCMmmsCr2CJw63SptFZ9HcC670oJWTGxVvWCGjTOQAXkwcD1ND4poJCfuXbaN/STPSQxAfF6KGrtMwVcssfbQU0h2XG2N/I8VNcldBFsCwGIe+tvUCnVK0bH9Clst/3sC5HokI4CPGL5YUG+c57rkhh4PDl5gsJHbBdbO7XL8ftjnBkWPuZ9s6NnzJEe12G8s4llUGyzPUpYVer+L0iREdCgAbvD1HZ7ejox2wEmDScKR58fnyF64m4MVOb5Wf0WCh3C9kZH1UrqqOl/ssG+sM6RuNf9piCizPfQWJ3tSiAaqWSO6DdHXS66MPipkeWg6fcqijz+yDgJbjqsB/0cV+oP3RFNbTHpG6oiFwMY4dX9Wnrz8wbhOiebWo2EwusUuV3JigvGrQQv0zxYkTauDDXCMEJGALDoU/QUNYtiQekx7AsNlUScNdqbL1+IZkcVQ8UdXUiZR8mTebpEFCpR5v1LShehq4G4jgp0d3x4KPnBbMjY00R5dmGOdAPRkzoCl7WHPg33VVWcFyyAJ6gn4ijPRvSofdEoffuI88MGFmtkgA/gzYEYkVAdKhmr+9URSwfhXFnNAXi3s9FLf7oi8RvwR7Bl85pOzTD5nzV6KxeVWI08pDq6PoORUc+QJjwulIdGSQNQg4nHbc=
