@@ -135,6 +135,24 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <parallel>all</parallel>
+            <useUnlimitedThreads>true</useUnlimitedThreads>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <parallel>all</parallel>
+            <useUnlimitedThreads>true</useUnlimitedThreads>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
           <version>1.4.10</version>
@@ -156,7 +174,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.12.0</version>
+          <version>3.13.0</version>
           <configuration>
             <analysisCache>true</analysisCache>
             <rulesets>
