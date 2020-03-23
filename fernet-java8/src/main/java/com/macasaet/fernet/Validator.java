@@ -98,10 +98,19 @@ public interface Validator<T> {
      * @return the deserialised contents of the token
      * @throws TokenValidationException if the token is invalid.
      */
-    @SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis"})
+    @SuppressWarnings({"PMD.LawOfDemeter", "PMD.DataflowAnomalyAnalysis", "PMD.ConfusingTernary"})
     default T validateAndDecrypt(final Key key, final Token token) {
         final Instant now = Instant.now(getClock());
-        final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));
+        if (token.getVersion() != (byte) 0x80) {
+            throw new TokenValidationException("Invalid version");
+        } else if (!token.getTimestamp().isAfter(now.minus(getTimeToLive()))) {
+            throw new TokenExpiredException("Token is expired");
+        } else if (!token.getTimestamp().isBefore(now.plus(getMaxClockSkew()))) {
+            throw new TokenValidationException("Token timestamp is in the future (clock skew).");
+        } else if (!token.isValidSignature(key)) {
+            throw new TokenValidationException("Signature does not match.");
+        }
+        final byte[] plainText = key.decrypt(token.getCipherText(), token.getInitializationVector());
         final T object = getTransformer().apply(plainText);
         if (!getObjectValidator().test(object)) {
             for (int i = plainText.length; --i >= 0; plainText[i] = 0);

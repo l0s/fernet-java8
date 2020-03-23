@@ -16,19 +16,24 @@
 package com.macasaet.fernet;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.crypto.spec.IvParameterSpec;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class StringValidatorTest {
 
@@ -39,7 +44,7 @@ public class StringValidatorTest {
     @Before
     public void setUp() throws Exception {
         clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
-        key = Key.generateKey();
+        key = spy(Key.generateKey());
         validator = new StringValidator() {
             public Clock getClock() {
                 return clock;
@@ -55,10 +60,15 @@ public class StringValidatorTest {
     public void verifyPlainTextCleared() throws UnsupportedEncodingException {
         // given
         final String plainText = "plainText";
-        final byte[] plainBytes = plainText.getBytes("UTF-8");
-        final Token token = mock(Token.class);
-        given(token.validateAndDecrypt(key, clock.instant().minus(validator.getTimeToLive()),
-                clock.instant().plus(validator.getMaxClockSkew()))).willReturn(plainBytes);
+        final Token token = Token.generate(key, plainText);
+        final AtomicReference<byte[]> byteReference = new AtomicReference<byte[]>();
+        doAnswer(new Answer<byte[]>() {
+            public byte[] answer(final InvocationOnMock invocation) throws Throwable {
+                final byte[] retval = (byte[])invocation.callRealMethod();
+                byteReference.set(retval);
+                return retval;
+            }
+        }).when(key).decrypt(any(byte[].class), any(IvParameterSpec.class));
 
         // when
         final String result = validator.validateAndDecrypt(key, token);
@@ -66,7 +76,7 @@ public class StringValidatorTest {
         // then
         assertEquals(plainText, result);
         // verify the intermediate representation was cleared
-        assertFalse(Arrays.equals(plainBytes, plainText.getBytes("UTF-8")));
+        assertNotEquals(plainText.getBytes("UTF-8"), byteReference.get());
     }
 
 }

@@ -118,7 +118,7 @@ public class ProtocolBuffersExampleIT {
     public String renew(@PathParam("sessionId") final String sessionId, final String tokenString,
             @Context final HttpServletResponse servletResponse) {
         final Token inputToken = Token.fromString(tokenString);
-        final Session session = inputToken.validateAndDecrypt(key, validator);
+        final Session session = validator.validateAndDecrypt(key, inputToken);
         if (!Objects.equals(sessionId, session.getSessionId())) {
             throw new BadRequestException("SessionID mismatch.");
         }
@@ -164,7 +164,7 @@ public class ProtocolBuffersExampleIT {
         final String subsequentToken = renew(sessionId, initialToken, renewalResponse);
 
         // then
-        final Session result = Token.fromString(subsequentToken).validateAndDecrypt(key, validator);
+        final Session result = validator.validateAndDecrypt(key, Token.fromString(subsequentToken));
         assertEquals(1, result.getRenewalCount());
         assertEquals(sessionId, result.getSessionId());
     }

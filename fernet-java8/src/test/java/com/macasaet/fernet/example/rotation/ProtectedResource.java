@@ -70,7 +70,7 @@ public class ProtectedResource {
     @Path("secret")
     public String getSecret(@HeaderParam("X-Auth-Token") final String authToken) {
         final Token token = Token.fromString(authToken);
-        token.validateAndDecrypt(getKeyRepository().getDecryptionKeys(), getValidator());
+        getValidator().validateAndDecrypt(getKeyRepository().getDecryptionKeys(), token);
         return "secret";
     }
 

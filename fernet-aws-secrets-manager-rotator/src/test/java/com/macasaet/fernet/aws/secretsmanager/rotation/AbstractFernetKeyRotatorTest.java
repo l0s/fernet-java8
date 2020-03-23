@@ -18,6 +18,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Step.SET_SECRET;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -42,9 +43,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -75,8 +74,6 @@ public class AbstractFernetKeyRotatorTest {
 
     private AbstractFernetKeyRotator rotator;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     @Captor
     private ArgumentCaptor<RotationRequest> requestCaptor;
 
@@ -174,8 +171,7 @@ public class AbstractFernetKeyRotatorTest {
         versions.put("version", singletonList("AWSPENDING"));
 
         // when
-        thrown.expect(RuntimeException.class);
-        rotator.finishSecret("secret", "version", versions);
+        assertThrows(RuntimeException.class, () -> rotator.finishSecret("secret", "version", versions));
 
         // then (exception thrown)
     }

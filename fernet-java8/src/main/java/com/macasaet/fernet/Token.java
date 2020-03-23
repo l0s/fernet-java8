@@ -36,7 +36,6 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64.Encoder;
-import java.util.Collection;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -213,47 +212,6 @@ public class Token {
         final Instant timestamp = Instant.now();
         final byte[] hmac = key.sign(supportedVersion, timestamp, initializationVector, cipherText);
         return new Token(supportedVersion, timestamp, initializationVector, cipherText, hmac);
-    }
-
-    /**
-     * Check the validity of this token. 
-     *
-     * @param key the secret key against which to validate the token
-     * @param validator an object that encapsulates the validation parameters (e.g. TTL)
-     * @return the decrypted, deserialised payload of this token
-     * @throws TokenValidationException if <em>key</em> was NOT used to generate this token
-     */
-    @SuppressWarnings("PMD.LawOfDemeter")
-    public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) {
-        return validator.validateAndDecrypt(key, this);
-    }
-
-    /**
-     * Check the validity of this token against a collection of keys. Use this if you have implemented key rotation.
-     *
-     * @param keys the active keys which may have been used to generate token
-     * @param validator an object that encapsulates the validation parameters (e.g. TTL)
-     * @return the decrypted, deserialised payload of this token
-     * @throws TokenValidationException if none of the keys were used to generate this token
-     */
-    @SuppressWarnings("PMD.LawOfDemeter")
-    public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator) {
-        return validator.validateAndDecrypt(keys, this);
-    }
-
-    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter"})
-    protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
-            final Instant latestValidInstant) {
-        if (getVersion() != (byte) 0x80) {
-            throw new TokenValidationException("Invalid version");
-        } else if (!getTimestamp().isAfter(earliestValidInstant)) {
-            throw new TokenExpiredException("Token is expired");
-        } else if (!getTimestamp().isBefore(latestValidInstant)) {
-            throw new TokenValidationException("Token timestamp is in the future (clock skew).");
-        } else if (!isValidSignature(key)) {
-            throw new TokenValidationException("Signature does not match.");
-        }
-        return key.decrypt(getCipherText(), getInitializationVector());
     }
 
     /**

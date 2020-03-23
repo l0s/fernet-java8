@@ -15,18 +15,20 @@
  */
 package com.macasaet.fernet;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -34,6 +36,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class ValidatorTest {
 
@@ -47,7 +51,7 @@ public class ValidatorTest {
     public void setUp() throws Exception {
         initMocks(this);
         clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
-        key = Key.generateKey();
+        key = spy(Key.generateKey());
         validator = new Validator<byte[]>() {
             public Function<byte[], byte[]> getTransformer() {
                 return Function.identity();
@@ -71,36 +75,36 @@ public class ValidatorTest {
     public void verifyPlainTextRetained() {
         // given
         final byte[] plainBytes = new byte[] { 1, 1, 2, 3, 5, 8 };
-        final Token token = mock(Token.class);
-        given(token.validateAndDecrypt(key, clock.instant().minus(validator.getTimeToLive()),
-                clock.instant().plus(validator.getMaxClockSkew()))).willReturn(plainBytes);
+        final Token token = Token.generate(key, plainBytes);
         given(objectValidator.test(eq(plainBytes))).willReturn(true);
 
         // when
         final byte[] result = validator.validateAndDecrypt(key, token);
 
         // then
-        assertTrue(Arrays.equals(result, new byte[] { 1, 1, 2, 3, 5, 8 })); // output the correct plain text
+        assertArrayEquals(new byte[] { 1, 1, 2, 3, 5, 8 }, result); // output the correct plain text
     }
 
     @Test
     public void verifyPlainTextClearedOnValidationFailure() {
         // given
         final byte[] plainBytes = new byte[] { 1, 1, 2, 3, 5, 8 };
-        final Token token = mock(Token.class);
-        given(token.validateAndDecrypt(key, clock.instant().minus(validator.getTimeToLive()),
-                clock.instant().plus(validator.getMaxClockSkew()))).willReturn(plainBytes);
+        final Token token = Token.generate(key, plainBytes);
+        final AtomicReference<byte[]> bytesReference = new AtomicReference<>();
+        doAnswer(new Answer<byte[]>() {
+            public byte[] answer(final InvocationOnMock invocation) throws Throwable {
+                final byte[] retval = (byte[]) invocation.callRealMethod();
+                bytesReference.set(retval);
+                return retval;
+            }
+        }).when(key).decrypt(token.getCipherText(), token.getInitializationVector());
         given(objectValidator.test(eq(plainBytes))).willReturn(false);
 
         // when
-        try {
-            validator.validateAndDecrypt(key, token);
-            fail("validation should fail");
-        } catch (final PayloadValidationException pve) {
-        }
+        assertThrows(PayloadValidationException.class, () -> validator.validateAndDecrypt(key, token));
 
         // then
-        assertFalse(Arrays.equals(plainBytes, new byte[] { 1, 1, 2, 3, 5, 8 })); // verify the intermediate
-                                                                                 // representation was cleared
+        assertFalse(Arrays.equals(bytesReference.get(), new byte[] { 1, 1, 2, 3, 5, 8 })); // verify the intermediate
+                                                                                           // representation was cleared
     }
 }

@@ -17,6 +17,7 @@ package com.macasaet.fernet.jersey;
 
 import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -32,9 +33,7 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -65,9 +64,6 @@ public class FernetSecretValueParamProviderTest {
     private Token token;
     
     private Collection<Key> keys;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private Function<ContainerRequest, String> function;
 
@@ -121,8 +117,7 @@ public class FernetSecretValueParamProviderTest {
         final ContainerRequest request = mock(ContainerRequest.class);
 
         // when / then
-        thrown.expect(NotAuthorizedException.class);
-        function.apply(request);
+        assertThrows(NotAuthorizedException.class, () -> function.apply(request));
     }
 
 }

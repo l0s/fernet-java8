@@ -19,6 +19,7 @@ import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
 import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
@@ -35,9 +36,7 @@ import java.util.stream.IntStream;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Unit tests for the {@link Token} class.
@@ -49,8 +48,6 @@ import org.junit.rules.ExpectedException;
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-	@Rule
-    public ExpectedException thrown = ExpectedException.none();
 	private Validator<String> validator;
 
     @Before
@@ -90,7 +87,7 @@ public class TokenTest {
         final Token result = Token.generate(deterministicRandom, key, "Hello, world!");
 
         // then
-        final String plainText = result.validateAndDecrypt(key, validator);
+        final String plainText = validator.validateAndDecrypt(key, result);
         assertEquals("Hello, world!", plainText);
     }
 
@@ -110,7 +107,7 @@ public class TokenTest {
         final Token result = Token.generate(deterministicRandom, key, "");
 
         // then
-        final String plainText = result.validateAndDecrypt(key, validator);
+        final String plainText = validator.validateAndDecrypt(key, result);
         assertEquals("", plainText);
     }
 
@@ -129,7 +126,7 @@ public class TokenTest {
         final Token token = Token.generate(deterministicRandom, key, "Hello, world!");
 
         // when
-        final String result = token.validateAndDecrypt(key, validator);
+        final String result = validator.validateAndDecrypt(key, token);
 
         // then
         assertEquals("Hello, world!", result);
@@ -163,8 +160,7 @@ public class TokenTest {
                 IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
 
         // when
-        thrown.expect(TokenValidationException.class);
-        token.validateAndDecrypt(decryptionKeys, validator);
+        assertThrows(TokenValidationException.class, () -> validator.validateAndDecrypt(decryptionKeys, token));
 
         // then (nothing)
     }
@@ -178,7 +174,7 @@ public class TokenTest {
         final Token token = Token.generate(random, decryptionKeys.get(8), "Don't wait too long to decrypt this!");
 
         // when
-        final String result = token.validateAndDecrypt(decryptionKeys, validator);
+        final String result = validator.validateAndDecrypt(decryptionKeys, token);
 
         // then
         assertEquals("Don't wait too long to decrypt this!", result);
@@ -193,8 +189,8 @@ public class TokenTest {
         final Token result = Token.generate(key, "message");
 
         // then
-        final String message = result.validateAndDecrypt(key, new StringValidator() {
-        });
+        final String message = new StringValidator() {
+        }.validateAndDecrypt(key, result);
         assertEquals("message", message);
     }
 

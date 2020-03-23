@@ -16,12 +16,11 @@
 package com.macasaet.fernet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import java.security.SecureRandom;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * This test eschews the use of mocks to validate the full lifecycle of token creation and validation.
@@ -32,8 +31,6 @@ import org.junit.rules.ExpectedException;
  */
 public class EndToEndTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     private SecureRandom random = new SecureRandom();
     private Validator<String> validator = new StringValidator() {
     };
@@ -45,7 +42,7 @@ public class EndToEndTest {
         final Token token = Token.generate(random, key, "secret message");
 
         // when
-        final String result = token.validateAndDecrypt(key, validator);
+        final String result = validator.validateAndDecrypt(key, token);
 
         // then
         assertEquals("secret message", result);
@@ -57,8 +54,9 @@ public class EndToEndTest {
         final Token token = Token.generate(random, Key.generateKey(random), "secret message");
 
         // when
-        thrown.expect(TokenValidationException.class);
-        token.validateAndDecrypt(Key.generateKey(random), validator);
+        assertThrows(TokenValidationException.class, () -> {
+            validator.validateAndDecrypt(Key.generateKey(random), token);
+        });
 
         // then (nothing)
     }

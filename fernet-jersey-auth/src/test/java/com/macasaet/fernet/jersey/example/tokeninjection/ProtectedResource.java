@@ -65,7 +65,7 @@ public class ProtectedResource {
     @GET
     public String getSecret(@FernetToken final Token token) {
         try {
-            final User user = token.validateAndDecrypt(key, validator);
+            final User user = validator.validateAndDecrypt(key, token);
             // if the token is invalid, an exception will be thrown and the next line will not be executed
             // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
             // access to the data requested

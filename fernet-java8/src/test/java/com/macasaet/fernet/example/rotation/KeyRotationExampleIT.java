@@ -16,6 +16,7 @@
 package com.macasaet.fernet.example.rotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
@@ -25,9 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 
 import com.macasaet.fernet.TokenValidationException;
@@ -54,9 +53,6 @@ public class KeyRotationExampleIT {
 
     @Mock
     private HttpServletResponse servletResponse;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws IOException {
@@ -98,8 +94,7 @@ public class KeyRotationExampleIT {
         assertEquals("secret", result);
 
         manager.rotate();
-        thrown.expect(TokenValidationException.class);
-        resource.getSecret(initialToken);
+        assertThrows(TokenValidationException.class, () -> resource.getSecret(initialToken));
     }
 
 }

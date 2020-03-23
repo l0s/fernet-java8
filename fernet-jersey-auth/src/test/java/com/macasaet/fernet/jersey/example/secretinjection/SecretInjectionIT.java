@@ -16,6 +16,9 @@
 package com.macasaet.fernet.jersey.example.secretinjection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
@@ -34,9 +37,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.macasaet.fernet.Key;
@@ -60,9 +61,6 @@ public class SecretInjectionIT extends JerseyTest {
             return challengeString.startsWith("Bearer");
         }
     };
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     protected Application configure() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
@@ -101,11 +99,12 @@ public class SecretInjectionIT extends JerseyTest {
         // given
         final LoginRequest login = new LoginRequest("mallory", "Lpei3NWxhPsyc5NrJp6zkbHj4P_bji6Z7GsY0JSAUb8=");
         final Entity<LoginRequest> entity = Entity.json(login);
-        final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
+        final String tokenString =
+                target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
         // when
-        thrown.expect(ForbiddenException.class);
-        target("secrets").request().header("Authorization", "Bearer " + tokenString).get(String.class);
+        assertThrows(ForbiddenException.class,
+                () -> target("secrets").request().header("Authorization", "Bearer " + tokenString).get(String.class));
 
         // then (nothing)
     }
@@ -121,8 +120,8 @@ public class SecretInjectionIT extends JerseyTest {
         final Entity<LoginRequest> entity = Entity.json(login);
 
         // when
-        thrown.expect(NotAuthorizedException.class);
-        target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
+        assertThrows(NotAuthorizedException.class,
+                () -> target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class)); 
 
         // then (nothing)
     }
@@ -140,20 +139,26 @@ public class SecretInjectionIT extends JerseyTest {
         final String tokenString = forgedToken.serialise();
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        try {
+            target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+            fail("Expected exception.");
+        } catch (final NotAuthorizedException nae) {
+            assertTrue(notAuthorisedMatcher.matches(nae));
+        }
     }
 
     @Test
     public final void verifyMissingTokenReturnsNotAuthorized() {
         // given
-        
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().get(String.class);
-
-        // then (nothing)
+        try {
+            target("secrets").request().get(String.class);
+            fail("Expected exception.");
+        } catch (final NotAuthorizedException nae) {
+            // then
+            assertTrue(notAuthorisedMatcher.matches(nae));
+        }
     }
 
     @Test
@@ -187,10 +192,13 @@ public class SecretInjectionIT extends JerseyTest {
         };
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().header("Authorization", "Bearer " + invalidToken.serialise()).get(String.class);
-
-        // then (nothing)
+        try {
+            target("secrets").request().header("Authorization", "Bearer " + invalidToken.serialise()).get(String.class);
+            fail("Expected exception.");
+        } catch (final NotAuthorizedException nae) {
+            // then
+            assertTrue(notAuthorisedMatcher.matches(nae));
+        }
     }
 
 }

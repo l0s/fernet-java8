@@ -20,6 +20,7 @@ import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,9 +38,7 @@ import java.util.Collection;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -68,9 +67,6 @@ public class MultiFernetKeyRotatorTest {
 
     @InjectMocks
     private MultiFernetKeyRotator rotator;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -142,8 +138,7 @@ public class MultiFernetKeyRotatorTest {
         given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
 
         // when
-        thrown.expect(RuntimeException.class);
-        rotator.testSecret("secret", "version");
+        assertThrows(RuntimeException.class, () -> rotator.testSecret("secret", "version"));
 
         // then
     }
@@ -156,8 +151,7 @@ public class MultiFernetKeyRotatorTest {
         given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
 
         // when
-        thrown.expect(RuntimeException.class);
-        rotator.testSecret("secret", "version");
+        assertThrows(RuntimeException.class, () -> rotator.testSecret("secret", "version"));
 
         // then
     }

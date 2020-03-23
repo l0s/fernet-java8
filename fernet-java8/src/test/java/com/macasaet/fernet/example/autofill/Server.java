@@ -133,7 +133,7 @@ public class Server {
     public Response register(final String notificationType, final String secureEnvelope)
         throws JsonProcessingException {
         final Token token = Token.fromString(secureEnvelope); // throws exception if it cannot be a token
-        final Customer customer = token.validateAndDecrypt(key, validator); // throws exception if the token was forged
+        final Customer customer = validator.validateAndDecrypt(key, token); // throws exception if the token was forged
                                                                             // or is expired
         register(notificationType, customer);
         final byte[] tokenPayload = mapper.writeValueAsBytes(customer);
