@@ -61,7 +61,7 @@
   </scm>
   <ciManagement>
     <system>Travis CI</system>
-    <url>https://travis-ci.org/l0s/fernet-java8/</url>
+    <url>https://travis-ci.com/github/l0s/fernet-java8</url>
   </ciManagement>
   <dependencyManagement>
     <dependencies>
