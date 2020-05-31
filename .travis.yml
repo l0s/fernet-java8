@@ -18,7 +18,10 @@ jdk:
   - openjdk8
   - openjdk10
   - openjdk11
-dist: xenial
+dist: bionic
+install:
+  # disable (erroneous) mirrors in settings.xml
+  - xmlstarlet edit --inplace --delete "//mirrors" "${TRAVIS_HOME}/.m2/settings.xml"
 script: ./mvnw org.jacoco:jacoco-maven-plugin:prepare-agent clean install sonar:sonar site
 env:
   jobs:
@@ -31,6 +34,9 @@ deploy:
   on:
     tags: true
 addons:
+  apt:
+    packages:
+      - xmlstarlet # XML manipulation tool to edit default setting.xml
   sonarcloud:
     organization: 'l0s-github'
     token:
