@@ -52,6 +52,7 @@
     <sonar.organization>l0s-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <dependency.locations.enabled>false</dependency.locations.enabled>
+    <dependencycheck.version>5.3.2</dependencycheck.version>
   </properties>
   <scm>
     <url>https://github.com/l0s/fernet-java8</url>
@@ -131,6 +132,18 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>${dependencycheck.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -202,6 +215,22 @@
       </plugins>
     </pluginManagement>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>${dependencycheck.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
