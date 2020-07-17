@@ -98,7 +98,7 @@ public class Token {
             throw new IllegalTokenException("hmac must be 256 bits");
         }
         this.version = version;
-        this.timestamp = timestamp;
+        this.timestamp = Instant.ofEpochSecond(timestamp.getEpochSecond());
         this.initializationVector = initializationVector;
         this.cipherText = cipherText;
         this.hmac = hmac;

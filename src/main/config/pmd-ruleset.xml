@@ -61,6 +61,11 @@ under the License.
     <exclude name="DataClass" />
     <exclude name="LoosePackageCoupling" />
   </rule>
+  <rule ref="category/java/design.xml/CyclomaticComplexity">
+    <properties>
+      <property name="methodReportLevel" value="16" />
+    </properties>
+  </rule>
   <rule ref="category/java/multithreading.xml" />
   <rule ref="category/java/performance.xml" />
 </ruleset>
