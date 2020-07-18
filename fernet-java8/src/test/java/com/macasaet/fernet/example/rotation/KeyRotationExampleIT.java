@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.TokenValidationException;
 
 import redis.clients.jedis.Jedis;
@@ -58,12 +59,13 @@ public class KeyRotationExampleIT {
     public void setUp() throws IOException {
         initMocks(this);
         final SecureRandom random = new SecureRandom();
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
         redisServer = new RedisServer();
         redisServer.start();
 
         pool = new JedisPool();
         repository = new RedisKeyRepository(pool);
-        manager = new RedisKeyManager(random, pool, repository);
+        manager = new RedisKeyManager(keyFactory, pool, repository);
         manager.setMaxActiveKeys(3);
 
         clearData();

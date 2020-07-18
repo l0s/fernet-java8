@@ -42,6 +42,7 @@ import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.macasaet.fernet.FernetKeyFactory;
 
 /**
  * This is an AWS Lambda {@link RequestStreamHandler} that rotates a Fernet key.
@@ -58,6 +59,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
     private final SecretsManager secretsManager;
     private final AWSKMS kms;
     private final SecureRandom random;
+    private final FernetKeyFactory keyFactory;
 
     private final AtomicBoolean seeded = new AtomicBoolean(false);
 
@@ -84,6 +86,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
         this.secretsManager = secretsManager;
         this.kms = kms;
         this.random = random;
+        this.keyFactory = new FernetKeyFactory(random);
     }
 
     public void handleRequest(final InputStream input, final OutputStream output, final Context context) throws IOException {
@@ -264,6 +267,10 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     protected ObjectMapper getMapper() {
         return mapper;
+    }
+
+    protected FernetKeyFactory getKeyFactory() {
+        return keyFactory;
     }
 
 }

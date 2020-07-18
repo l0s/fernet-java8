@@ -47,6 +47,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.TokenValidationException;
@@ -65,7 +66,8 @@ public class ProtocolBuffersExampleIT {
 
     final Charset charset = StandardCharsets.UTF_8;
     final SecureRandom random = new SecureRandom();
-    final Key key = Key.generateKey(random);
+    final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+    final Key key = keyFactory.generateKey();
 
     private Validator<Session> validator = new Validator<Session>() {
         public Function<byte[], Session> getTransformer() {

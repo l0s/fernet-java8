@@ -50,8 +50,9 @@ public class ValidatorTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory();
         clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
-        key = spy(Key.generateKey());
+        key = spy(keyFactory.generateKey());
         validator = new Validator<byte[]>() {
             public Function<byte[], byte[]> getTransformer() {
                 return Function.identity();

@@ -15,10 +15,11 @@
  */
 package com.macasaet.fernet.example.rotation;
 
-import java.security.SecureRandom;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 
@@ -35,29 +36,23 @@ import redis.clients.jedis.Transaction;
  */
 public class RedisKeyManager {
 
-    private final SecureRandom random;
+    private final FernetKeyFactory keyFactory;
     private final JedisPool pool;
     private final RedisKeyRepository repository;
 
     private int maxActiveKeys = 2;
 
     /**
-     * @param random entropy source used for generating new keys
+     * @param keyFactory utility for generating new keys
      * @param pool connection to the underlying Redis datastore
      * @param repository utility for retrieving keys
      */
     @Inject
-    public RedisKeyManager(final SecureRandom random, final JedisPool pool, final RedisKeyRepository repository) {
-        if (random == null) {
-            throw new IllegalArgumentException("random cannot be null");
-        }
-        if (pool == null) {
-            throw new IllegalArgumentException("pool cannot be null");
-        }
-        if (repository == null) {
-            throw new IllegalArgumentException("repository cannot be null");
-        }
-        this.random = random;
+    public RedisKeyManager(final FernetKeyFactory keyFactory, final JedisPool pool, final RedisKeyRepository repository) {
+        Objects.requireNonNull(keyFactory, "keyFactory cannot be null");
+        Objects.requireNonNull(pool, "pool cannot be null");
+        Objects.requireNonNull(repository, "repository cannot be null");
+        this.keyFactory = keyFactory;
         this.pool = pool;
         this.repository = repository;
     }
@@ -68,7 +63,7 @@ public class RedisKeyManager {
      * uses to validate {@link Token Tokens}. So be mindful not to over-rotate your keys.
      */
     public void rotate() {
-        final Key newStaged = Key.generateKey(getRandom());
+        final Key newStaged = getKeyFactory().generateKey();
         try (final Jedis jedis = getPool().getResource()) {
             try (final Transaction transaction = jedis.multi()) {
                 transaction.lpush("fernet_keys", newStaged.serialise());
@@ -85,16 +80,16 @@ public class RedisKeyManager {
         for (int i = getMaxActiveKeys(); --i >= 0; rotate());
     }
 
+    protected FernetKeyFactory getKeyFactory() {
+        return keyFactory;
+    }
+
     protected JedisPool getPool() {
         return pool;
     }
 
     protected RedisKeyRepository getRepository() {
         return repository;
-    }
-
-    protected SecureRandom getRandom() {
-        return random;
     }
 
     /**

@@ -32,13 +32,14 @@ import org.junit.Test;
 public class EndToEndTest {
 
     private SecureRandom random = new SecureRandom();
+    private FernetKeyFactory keyFactory = new FernetKeyFactory(random);
     private Validator<String> validator = new StringValidator() {
     };
 
     @Test
     public final void testValidKey() {
         // given
-        final Key key = Key.generateKey(random);
+        final Key key = keyFactory.generateKey();
         final Token token = Token.generate(random, key, "secret message");
 
         // when
@@ -51,11 +52,11 @@ public class EndToEndTest {
     @Test
     public final void testInvalidKey() {
         // given
-        final Token token = Token.generate(random, Key.generateKey(random), "secret message");
+        final Token token = Token.generate(random, keyFactory.generateKey(), "secret message");
 
         // when
         assertThrows(TokenValidationException.class, () -> {
-            validator.validateAndDecrypt(Key.generateKey(random), token);
+            validator.validateAndDecrypt(keyFactory.generateKey(), token);
         });
 
         // then (nothing)

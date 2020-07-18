@@ -88,7 +88,7 @@ public class MultiFernetKeyRotator extends AbstractFernetKeyRotator {
                 wipe(signingKey);
                 wipe(encryptionKey);
             }
-            final Key keyToStage = Key.generateKey(getRandom());
+            final Key keyToStage = getKeyFactory().generateKey();
             keys.add(0, keyToStage);
             final int desiredSize = getMaxActiveKeys() + 1; // max active keys + one pending
             if (keys.size() > desiredSize) {

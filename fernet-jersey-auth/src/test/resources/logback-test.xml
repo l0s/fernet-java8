@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<configuration debug="true" packagingData="true">
+<configuration packagingData="true">
   <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
     <resetJUL>true</resetJUL>
   </contextListener>
@@ -25,9 +25,9 @@
     </encoder>
   </appender>
 
-  <logger name="org.glassfish.jersey.client" level="INFO" />
+  <logger name="org.glassfish.jersey.client" level="ERROR" />
 
-  <root level="debug">
+  <root level="warn">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

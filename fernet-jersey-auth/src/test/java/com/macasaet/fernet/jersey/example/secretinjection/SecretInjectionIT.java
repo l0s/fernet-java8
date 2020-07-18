@@ -40,6 +40,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.jersey.example.common.LoginRequest;
@@ -134,7 +135,8 @@ public class SecretInjectionIT extends JerseyTest {
     public final void verifyFailedForgery() {
         // given
         final SecureRandom random = new SecureRandom();
-        final Key invalidKey = Key.generateKey(random);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+        final Key invalidKey = keyFactory.generateKey();
         final Token forgedToken = Token.generate(random, invalidKey, "alice");
         final String tokenString = forgedToken.serialise();
 
@@ -165,7 +167,8 @@ public class SecretInjectionIT extends JerseyTest {
     public final void verifyInvalidTokenReturnsNotAuthorized() throws UnsupportedEncodingException {
         // given
         final SecureRandom random = new SecureRandom();
-        final Key key = Key.generateKey(random);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+        final Key key = keyFactory.generateKey();
         final byte[] plainText = "this is a valid token".getBytes("UTF-8");
         final Token validToken = Token.generate(random, key, plainText);
         final byte[] cipherText = key.encrypt(plainText, validToken.getInitializationVector());

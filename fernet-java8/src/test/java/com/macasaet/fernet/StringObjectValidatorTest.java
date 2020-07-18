@@ -53,11 +53,13 @@ public class StringObjectValidatorTest {
         }
     };
 
+    private FernetKeyFactory keyFactory = new FernetKeyFactory();
     private Key key;
 
     @Before
     public void setUp() {
-        key = Key.generateKey();
+        keyFactory = new FernetKeyFactory();
+        key = keyFactory.generateKey();
     }
 
     @Test
@@ -83,7 +85,7 @@ public class StringObjectValidatorTest {
                 "bea985b3-3ae8-4a4a-bbd1-c62e607f1319,bevan,https://static.example.com/images/e00ec8e3-581a-4e08-95c5-493f02466376.png");
 
         // when
-        final Pojo result = validator.validateAndDecrypt(asList(Key.generateKey(), key, Key.generateKey()), token);
+        final Pojo result = validator.validateAndDecrypt(asList(keyFactory.generateKey(), key, keyFactory.generateKey()), token);
 
         // then
         assertEquals(UUID.fromString("bea985b3-3ae8-4a4a-bbd1-c62e607f1319"), result.id);

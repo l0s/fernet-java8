@@ -56,7 +56,7 @@ public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
     }
 
     protected void createSecret(final String secretId, final String clientRequestToken) {
-        final Key key = Key.generateKey(getRandom());
+        final Key key = getKeyFactory().generateKey();
         getSecretsManager().putSecretValue(secretId, clientRequestToken, key, PENDING);
         getLogger().info("createSecret: Successfully put secret for ARN {} and version {}.", secretId, clientRequestToken);
     }

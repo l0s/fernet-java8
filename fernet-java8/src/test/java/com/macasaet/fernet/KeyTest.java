@@ -118,9 +118,10 @@ public class KeyTest {
                 for (int i = signingKeyBytes; --i >= 0; bytes[i] = 1);
             }
         };
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(deterministicRandom);
 
         // when
-        final Key result = Key.generateKey(deterministicRandom);
+        final Key result = keyFactory.generateKey();
 
         // then
         final byte[] signingKey = result.getSigningKeySpec().getEncoded();

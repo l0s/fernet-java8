@@ -21,6 +21,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,9 +38,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -65,9 +64,6 @@ public class SecretsManagerTest {
     private AWSSecretsManager delegate;
     @InjectMocks
     private SecretsManager manager;
-    
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -87,8 +83,7 @@ public class SecretsManagerTest {
         given(delegate.getSecretValue(eq(request))).willThrow(new ResourceNotFoundException("not found"));
 
         // when
-        thrown.expect(ResourceNotFoundException.class);
-        manager.assertCurrentStageExists("secret");
+        assertThrows(ResourceNotFoundException.class, () -> manager.assertCurrentStageExists("secret")); 
 
         // then (exception thrown)
     }

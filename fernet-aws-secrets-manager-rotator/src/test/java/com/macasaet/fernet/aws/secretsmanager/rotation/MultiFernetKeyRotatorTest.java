@@ -41,13 +41,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
 import com.amazonaws.services.kms.model.GenerateRandomResult;
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 
 /**
@@ -60,17 +60,19 @@ public class MultiFernetKeyRotatorTest {
     private SecretsManager secretsManager;
     @Mock
     private AWSKMS kms;
-    @Spy
     private SecureRandom random = new SecureRandom();
+    @Spy
+    private FernetKeyFactory keyFactory = new FernetKeyFactory(random);
     @Captor
     private ArgumentCaptor<Collection<? extends Key>> keyCollector;
 
-    @InjectMocks
     private MultiFernetKeyRotator rotator;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+
+        rotator = new MultiFernetKeyRotator(secretsManager, kms, random);
         rotator.setMaxActiveKeys(2);
 
         final GenerateRandomResult value = mock(GenerateRandomResult.class);
@@ -85,9 +87,9 @@ public class MultiFernetKeyRotatorTest {
     @Test
     public final void verifyCreateSecretAddsKeyAndRemovesOldest() throws IOException {
         // given
-        final Key key0 = Key.generateKey(random);
-        final Key key1 = Key.generateKey(random);
-        final Key key2 = Key.generateKey(random);
+        final Key key0 = keyFactory.generateKey();
+        final Key key1 = keyFactory.generateKey();
+        final Key key2 = keyFactory.generateKey();
 
         try( ByteArrayOutputStream stream = new ByteArrayOutputStream() ) {
             key0.writeTo(stream); // pending
@@ -112,9 +114,9 @@ public class MultiFernetKeyRotatorTest {
     @Test
     public final void verifyTestAcceptsValidSecret() throws IOException {
         // given
-        final Key key0 = Key.generateKey(random);
-        final Key key1 = Key.generateKey(random);
-        final Key key2 = Key.generateKey(random);
+        final Key key0 = keyFactory.generateKey();
+        final Key key1 = keyFactory.generateKey();
+        final Key key2 = keyFactory.generateKey();
 
         try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             key0.writeTo(stream);

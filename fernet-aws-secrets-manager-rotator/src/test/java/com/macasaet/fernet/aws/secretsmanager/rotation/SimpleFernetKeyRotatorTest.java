@@ -18,6 +18,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,10 +40,7 @@ import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -55,6 +53,7 @@ import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 
 /**
@@ -69,14 +68,11 @@ public class SimpleFernetKeyRotatorTest {
     private AWSKMS kms;
     @Mock
     private SecureRandom random;
+    private FernetKeyFactory keyFactory;
 
     private ObjectMapper mapper;
 
-    @InjectMocks
     private SimpleFernetKeyRotator rotator;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -101,6 +97,9 @@ public class SimpleFernetKeyRotatorTest {
             }
         };
         given(kms.generateRandom(any(GenerateRandomRequest.class))).will(nonRandomResult);
+        keyFactory = new FernetKeyFactory(random);
+        
+        rotator = new SimpleFernetKeyRotator(secretsManager, kms, random);
     }
 
     @After
@@ -151,7 +150,7 @@ public class SimpleFernetKeyRotatorTest {
         secretDescription.addVersionIdsToStagesEntry(clientRequestToken, singletonList("AWSPENDING"));
         given(secretsManager.describeSecret(secretId)).willReturn(secretDescription);
 
-        final Key key = Key.generateKey(random);
+        final Key key = keyFactory.generateKey();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(32)) {
             key.writeTo(outputStream);
             given(secretsManager.getSecretVersion(secretId, clientRequestToken))
@@ -196,11 +195,8 @@ public class SimpleFernetKeyRotatorTest {
 
         try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
             try( OutputStream output = new ByteArrayOutputStream() ) {
-                // when
-                thrown.expect(RuntimeException.class);
-                rotator.handleRequest(input, output, context);
-
-                // then (exception thrown)
+                // when / then (exception thrown)
+                assertThrows(RuntimeException.class, () -> rotator.handleRequest(input, output, context));
             }
         }
     }
@@ -227,11 +223,8 @@ public class SimpleFernetKeyRotatorTest {
 
         try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
             try( OutputStream output = new ByteArrayOutputStream() ) {
-                // when
-                thrown.expect(RuntimeException.class);
-                rotator.handleRequest(input, output, context);
-
-                // then (exception thrown)
+                // when / then (exception thrown)
+                assertThrows(RuntimeException.class, () -> rotator.handleRequest(input, output, context));
             }
         }
     }

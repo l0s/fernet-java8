@@ -37,7 +37,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
@@ -101,30 +100,6 @@ public class Key {
      */
     public Key(final String string) {
         this(decoder.decode(string));
-    }
-
-    /**
-     * Generate a random key
-     *
-     * @return a new shared secret key
-     */
-    public static Key generateKey() {
-        return generateKey(new SecureRandom());
-    }
-
-    /**
-     * Generate a random key
-     *
-     * @param random
-     *            source of entropy
-     * @return a new shared secret key
-     */
-    public static Key generateKey(final SecureRandom random) {
-        final byte[] signingKey = new byte[signingKeyBytes];
-        random.nextBytes(signingKey);
-        final byte[] encryptionKey = new byte[encryptionKeyBytes];
-        random.nextBytes(encryptionKey);
-        return new Key(signingKey, encryptionKey);
     }
 
     /**

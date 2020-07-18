@@ -81,7 +81,8 @@ public class TokenTest {
                 for (int i = bytes.length; --i >= 0; bytes[i] = 1);
             }
         };
-        final Key key = Key.generateKey(deterministicRandom);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(deterministicRandom);
+        final Key key = keyFactory.generateKey();
 
         // when
         final Token result = Token.generate(deterministicRandom, key, "Hello, world!");
@@ -101,7 +102,8 @@ public class TokenTest {
                 for (int i = bytes.length; --i >= 0; bytes[i] = 1);
             }
         };
-        final Key key = Key.generateKey(deterministicRandom);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(deterministicRandom);
+        final Key key = keyFactory.generateKey();
 
         // when
         final Token result = Token.generate(deterministicRandom, key, "");
@@ -154,10 +156,11 @@ public class TokenTest {
     public final void verifyExceptionThrownWhenKeyNoLongerInRotation() {
         // given
         final SecureRandom random = new SecureRandom();
-        final Token token = Token.generate(random, Key.generateKey(random), "Don't wait too long to decrypt this!");
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+        final Token token = Token.generate(random, keyFactory.generateKey(), "Don't wait too long to decrypt this!");
 
         final List<? extends Key> decryptionKeys =
-                IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
+                IntStream.range(0, 16).mapToObj(i -> keyFactory.generateKey()).collect(toList());
 
         // when
         assertThrows(TokenValidationException.class, () -> validator.validateAndDecrypt(decryptionKeys, token));
@@ -169,8 +172,9 @@ public class TokenTest {
     public final void verifyKeyInRotationCanDecryptToken() {
         // given
         final SecureRandom random = new SecureRandom();
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
         final List<? extends Key> decryptionKeys =
-                IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
+                IntStream.range(0, 16).mapToObj(i -> keyFactory.generateKey()).collect(toList());
         final Token token = Token.generate(random, decryptionKeys.get(8), "Don't wait too long to decrypt this!");
 
         // when
@@ -183,7 +187,9 @@ public class TokenTest {
     @Test
     public final void verifyTextTokenGenerationWithDefaultEntropySource() {
         // given
-        final Key key = Key.generateKey();
+        final SecureRandom random = new SecureRandom();
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+        final Key key = keyFactory.generateKey();
 
         // when
         final Token result = Token.generate(key, "message");
@@ -197,7 +203,9 @@ public class TokenTest {
     @Test
     public final void verifyTokenGenerationWithDefaultEntropySource() {
         // given
-        final Key key = Key.generateKey();
+        final SecureRandom random = new SecureRandom();
+        final FernetKeyFactory keyFactory = new FernetKeyFactory(random);
+        final Key key = keyFactory.generateKey();
 
         // when
         final Token result = Token.generate(key, new byte[] {1, 1, 2, 3, 5, 8, 13, 21});
