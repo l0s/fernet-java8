@@ -16,8 +16,8 @@
 package com.macasaet.fernet.aws.secretsmanager.bootstrap;
 
 import java.io.FileOutputStream;
-import java.security.SecureRandom;
 
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 
 /**
@@ -29,8 +29,8 @@ import com.macasaet.fernet.Key;
 public class CreateSimpleKey {
 
     public static final void main(final String... args) throws Exception {
-        final SecureRandom random = new SecureRandom();
-        final Key key = Key.generateKey(random);
+        final FernetKeyFactory keyFactory = new FernetKeyFactory();
+        final Key key = keyFactory.generateKey();
         try (FileOutputStream outputStream = new FileOutputStream("simple-key")) {
             key.writeTo(outputStream);
         }

@@ -16,8 +16,8 @@
 package com.macasaet.fernet.aws.secretsmanager.bootstrap;
 
 import java.io.FileOutputStream;
-import java.security.SecureRandom;
 
+import com.macasaet.fernet.FernetKeyFactory;
 import com.macasaet.fernet.Key;
 
 /**
@@ -29,11 +29,11 @@ import com.macasaet.fernet.Key;
 public class CreateMultiKey {
 
     public static final void main(final String... arguments) throws Exception {
-        final SecureRandom random = new SecureRandom();
+        final FernetKeyFactory keyFactory = new FernetKeyFactory();
 
         try (FileOutputStream outputStream = new FileOutputStream("multi-key")) {
             for (int i = 3; --i >= 0;) {
-                final Key key = Key.generateKey(random);
+                final Key key = keyFactory.generateKey();
                 key.writeTo(outputStream);
             }
         }
