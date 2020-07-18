@@ -61,7 +61,7 @@
   </scm>
   <ciManagement>
     <system>Travis CI</system>
-    <url>https://travis-ci.org/l0s/fernet-java8/</url>
+    <url>https://travis-ci.com/github/l0s/fernet-java8</url>
   </ciManagement>
   <dependencyManagement>
     <dependencies>
@@ -74,7 +74,7 @@
       <dependency>
           <groupId>org.mockito</groupId>
           <artifactId>mockito-core</artifactId>
-          <version>3.3.3</version>
+          <version>3.4.0</version>
           <scope>test</scope>
       </dependency>
       <dependency>
@@ -89,7 +89,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>3.8.2</version>
+        <version>3.9.1</version>
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.doxia</groupId>
@@ -155,7 +155,7 @@
         <plugin>
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
-          <version>1.5.0</version>
+          <version>1.5.2</version>
           <configuration>
             <avoidCallsTo>
               <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>

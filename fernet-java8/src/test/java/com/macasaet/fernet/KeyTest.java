@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.EqualsVerifierApi;
+import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
 
 /**
  * Unit tests for the {@link Key} class.
@@ -187,7 +187,8 @@ public class KeyTest {
     @Test
     public final void verifyEqualityContract() {
         // given
-        final EqualsVerifierApi<Key> verifier = EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE).suppress(ALL_FIELDS_SHOULD_BE_USED);
+        final SingleTypeEqualsVerifierApi<Key> verifier =
+                EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE).suppress(ALL_FIELDS_SHOULD_BE_USED);
 
         // when / then
         verifier.verify();
