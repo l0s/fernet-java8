@@ -17,6 +17,7 @@ package com.macasaet.fernet.example.rotation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -26,9 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.macasaet.fernet.TokenValidationException;
 
@@ -44,9 +43,9 @@ import redis.embedded.RedisServer;
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@RunWith(MockitoJUnitRunner.class)
 public class KeyRotationExampleIT {
 
+    private AutoCloseable mockContext;
     private RedisServer redisServer;
     private JedisPool pool;
     private RedisKeyRepository repository;
@@ -58,6 +57,7 @@ public class KeyRotationExampleIT {
 
     @Before
     public void setUp() throws IOException {
+        mockContext = openMocks(this);
         final SecureRandom random = new SecureRandom();
         redisServer = new RedisServer();
         redisServer.start();
@@ -74,9 +74,16 @@ public class KeyRotationExampleIT {
     }
 
     @After
-    public void tearDown() {
-        clearData();
-        redisServer.stop();
+    public void tearDown() throws Exception {
+        try {
+            try {
+                clearData();
+            } finally {
+                redisServer.stop();
+            }
+        } finally {
+            mockContext.close();
+        }
     }
 
     protected void clearData() {
