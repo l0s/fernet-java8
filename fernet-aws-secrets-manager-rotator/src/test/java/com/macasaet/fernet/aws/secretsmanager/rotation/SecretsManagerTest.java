@@ -21,6 +21,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,21 +29,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
@@ -59,24 +57,13 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SecretsManagerTest {
 
     @Mock
     private AWSSecretsManager delegate;
     @InjectMocks
     private SecretsManager manager;
-    
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public final void verifyAssertCurrentStageExistsThrowsException() {
@@ -86,11 +73,8 @@ public class SecretsManagerTest {
         request.setVersionStage("AWSCURRENT");
         given(delegate.getSecretValue(eq(request))).willThrow(new ResourceNotFoundException("not found"));
 
-        // when
-        thrown.expect(ResourceNotFoundException.class);
-        manager.assertCurrentStageExists("secret");
-
-        // then (exception thrown)
+        // when / then (exception thrown)
+        assertThrows(ResourceNotFoundException.class, () -> manager.assertCurrentStageExists("secret"));
     }
 
     @Test

@@ -16,7 +16,7 @@
 package com.macasaet.fernet.example.rotation;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.Assert.assertThrows;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.macasaet.fernet.TokenValidationException;
 
@@ -44,6 +44,7 @@ import redis.embedded.RedisServer;
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@RunWith(MockitoJUnitRunner.class)
 public class KeyRotationExampleIT {
 
     private RedisServer redisServer;
@@ -55,12 +56,8 @@ public class KeyRotationExampleIT {
     @Mock
     private HttpServletResponse servletResponse;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void setUp() throws IOException {
-        initMocks(this);
         final SecureRandom random = new SecureRandom();
         redisServer = new RedisServer();
         redisServer.start();
@@ -98,8 +95,7 @@ public class KeyRotationExampleIT {
         assertEquals("secret", result);
 
         manager.rotate();
-        thrown.expect(TokenValidationException.class);
-        resource.getSecret(initialToken);
+        assertThrows(TokenValidationException.class, () -> resource.getSecret(initialToken));
     }
 
 }

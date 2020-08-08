@@ -19,6 +19,7 @@ import static com.macasaet.fernet.Constants.initializationVectorBytes;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
 import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
@@ -35,9 +36,7 @@ import java.util.stream.IntStream;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Unit tests for the {@link Token} class.
@@ -49,8 +48,7 @@ import org.junit.rules.ExpectedException;
 public class TokenTest {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-	@Rule
-    public ExpectedException thrown = ExpectedException.none();
+
 	private Validator<String> validator;
 
     @Before
@@ -162,11 +160,8 @@ public class TokenTest {
         final List<? extends Key> decryptionKeys =
                 IntStream.range(0, 16).mapToObj(i -> Key.generateKey(random)).collect(toList());
 
-        // when
-        thrown.expect(TokenValidationException.class);
-        token.validateAndDecrypt(decryptionKeys, validator);
-
-        // then (nothing)
+        // when / then
+        assertThrows(TokenValidationException.class, () -> token.validateAndDecrypt(decryptionKeys, validator));
     }
 
     @Test

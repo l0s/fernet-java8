@@ -18,6 +18,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Step.SET_SECRET;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -27,7 +28,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,13 +42,13 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
@@ -62,6 +62,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AbstractFernetKeyRotatorTest {
 
     @Spy
@@ -75,15 +76,11 @@ public class AbstractFernetKeyRotatorTest {
 
     private AbstractFernetKeyRotator rotator;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     @Captor
     private ArgumentCaptor<RotationRequest> requestCaptor;
 
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
-
         final GenerateRandomResult randomResult = mock(GenerateRandomResult.class);
         given(randomResult.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
         given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(randomResult);
@@ -112,7 +109,6 @@ public class AbstractFernetKeyRotatorTest {
           + "\"ClientRequestToken\": \"token\","
           + "\"Step\": \"setSecret\""
           + "}";
-        doNothing().when(rotator).seed();
         doNothing().when(rotator).handleRotationRequest(any(RotationRequest.class));
 
         try (ByteArrayInputStream input = new ByteArrayInputStream(inputString.getBytes("UTF-8"))) {
@@ -173,11 +169,8 @@ public class AbstractFernetKeyRotatorTest {
         final Map<String, List<String>> versions = new HashMap<>();
         versions.put("version", singletonList("AWSPENDING"));
 
-        // when
-        thrown.expect(RuntimeException.class);
-        rotator.finishSecret("secret", "version", versions);
-
-        // then (exception thrown)
+        // when / then (exception thrown)
+        assertThrows(RuntimeException.class, () -> rotator.finishSecret("secret", "version", versions));
     }
 
     @Test
