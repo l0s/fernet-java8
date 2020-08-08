@@ -26,6 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,11 +41,9 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.amazonaws.services.kms.AWSKMS;
@@ -61,9 +60,9 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SimpleFernetKeyRotatorTest {
 
+    private AutoCloseable mockContext;
     @Mock
     private SecretsManager secretsManager;
     @Mock
@@ -78,6 +77,7 @@ public class SimpleFernetKeyRotatorTest {
 
     @Before
     public void setUp() throws Exception {
+        mockContext = openMocks(this);
         mapper = new ObjectMapper();
         mapper.registerModule(new JaxbAnnotationModule());
 
@@ -102,6 +102,7 @@ public class SimpleFernetKeyRotatorTest {
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test

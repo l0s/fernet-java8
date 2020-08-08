@@ -28,6 +28,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,12 +44,10 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
@@ -62,9 +61,9 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@RunWith(MockitoJUnitRunner.class)
 public class AbstractFernetKeyRotatorTest {
 
+    private AutoCloseable mockContext;
     @Spy
     private ObjectMapper mapper = new ObjectMapper().registerModule(new JaxbAnnotationModule());
     @Mock
@@ -81,6 +80,7 @@ public class AbstractFernetKeyRotatorTest {
 
     @Before
     public void setUp() throws Exception {
+        mockContext = openMocks(this);
         final GenerateRandomResult randomResult = mock(GenerateRandomResult.class);
         given(randomResult.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
         given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(randomResult);
@@ -98,6 +98,7 @@ public class AbstractFernetKeyRotatorTest {
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test

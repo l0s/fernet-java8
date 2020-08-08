@@ -29,18 +29,19 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
@@ -57,13 +58,23 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SecretsManagerTest {
 
+    private AutoCloseable mockContext;
     @Mock
     private AWSSecretsManager delegate;
     @InjectMocks
     private SecretsManager manager;
+
+    @Before
+    public void setUp() {
+        mockContext = openMocks(this);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mockContext.close();
+    }
 
     @Test
     public final void verifyAssertCurrentStageExistsThrowsException() {

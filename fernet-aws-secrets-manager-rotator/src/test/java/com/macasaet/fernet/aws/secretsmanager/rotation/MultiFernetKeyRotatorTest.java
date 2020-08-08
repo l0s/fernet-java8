@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,13 +36,12 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
@@ -52,9 +52,9 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@RunWith(MockitoJUnitRunner.class)
 public class MultiFernetKeyRotatorTest {
 
+    private AutoCloseable mockContext;
     @Mock
     private SecretsManager secretsManager;
     @Mock
@@ -67,12 +67,18 @@ public class MultiFernetKeyRotatorTest {
 
     @Before
     public void setUp() throws Exception {
+        mockContext = openMocks(this);
         rotator = new MultiFernetKeyRotator(secretsManager, kms, random);
         rotator.setMaxActiveKeys(2);
 
         final GenerateRandomResult value = mock(GenerateRandomResult.class);
         given(value.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
         given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(value);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test
