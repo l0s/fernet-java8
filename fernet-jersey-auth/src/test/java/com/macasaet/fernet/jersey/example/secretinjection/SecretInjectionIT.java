@@ -15,6 +15,7 @@
  */
 package com.macasaet.fernet.jersey.example.secretinjection;
 
+import static org.glassfish.jersey.test.TestProperties.CONTAINER_PORT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -63,6 +64,8 @@ public class SecretInjectionIT extends JerseyTest {
     protected Application configure() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
+
+        forceSet(CONTAINER_PORT, "0");
 
         return new ExampleSecretInjectionApplication<User>();
     }

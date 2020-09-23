@@ -15,6 +15,7 @@
  */
 package com.macasaet.fernet.jersey.example.tokeninjection;
 
+import static org.glassfish.jersey.test.TestProperties.CONTAINER_PORT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -39,6 +40,7 @@ public class TokenInjectionIT extends JerseyTest {
     protected Application configure() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
+        forceSet(CONTAINER_PORT, "0");
         return new ExampleTokenInjectionApplication();
     }
 
