@@ -8,15 +8,6 @@
     </Lambda>
   </Appenders>
   <Loggers>
-    <Logger name="com.macasaet.fernet.aws.secretsmanager" level="debug" additivity="false">
-      <AppenderRef ref="Lambda" />
-    </Logger>
-    <Logger name="com.macasaet" level="info" additivity="false">
-      <AppenderRef ref="Lambda" />
-    </Logger>
-    <Logger name="com.amazonaws" level="info" additivity="false">
-      <AppenderRef ref="Lambda" />
-    </Logger>
     <Root level="warn">
       <AppenderRef ref="Lambda" />
     </Root>
