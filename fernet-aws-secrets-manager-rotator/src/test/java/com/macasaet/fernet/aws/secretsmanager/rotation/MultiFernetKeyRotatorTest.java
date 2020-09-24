@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,6 +52,7 @@ import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import com.amazonaws.util.StringInputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.macasaet.fernet.Key;
 
 /**
@@ -96,7 +96,7 @@ public class MultiFernetKeyRotatorTest {
         final Key key2 = Key.generateKey(random);
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("version", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
 
         final InputStream input = new StringInputStream(
                 "{\"Step\": \"createSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
@@ -134,7 +134,7 @@ public class MultiFernetKeyRotatorTest {
         final Key key2 = Key.generateKey(random);
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("version", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
         final InputStream input = new StringInputStream(
                 "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -164,7 +164,7 @@ public class MultiFernetKeyRotatorTest {
         Arrays.fill(shortArray, (byte) 0);
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("version", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
         final InputStream input = new StringInputStream(
                 "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -184,7 +184,7 @@ public class MultiFernetKeyRotatorTest {
         Arrays.fill(longArray, (byte) 0);
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("version", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
         final InputStream input = new StringInputStream(
                 "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -207,7 +207,7 @@ public class MultiFernetKeyRotatorTest {
         assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("clientRequestToken", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("clientRequestToken", Arrays.asList("AWSPENDING")));
         given(secretsManager.getSecretStage("secretId", CURRENT)).willReturn(secretByteBuffer);
         given(secretsManager.describeSecret("secretId")).willReturn(description);
         given(secretsManager.getSecretVersion("secretId", "clientRequestToken"))
@@ -238,7 +238,7 @@ public class MultiFernetKeyRotatorTest {
         assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
         final DescribeSecretResult description = new DescribeSecretResult();
         description.setRotationEnabled(true);
-        description.setVersionIdsToStages(Map.of("clientRequestToken", Arrays.asList("AWSPENDING")));
+        description.setVersionIdsToStages(ImmutableMap.of("clientRequestToken", Arrays.asList("AWSPENDING")));
         final InputStream input = new StringInputStream(
                 "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"clientRequestToken\",\"SecretId\":\"secretId\"}");
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
