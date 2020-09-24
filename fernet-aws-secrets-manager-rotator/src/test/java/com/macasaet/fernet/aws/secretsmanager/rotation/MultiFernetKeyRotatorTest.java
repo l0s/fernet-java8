@@ -31,6 +31,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -46,6 +47,12 @@ import org.mockito.Mock;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.GenerateRandomRequest;
 import com.amazonaws.services.kms.model.GenerateRandomResult;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.secretsmanager.model.DescribeSecretResult;
+import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
+import com.amazonaws.util.StringInputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.macasaet.fernet.Key;
 
 /**
@@ -87,16 +94,26 @@ public class MultiFernetKeyRotatorTest {
         final Key key0 = Key.generateKey(random);
         final Key key1 = Key.generateKey(random);
         final Key key2 = Key.generateKey(random);
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
 
-        try( ByteArrayOutputStream stream = new ByteArrayOutputStream() ) {
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"createSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
+
+        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             key0.writeTo(stream); // pending
             key1.writeTo(stream); // primary
             key2.writeTo(stream); // old key
 
             given(secretsManager.getSecretStage("secret", CURRENT)).willReturn(ByteBuffer.wrap(stream.toByteArray()));
+            given(secretsManager.describeSecret("secret")).willReturn(description);
+            given(secretsManager.getSecretVersion("secret", "version")).willThrow(new ResourceNotFoundException(""));
 
             // when
-            rotator.createSecret("secret", "version");
+            rotator.handleRequest(input, output, context);
 
             // then
             verify(secretsManager).putSecretValue(eq("secret"), eq("version"), keyCollector.capture(), eq(PENDING));
@@ -105,6 +122,7 @@ public class MultiFernetKeyRotatorTest {
             assertTrue(keys.contains(key0)); // new pending key
             assertTrue(keys.contains(key1)); // primary key (old pending)
             assertFalse(keys.contains(key2)); // old key (old primary)
+            new ObjectMapper().readTree(output.toByteArray());
         }
     }
 
@@ -114,6 +132,13 @@ public class MultiFernetKeyRotatorTest {
         final Key key0 = Key.generateKey(random);
         final Key key1 = Key.generateKey(random);
         final Key key2 = Key.generateKey(random);
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
 
         try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             key0.writeTo(stream);
@@ -121,72 +146,114 @@ public class MultiFernetKeyRotatorTest {
             key2.writeTo(stream);
 
             given(secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(stream.toByteArray()));
+            given(secretsManager.getSecretStage("secret", CURRENT)).willReturn(ByteBuffer.wrap(stream.toByteArray()));
+            given(secretsManager.describeSecret("secret")).willReturn(description);
 
             // when
-            rotator.testSecret("secret", "version");
+            rotator.handleRequest(input, output, context);
 
-            // then (no exception)
+            // then
+            new ObjectMapper().readTree(output.toByteArray());
         }
     }
 
     @Test
     public final void verifyTestRejectsTooFewBytes() throws IOException {
         // given
-        final byte[] shortArray = new byte[ 6*32 - 1 ];
-        Arrays.fill(shortArray, (byte)0);
-        given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
+        final byte[] shortArray = new byte[6 * 32 - 1];
+        Arrays.fill(shortArray, (byte) 0);
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
+        given(secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
+        given(secretsManager.describeSecret("secret")).willReturn(description);
 
         // when / then
-        assertThrows(RuntimeException.class, () -> rotator.testSecret("secret", "version"));
+        assertThrows(IllegalStateException.class, () -> rotator.handleRequest(input, output, context));
+        new ObjectMapper().readTree(output.toByteArray());
     }
 
     @Test
     public final void verifyTestRejectsTooManyBytes() throws IOException {
         // given
-        final byte[] shortArray = new byte[ 6*32 + 1 ];
-        Arrays.fill(shortArray, (byte)0);
-        given( secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(shortArray));
+        final byte[] longArray = new byte[6 * 32 + 1];
+        Arrays.fill(longArray, (byte) 0);
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("version", Arrays.asList("AWSPENDING")));
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"version\",\"SecretId\":\"secret\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
+        given(secretsManager.getSecretVersion("secret", "version")).willReturn(ByteBuffer.wrap(longArray));
+        given(secretsManager.describeSecret("secret")).willReturn(description);
 
         // when / then
-        assertThrows(RuntimeException.class, () -> rotator.testSecret("secret", "version"));
+        assertThrows(RuntimeException.class, () -> rotator.handleRequest(input, output, context));
+        new ObjectMapper().readTree(output.toByteArray());
     }
 
     @Test
-    public final void verifyCreateClearsIntermediateSecret() {
+    public final void verifyCreateClearsIntermediateSecret() throws IOException {
         // given
         final byte[] secretBytes = new byte[32];
         random.nextBytes(secretBytes);
         final int originalHashCode = Arrays.hashCode(secretBytes);
         final ByteBuffer secretByteBuffer = ByteBuffer.wrap(secretBytes);
         assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("clientRequestToken", Arrays.asList("AWSPENDING")));
         given(secretsManager.getSecretStage("secretId", CURRENT)).willReturn(secretByteBuffer);
+        given(secretsManager.describeSecret("secretId")).willReturn(description);
+        given(secretsManager.getSecretVersion("secretId", "clientRequestToken"))
+                .willThrow(new ResourceNotFoundException(""));
+
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"createSecret\",\"ClientRequestToken\": \"clientRequestToken\",\"SecretId\":\"secretId\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
 
         // when
-        rotator.createSecret("secretId", "clientRequestToken");
+        rotator.handleRequest(input, output, context);
 
         // then
         final byte[] modifiedBytes = secretByteBuffer.array();
         assertEquals(32, modifiedBytes.length);
         assertNotEquals(originalHashCode, Arrays.hashCode(secretBytes));
+        new ObjectMapper().readTree(output.toByteArray());
     }
 
     @Test
-    public final void verifyTestClearsIntermediateSecret() {
+    public final void verifyTestClearsIntermediateSecret() throws IOException {
         // given
         final byte[] secretBytes = new byte[32];
         for (byte i = 32; --i >= 0; secretBytes[i] = i);
         final int originalHashCode = Arrays.hashCode(secretBytes);
         final ByteBuffer secretByteBuffer = ByteBuffer.wrap(secretBytes);
         assertTrue(Arrays.equals(secretByteBuffer.array(), secretBytes));
+        final DescribeSecretResult description = new DescribeSecretResult();
+        description.setRotationEnabled(true);
+        description.setVersionIdsToStages(ImmutableMap.of("clientRequestToken", Arrays.asList("AWSPENDING")));
+        final InputStream input = new StringInputStream(
+                "{\"Step\": \"testSecret\",\"ClientRequestToken\": \"clientRequestToken\",\"SecretId\":\"secretId\"}");
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final Context context = mock(Context.class);
         given(secretsManager.getSecretVersion("secretId", "clientRequestToken")).willReturn(secretByteBuffer);
+        given(secretsManager.describeSecret("secretId")).willReturn(description);
 
         // when
-        rotator.testSecret("secretId", "clientRequestToken");
+        rotator.handleRequest(input, output, context);
 
         // then
         final byte[] modifiedBytes = secretByteBuffer.array();
         assertEquals(32, modifiedBytes.length);
         assertNotEquals(originalHashCode, Arrays.hashCode(secretBytes));
+        new ObjectMapper().readTree(output.toByteArray());
     }
 
 }
