@@ -42,7 +42,7 @@ public class StringObjectValidatorTest {
         try {
             retval.avatar = new URL(components[2]);
         } catch (final MalformedURLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         }
         return retval;
     }

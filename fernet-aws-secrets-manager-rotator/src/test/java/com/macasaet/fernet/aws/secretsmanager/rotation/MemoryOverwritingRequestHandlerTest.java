@@ -18,7 +18,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
@@ -39,18 +39,20 @@ import com.amazonaws.services.secretsmanager.model.PutSecretValueResult;
 
 public class MemoryOverwritingRequestHandlerTest {
 
+    private AutoCloseable mockContext;
     @Spy
     private SecureRandom random;
     @InjectMocks
     private MemoryOverwritingRequestHandler handler;
 
     @Before
-    public void setUp() throws Exception {
-        initMocks(this);
+    public void setUp() {
+        mockContext = openMocks(this);
     }
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test

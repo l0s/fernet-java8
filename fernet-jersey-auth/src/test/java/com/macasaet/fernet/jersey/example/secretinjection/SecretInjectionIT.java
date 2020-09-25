@@ -15,7 +15,10 @@
  */
 package com.macasaet.fernet.jersey.example.secretinjection;
 
+import static org.glassfish.jersey.test.TestProperties.CONTAINER_PORT;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
@@ -31,12 +34,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.test.JerseyTest;
-import org.glassfish.jersey.test.TestProperties;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.macasaet.fernet.Key;
@@ -61,13 +61,11 @@ public class SecretInjectionIT extends JerseyTest {
         }
     };
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     protected Application configure() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
-        enable(TestProperties.LOG_TRAFFIC);
+
+        forceSet(CONTAINER_PORT, "0");
 
         return new ExampleSecretInjectionApplication<User>();
     }
@@ -103,11 +101,12 @@ public class SecretInjectionIT extends JerseyTest {
         final Entity<LoginRequest> entity = Entity.json(login);
         final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
-        // when
-        thrown.expect(ForbiddenException.class);
-        target("secrets").request().header("Authorization", "Bearer " + tokenString).get(String.class);
-
-        // then (nothing)
+        // when / then
+        assertThrows(ForbiddenException.class,
+                () -> target("secrets")
+                    .request()
+                    .header("Authorization", "Bearer " + tokenString)
+                    .get(String.class));
     }
 
     /**
@@ -120,11 +119,12 @@ public class SecretInjectionIT extends JerseyTest {
         final LoginRequest login = new LoginRequest("bob", "NReIudfT_iovLMo-MCX8sClVr3UwbeEhAq7er6X_Kps=");
         final Entity<LoginRequest> entity = Entity.json(login);
 
-        // when
-        thrown.expect(NotAuthorizedException.class);
-        target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
-
-        // then (nothing)
+        // when / then
+        assertThrows(NotAuthorizedException.class,
+                () -> target("session")
+                    .request()
+                    .accept(MediaType.TEXT_PLAIN_TYPE)
+                    .post(entity, String.class));
     }
 
     /**
@@ -140,20 +140,30 @@ public class SecretInjectionIT extends JerseyTest {
         final String tokenString = forgedToken.serialise();
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().header("X-Authorization", tokenString).get(String.class);
+        final NotAuthorizedException result =
+                assertThrows(NotAuthorizedException.class,
+                        () -> target("secrets")
+                            .request()
+                            .header("X-Authorization", tokenString)
+                            .get(String.class));
+
+        // then
+        assertThat(result, notAuthorisedMatcher);
     }
 
     @Test
     public final void verifyMissingTokenReturnsNotAuthorized() {
         // given
-        
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().get(String.class);
+        final NotAuthorizedException result =
+                assertThrows(NotAuthorizedException.class,
+                        () -> target("secrets")
+                            .request()
+                            .get(String.class));
 
-        // then (nothing)
+        // then
+        assertThat(result, notAuthorisedMatcher);
     }
 
     @Test
@@ -187,10 +197,15 @@ public class SecretInjectionIT extends JerseyTest {
         };
 
         // when
-        thrown.expect(notAuthorisedMatcher);
-        target("secrets").request().header("Authorization", "Bearer " + invalidToken.serialise()).get(String.class);
+        final NotAuthorizedException result =
+                assertThrows(NotAuthorizedException.class,
+                        () -> target("secrets")
+                            .request()
+                            .header("Authorization", "Bearer " + invalidToken.serialise())
+                            .get(String.class));
 
-        // then (nothing)
+        // then
+        assertThat(result, notAuthorisedMatcher);
     }
 
 }

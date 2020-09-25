@@ -17,6 +17,7 @@ package com.macasaet.fernet.jersey;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -25,11 +26,8 @@ import java.security.SecureRandom;
 import javax.ws.rs.NotAuthorizedException;
 
 import org.glassfish.jersey.server.ContainerRequest;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
@@ -39,18 +37,11 @@ public class TokenHeaderUtilityTest {
 
     private TokenHeaderUtility utility;
     private SecureRandom random;
-    
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
         utility = new TokenHeaderUtility();
         random = new SecureRandom();
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
     @Test
@@ -75,8 +66,7 @@ public class TokenHeaderUtilityTest {
         given(request.getHeaderString("Authorization")).willReturn("Basic YWxpY2U6cGFzc3dvcmQ= 76bd6d14-0148-43c4-8ea0-8368336ce9f1");
 
         // when / then
-        thrown.expect(NotAuthorizedException.class);
-        utility.getAuthorizationToken(request);
+        assertThrows(NotAuthorizedException.class, () -> utility.getAuthorizationToken(request));
     }
 
     @Test
@@ -86,8 +76,7 @@ public class TokenHeaderUtilityTest {
         given(request.getHeaderString("Authorization")).willReturn("Basic YWxpY2U6cGFzc3dvcmQ=");
 
         // when / then
-        thrown.expect(NotAuthorizedException.class);
-        utility.getAuthorizationToken(request);
+        assertThrows(NotAuthorizedException.class, () -> utility.getAuthorizationToken(request));
     }
 
     @Test

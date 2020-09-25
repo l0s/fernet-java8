@@ -18,6 +18,7 @@ package com.macasaet.fernet.aws.secretsmanager.rotation;
 import static com.macasaet.fernet.aws.secretsmanager.rotation.Stage.PENDING;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,9 +40,7 @@ import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -63,6 +62,7 @@ import com.macasaet.fernet.Key;
  */
 public class SimpleFernetKeyRotatorTest {
 
+    private AutoCloseable mockContext;
     @Mock
     private SecretsManager secretsManager;
     @Mock
@@ -75,14 +75,11 @@ public class SimpleFernetKeyRotatorTest {
     @InjectMocks
     private SimpleFernetKeyRotator rotator;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void setUp() throws Exception {
+        mockContext = openMocks(this);
         mapper = new ObjectMapper();
         mapper.registerModule(new JaxbAnnotationModule());
-        initMocks(this);
 
         final Answer<Void> nonRandomBytes = new Answer<Void>() {
             public Void answer(final InvocationOnMock invocation) throws Throwable {
@@ -105,6 +102,7 @@ public class SimpleFernetKeyRotatorTest {
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test
@@ -196,11 +194,8 @@ public class SimpleFernetKeyRotatorTest {
 
         try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
             try( OutputStream output = new ByteArrayOutputStream() ) {
-                // when
-                thrown.expect(RuntimeException.class);
-                rotator.handleRequest(input, output, context);
-
-                // then (exception thrown)
+                // when / then (exception thrown)
+                assertThrows(RuntimeException.class, () -> rotator.handleRequest(input, output, context));
             }
         }
     }
@@ -227,11 +222,8 @@ public class SimpleFernetKeyRotatorTest {
 
         try( InputStream input = new ByteArrayInputStream(testRequestBytes) ) {
             try( OutputStream output = new ByteArrayOutputStream() ) {
-                // when
-                thrown.expect(RuntimeException.class);
-                rotator.handleRequest(input, output, context);
-
-                // then (exception thrown)
+                // when / then (exception thrown)
+                assertThrows(RuntimeException.class, () -> rotator.handleRequest(input, output, context));
             }
         }
     }

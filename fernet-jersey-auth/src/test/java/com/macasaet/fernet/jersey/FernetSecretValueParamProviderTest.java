@@ -17,10 +17,10 @@ package com.macasaet.fernet.jersey;
 
 import static java.util.Collections.singleton;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -32,27 +32,25 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.jaxrs.FernetSecret;
 
-
 public class FernetSecretValueParamProviderTest {
+
+    private AutoCloseable mockContext;
 
     @Mock
     private Validator<String> validator;
     @Mock
     private Supplier<Collection<Key>> keySupplier;
-    @Spy
-    private TokenHeaderUtility tokenHeaderUtility = new TokenHeaderUtility();
+    @Mock
+    private TokenHeaderUtility tokenHeaderUtility;
 
     @InjectMocks
     private FernetSecretValueParamProvider<String> provider;
@@ -66,14 +64,11 @@ public class FernetSecretValueParamProviderTest {
     
     private Collection<Key> keys;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private Function<ContainerRequest, String> function;
 
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
+        mockContext = openMocks(this); // there seems to be a bug with @RunWith(MockitoJUnitRunner.class)
         given(parameter.isAnnotationPresent(FernetSecret.class)).willReturn(true);
         function = provider.getValueProvider(parameter);
 
@@ -83,14 +78,14 @@ public class FernetSecretValueParamProviderTest {
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test
     public final void verifyApplyReturnsPayloadFromBearerToken() {
         // given
         final ContainerRequest request = mock(ContainerRequest.class);
-        doReturn(token).when(tokenHeaderUtility).getAuthorizationToken(request);
-        doReturn(null).when(tokenHeaderUtility).getXAuthorizationToken(request);
+        given(tokenHeaderUtility.getAuthorizationToken(request)).willReturn(token);
         given(validator.validateAndDecrypt(keys, token)).willReturn("hello");
 
         // when
@@ -104,8 +99,7 @@ public class FernetSecretValueParamProviderTest {
     public final void verifyApplyReturnsPayloadFromXToken() {
         // given
         final ContainerRequest request = mock(ContainerRequest.class);
-        doReturn(null).when(tokenHeaderUtility).getAuthorizationToken(request);
-        doReturn(token).when(tokenHeaderUtility).getXAuthorizationToken(request);
+        given(tokenHeaderUtility.getXAuthorizationToken(request)).willReturn(token);
         given(validator.validateAndDecrypt(keys, token)).willReturn("hello");
 
         // when
@@ -121,8 +115,7 @@ public class FernetSecretValueParamProviderTest {
         final ContainerRequest request = mock(ContainerRequest.class);
 
         // when / then
-        thrown.expect(NotAuthorizedException.class);
-        function.apply(request);
+        assertThrows(NotAuthorizedException.class, () -> function.apply(request));
     }
 
 }

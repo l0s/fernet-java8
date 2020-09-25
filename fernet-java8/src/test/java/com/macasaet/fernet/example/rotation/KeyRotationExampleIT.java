@@ -16,7 +16,8 @@
 package com.macasaet.fernet.example.rotation;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -25,9 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 
 import com.macasaet.fernet.TokenValidationException;
@@ -46,6 +45,7 @@ import redis.embedded.RedisServer;
  */
 public class KeyRotationExampleIT {
 
+    private AutoCloseable mockContext;
     private RedisServer redisServer;
     private JedisPool pool;
     private RedisKeyRepository repository;
@@ -55,12 +55,9 @@ public class KeyRotationExampleIT {
     @Mock
     private HttpServletResponse servletResponse;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void setUp() throws IOException {
-        initMocks(this);
+        mockContext = openMocks(this);
         final SecureRandom random = new SecureRandom();
         redisServer = new RedisServer();
         redisServer.start();
@@ -77,9 +74,16 @@ public class KeyRotationExampleIT {
     }
 
     @After
-    public void tearDown() {
-        clearData();
-        redisServer.stop();
+    public void tearDown() throws Exception {
+        try {
+            try {
+                clearData();
+            } finally {
+                redisServer.stop();
+            }
+        } finally {
+            mockContext.close();
+        }
     }
 
     protected void clearData() {
@@ -98,8 +102,7 @@ public class KeyRotationExampleIT {
         assertEquals("secret", result);
 
         manager.rotate();
-        thrown.expect(TokenValidationException.class);
-        resource.getSecret(initialToken);
+        assertThrows(TokenValidationException.class, () -> resource.getSecret(initialToken));
     }
 
 }
