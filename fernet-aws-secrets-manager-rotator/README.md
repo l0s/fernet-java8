@@ -74,9 +74,6 @@ The Lambda Function will need permission to write logs (CloudWatch),
 generate random numbers (KMS), and rotate secrets (Secrets Manager). A
 sample IAM role is available
 [here](https://github.com/l0s/fernet-java8/blob/master/fernet-aws-secrets-manager-rotator/src/test/resources/sample-lambda-iam-role.json).
-If you would like to enable X-Ray tracing, you will also need to grant
-the permissions in the IAM role
-[here](https://github.com/l0s/fernet-java8/blob/master/fernet-aws-secrets-manager-rotator/src/test/resources/sample-lambda-iam-xray-role.json).
 
 #### Secrets Manager Permissions
 
