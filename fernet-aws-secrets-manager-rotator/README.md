@@ -106,8 +106,6 @@ to instantiate each key.
 
 [PIT Mutation Testing  Report](https://l0s.github.io/fernet-java8/fernet-aws-secrets-manager-rotator/pit-reports/index.html)
 
-[SonarCloud Code Quality](https://sonarcloud.io/dashboard?id=com.macasaet.fernet%3Afernet-aws-secrets-manager-rotator)
-
 ## References
 
 [AWS Secrets Manager Documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html)

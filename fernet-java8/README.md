@@ -4,10 +4,7 @@ See the parent module for [documentation](https://github.com/l0s/fernet-java8).
 
 ## Development
 
-[PIT Mutation Testing  Report](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/index.html)
-
-[SonarCloud Code Quality](https://sonarcloud.io/dashboard?id=com.macasaet.fernet%3Afernet-java8)
-
+[PIT Mutation Testing Report](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/index.html)
 
 ## License
 
