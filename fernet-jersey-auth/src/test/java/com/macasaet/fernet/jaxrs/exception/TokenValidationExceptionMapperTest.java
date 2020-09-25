@@ -15,15 +15,13 @@
  */
 package com.macasaet.fernet.jaxrs.exception;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.macasaet.fernet.PayloadValidationException;
 import com.macasaet.fernet.TokenExpiredException;
@@ -34,16 +32,9 @@ public class TokenValidationExceptionMapperTest {
 
     private TokenValidationExceptionMapper mapper;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Before
     public void setUp() throws Exception {
         mapper = new TokenValidationExceptionMapper();
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
     @Test

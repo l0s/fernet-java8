@@ -16,12 +16,12 @@
 package com.macasaet.fernet;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -37,6 +37,7 @@ import org.mockito.Mock;
 
 public class ValidatorTest {
 
+    private AutoCloseable mockContext;
     private Clock clock;
     private Key key;
     @Mock
@@ -45,7 +46,7 @@ public class ValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
+        mockContext = openMocks(this); // there seems to be a bug with @RunWith(MockitoJUnitRunner.class)
         clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
         key = Key.generateKey();
         validator = new Validator<byte[]>() {
@@ -65,6 +66,7 @@ public class ValidatorTest {
 
     @After
     public void tearDown() throws Exception {
+        mockContext.close();
     }
 
     @Test
@@ -93,11 +95,7 @@ public class ValidatorTest {
         given(objectValidator.test(eq(plainBytes))).willReturn(false);
 
         // when
-        try {
-            validator.validateAndDecrypt(key, token);
-            fail("validation should fail");
-        } catch (final PayloadValidationException pve) {
-        }
+        assertThrows(PayloadValidationException.class, () -> validator.validateAndDecrypt(key, token));
 
         // then
         assertFalse(Arrays.equals(plainBytes, new byte[] { 1, 1, 2, 3, 5, 8 })); // verify the intermediate

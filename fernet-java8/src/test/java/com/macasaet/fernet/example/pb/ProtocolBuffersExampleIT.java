@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -41,10 +40,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.macasaet.fernet.Key;
@@ -61,6 +61,7 @@ import com.macasaet.fernet.example.pb.Example.Session.Builder;
  *
  * @author Carlos Macasaet
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProtocolBuffersExampleIT {
 
     final Charset charset = StandardCharsets.UTF_8;
@@ -102,6 +103,9 @@ public class ProtocolBuffersExampleIT {
         builder.setStartTime(Instant.now().getEpochSecond());
         servletResponse.addHeader("Location", "/api/sessions/" + sessionId);
         final Session session = builder.build();
+
+        // persist session in server-side data store
+
         final Token token = Token.generate(random, key, session.toByteArray());
         return token.serialise();
     }
@@ -132,11 +136,16 @@ public class ProtocolBuffersExampleIT {
             throw new WebApplicationException("Try again in a minute", 429);
         }
 
+        // check session validity in server-side data store
+
         // The token and session are valid, now update the session
         final Builder builder = Session.newBuilder(session);
         builder.setRenewalCount(session.getRenewalCount() + 1);
         builder.setLastRenewalTime(Instant.now().getEpochSecond());
         final Session updatedSession = builder.build();
+
+        // update session in server-side data store
+
         // store the updated session in a new Fernet token
         final Token retval = Token.generate(random, key, updatedSession.toByteArray());
         return retval.serialise();
@@ -144,11 +153,6 @@ public class ProtocolBuffersExampleIT {
 
     @Captor
     ArgumentCaptor<String> locationHeaderCaptor;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public final void testRenewal() {
