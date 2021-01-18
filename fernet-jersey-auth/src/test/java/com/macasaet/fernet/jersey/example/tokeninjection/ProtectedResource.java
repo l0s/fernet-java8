@@ -15,17 +15,25 @@
  */
 package com.macasaet.fernet.jersey.example.tokeninjection;
 
+import java.util.Collection;
+import java.util.function.Supplier;
+
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.TokenValidationException;
 import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.jaxrs.FernetToken;
+import com.macasaet.fernet.jersey.example.common.Session;
 import com.macasaet.fernet.jersey.example.common.User;
+import com.macasaet.fernet.jersey.example.common.UserRepository;
 
 /**
  * This is an example of a resource that is protected by Fernet tokens. In order
@@ -39,12 +47,14 @@ import com.macasaet.fernet.jersey.example.common.User;
 @Path("secrets")
 public class ProtectedResource {
 
-	/**
-	 * The secret key that is shared among server-side components. The protected
-	 * resource does not need to run on the same infrastructure as the software
-	 * that generated the token as long as it has access to the same secret key.
-	 */
-	final Key key = new Key("oTWTxEsH8OZ2jNR64dibSaBHyj_CX2RGP-eBRxjlkoc=");
+    /**
+     * This provides the secret keys. There is no need to share it with the
+     * client. The resource that generates the tokens and the resource that
+     * validates the tokens need not share the same infrastructure as long
+     * as they both have access to the same keys.
+     */
+    @Inject
+    private Supplier<Collection<Key>> keySupplier;
 
 	/**
 	 * This is an example of a domain-specific token validator. It delegates to
@@ -53,7 +63,10 @@ public class ProtectedResource {
 	 * deserialised payload.
 	 */
     @Inject
-    private Validator<User> validator;
+    private Validator<Session> validator;
+
+    @Inject
+    private UserRepository userRepository;
 
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
@@ -64,15 +77,21 @@ public class ProtectedResource {
      */
     @GET
     public String getSecret(@FernetToken final Token token) {
+        // if a token was not provided or is not a well-formed Fernet token,
+        // this
+        // method will not execute
         try {
-            final User user = token.validateAndDecrypt(key, validator);
-            // if the token is invalid, an exception will be thrown and the next line will not be executed
-            // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
-            // access to the data requested
-            return user.getSecret();
+            // ensure that the token is valid and that the session is non-expired
+            final Session session = validator.validateAndDecrypt(keySupplier.get(), token);
+            final User user = userRepository.findUser(session);
+            if (user != null && user.isTrustworthy()) {
+                return user.getSecret();
+            }
         } catch (final TokenValidationException tve) {
-            throw new ForbiddenException("Invalid token.");
+            // be sure the client cannot distinguish between invalid token, revoked
+            // session, etc.
         }
+        throw new ForbiddenException("access denied");
     }
 
 }

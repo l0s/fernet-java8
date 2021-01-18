@@ -15,11 +15,15 @@
  */
 package com.macasaet.fernet.jersey.example.secretinjection;
 
+import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import com.macasaet.fernet.jaxrs.FernetSecret;
+import com.macasaet.fernet.jersey.example.common.Session;
 import com.macasaet.fernet.jersey.example.common.User;
+import com.macasaet.fernet.jersey.example.common.UserRepository;
 
 /**
  * This is an example of a resource that is protected by Fernet tokens. In order
@@ -33,6 +37,9 @@ import com.macasaet.fernet.jersey.example.common.User;
 @Path("secrets")
 public class ProtectedResource {
 
+    @Inject
+    private UserRepository userRepository;
+
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
      *
@@ -41,10 +48,16 @@ public class ProtectedResource {
      * @return the secret information
      */
     @GET
-    public String getSecret(@FernetSecret final User user) {
-        // if the token is invalid, an exception will be thrown and the next line will not be executed
-        // additional authorisation rules can be evaluated here such as ensuring the user specified by the token has
+    public String getSecret(@FernetSecret final Session session) {
+        // if the token is invalid, an exception will be thrown and the next
+        // line will not be executed
+        // additional authorisation rules can be evaluated here such as ensuring
+        // the user specified by the token has
         // access to the data requested
+        final User user = userRepository.findUser(session);
+        if (user == null || !user.isTrustworthy()) {
+            throw new ForbiddenException("access denied");
+        }
         return user.getSecret();
     }
 

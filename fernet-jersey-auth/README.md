@@ -17,7 +17,12 @@ Clients should pass Fernet tokens in either the `X-Authorization` header or usin
 
 ## Server-side implementation
 
-The JAX-RS application may receive the Fernet tokens either as [Token](https://javadoc.io/page/com.macasaet.fernet/fernet-java8/latest/com/macasaet/fernet/Token.html) objects or as the specific payload type that is stored inside the token (e.g. a User, Session, or String).
+The JAX-RS application may receive the Fernet tokens either as
+[Token](https://javadoc.io/page/com.macasaet.fernet/fernet-java8/latest/com/macasaet/fernet/Token.html)
+objects or as the specific payload type that is stored inside the token
+(e.g. a data transfer object, a type-safe identifier, or a String). Note:
+*do not use this library to implement stateless sessions*. Ensure that
+sessions can be revoked prior to Fernet token expiration.
 
 ### Token Injection
 
@@ -67,12 +72,15 @@ With Secret injection, fernet-jersey-auth will automatically validate the token,
 Add a POJO parameter to the argument list for an endpoint method within a resource class and annotate it with the `@FernetSecret` annotation. e.g.:
 
     import javax.ws.rs.*;
-    @Path("/sessions")
-    public class SessionResource {
+    @Path("/users")
+    public class UserResource {
         @POST
         @Produces("application/json")
-        public Session createSession(@FernetSecret final User user) {
+        public User getUser(@FernetSecret final Session session) {
             // The system will validate the token, extract the payload, and provide it to the endpoint.
+            // The `Validator` you provide will be responsible for ensuring
+            // the POJO is valid according to your business and security
+            // needs.
         }
     }
 

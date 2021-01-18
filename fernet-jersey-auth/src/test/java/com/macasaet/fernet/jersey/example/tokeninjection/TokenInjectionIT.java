@@ -20,12 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import java.security.SecureRandom;
+import java.util.UUID;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import com.macasaet.fernet.jersey.example.common.LoginRequest;
 
 public class TokenInjectionIT extends JerseyTest {
 
-    protected Application configure() {
+    protected ExampleTokenInjectionApplication configure() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         forceSet(CONTAINER_PORT, "0");
@@ -110,7 +111,7 @@ public class TokenInjectionIT extends JerseyTest {
         // given
         final SecureRandom random = new SecureRandom();
         final Key invalidKey = Key.generateKey(random);
-        final Token forgedToken = Token.generate(random, invalidKey, "alice");
+        final Token forgedToken = Token.generate(random, invalidKey, UUID.randomUUID().toString());
         final String tokenString = forgedToken.serialise();
 
         // when / then
@@ -119,6 +120,50 @@ public class TokenInjectionIT extends JerseyTest {
                     .request()
                     .header("Authorization", "Bearer\t" + tokenString)
                     .get(String.class));
+    }
+
+    /**
+     * This demonstrates a user logging out or otherwise having their
+     * session revoked. Any Fernet tokens that are still valid according to
+     * the Fernet spec can no longer be used.
+     */
+    @Test
+    public final void verifyRevokedTokenUnusable() {
+        // given
+        final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
+        final Entity<LoginRequest> entity = Entity.json(login);
+        final String tokenString = target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity,
+                String.class);
+
+        final Response revokeResponse = target("session").path("revocation").request(MediaType.TEXT_PLAIN_TYPE)
+                .put(Entity.text(tokenString));
+        assertEquals(204, revokeResponse.getStatus());
+
+        // when / then
+        assertThrows(ForbiddenException.class,
+                () -> target("secrets").request().header("Authorization", "Bearer\t" + tokenString).get(String.class));
+    }
+
+    /**
+     * This demonstrates a user renewing their token and keeping their
+     * session alive.
+     */
+    @Test
+    public final void verifyRenewedTokenUsable() {
+        // given
+        final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
+        final String firstToken = target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(Entity.json(login),
+                String.class);
+        final String secondToken = target("session").path("renewal").request(MediaType.TEXT_PLAIN_TYPE)
+                .put(Entity.text(firstToken), String.class);
+        // both tokens are usable, but the first one will expire sooner
+
+        // when
+        final String result = target("secrets").request().header("X-Authorization", secondToken)
+                .get(String.class);
+
+        // then
+        assertEquals("42", result);
     }
 
 }
