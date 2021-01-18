@@ -46,4 +46,12 @@ public class UserRepository {
 		return datastore.get(username);
 	}
 
+    public User findUser(final Session session) {
+        if (session == null) {
+            return null;
+        }
+        final String username = session.getUsername();
+        return findUser(username);
+    }
+
 }
