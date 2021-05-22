@@ -11,21 +11,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [ 8, 11, 16 ]
+        java-version: [ 8, 11, 15 ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v2
       with:
         java-version: ${{ matrix.java-version }}
+        distribution: 'adopt'
     - name: Cache Maven Packages
       uses: actions/cache@v2
       with:
         path: ~/.m2
-        key: ${{ runner.os }}-m2-{{ hashFiles('**/pom.xml') }}
-        restore-keys:
-        - ${{ runner.os }}-m2
-        - m2
+        key: m2-${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          m2-${{ runner.os }}-${{ matrix.java-version }}
+          m2-${{ runner.os }}
+          m2
     - name: Cache PMD
       uses: actions/cache@v2
       with:
@@ -33,4 +35,9 @@ jobs:
           fernet-java8/target/pmd
           fernet-aws-secrets-manager-rotator/target/pmd
           fernet-jersey-auth/target/pmd
+        key: pmd-${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          pmd-${{ runner.os }}-${{ matrix.java-version }}
+          pmd-${{ runner.os }}
+          pmd
     - run: ./mvnw clean install
