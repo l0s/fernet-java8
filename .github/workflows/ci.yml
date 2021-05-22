@@ -23,10 +23,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.m2
-        key: ${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}-m2
+        key: m2-${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.java-version }}-m2
-          ${{ runner.os }}-m2
+          m2-${{ runner.os }}-${{ matrix.java-version }}
+          m2-${{ runner.os }}
           m2
     - name: Cache PMD
       uses: actions/cache@v2
@@ -35,9 +35,9 @@ jobs:
           fernet-java8/target/pmd
           fernet-aws-secrets-manager-rotator/target/pmd
           fernet-jersey-auth/target/pmd
-        key: ${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}-pmd
+        key: pmd-${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.java-version }}-pmd
-          ${{ runner.os }}-pmd
+          pmd-${{ runner.os }}-${{ matrix.java-version }}
+          pmd-${{ runner.os }}
           pmd
     - run: ./mvnw clean install
