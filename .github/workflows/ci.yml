@@ -29,8 +29,8 @@ jobs:
     - name: Cache PMD
       uses: actions/cache@v2
       with:
-        path:
-        - fernet-java8/target/pmd
-        - fernet-aws-secrets-manager-rotator/target/pmd
-        - fernet-jersey-auth/target/pmd
+        path: |
+          fernet-java8/target/pmd
+          fernet-aws-secrets-manager-rotator/target/pmd
+          fernet-jersey-auth/target/pmd
     - run: ./mvnw clean install
