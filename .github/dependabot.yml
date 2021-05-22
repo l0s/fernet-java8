@@ -1,0 +1,97 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "13:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.amazonaws:aws-java-sdk-bom
+    versions:
+    - ">= 1.11.500.a, < 1.11.501"
+  - dependency-name: com.amazonaws:aws-java-sdk-bom
+    versions:
+    - "> 1.11.659, < 1.12"
+  - dependency-name: org.apache.logging.log4j:log4j-api
+    versions:
+    - "> 2.8.2"
+  - dependency-name: org.apache.logging.log4j:log4j-bom
+    versions:
+    - "< 2.10, >= 2.9.a"
+  - dependency-name: org.apache.logging.log4j:log4j-bom
+    versions:
+    - "< 2.11, >= 2.10.a"
+  - dependency-name: org.apache.logging.log4j:log4j-bom
+    versions:
+    - "< 2.12, >= 2.11.a"
+  - dependency-name: org.apache.logging.log4j:log4j-bom
+    versions:
+    - ">= 2.12.a, < 2.13"
+  - dependency-name: org.apache.logging.log4j:log4j-jcl
+    versions:
+    - "> 2.8.2"
+  - dependency-name: org.slf4j:jul-to-slf4j
+    versions:
+    - ">= 1.7.26.a, < 1.7.27"
+  - dependency-name: com.google.protobuf:protobuf-java
+    versions:
+    - 3.15.3
+    - 3.15.5
+    - 3.15.7
+  - dependency-name: net.sourceforge.pmd:pmd-xml
+    versions:
+    - 6.30.0
+    - 6.31.0
+    - 6.32.0
+    - 6.33.0
+  - dependency-name: net.sourceforge.pmd:pmd-java
+    versions:
+    - 6.30.0
+    - 6.31.0
+    - 6.32.0
+    - 6.33.0
+  - dependency-name: net.sourceforge.pmd:pmd-core
+    versions:
+    - 6.30.0
+    - 6.31.0
+    - 6.32.0
+    - 6.33.0
+  - dependency-name: com.fasterxml.jackson.core:jackson-annotations
+    versions:
+    - 2.12.1
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.module:jackson-module-jaxb-annotations
+    versions:
+    - 2.12.1
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.dataformat:jackson-dataformat-cbor
+    versions:
+    - 2.12.1
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.core:jackson-core
+    versions:
+    - 2.12.1
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.core:jackson-databind
+    versions:
+    - 2.12.1
+    - 2.12.2
+  - dependency-name: nl.jqno.equalsverifier:equalsverifier
+    versions:
+    - 3.5.2
+  - dependency-name: org.glassfish.jersey.media:jersey-media-json-jackson
+    versions:
+    - 3.0.0
+  - dependency-name: org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2
+    versions:
+    - 3.0.0
+  - dependency-name: org.glassfish.jersey.inject:jersey-hk2
+    versions:
+    - 3.0.0
+  - dependency-name: org.glassfish.jersey.containers:jersey-container-servlet-core
+    versions:
+    - 3.0.0
+  - dependency-name: org.apache.logging.log4j:log4j-bom
+    versions:
+    - 2.14.0
