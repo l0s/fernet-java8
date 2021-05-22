@@ -1,6 +1,6 @@
 # Fernet Java
 
-[![Build Status](https://travis-ci.com/l0s/fernet-java8.svg?branch=master)](https://travis-ci.com/l0s/fernet-java8)
+[![Build Status](https://github.com/l0s/fernet-java8/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/l0s/fernet-java8/actions/workflows/ci.yml)
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-java8.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-java8)
 [![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=pom.xml)
 
