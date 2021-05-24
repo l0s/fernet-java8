@@ -29,7 +29,7 @@
   <inceptionYear>2018</inceptionYear>
 
   <properties>
-    <jersey.version>2.34</jersey.version>
+    <jersey.version>3.0.2</jersey.version>
   </properties>
 
   <dependencies>
