@@ -45,7 +45,7 @@
     <dependency>
     	<groupId>com.google.protobuf</groupId>
     	<artifactId>protobuf-java</artifactId>
-    	<version>3.17.0</version>
+    	<version>3.17.1</version>
     	<scope>test</scope>
     </dependency>
     <dependency>
