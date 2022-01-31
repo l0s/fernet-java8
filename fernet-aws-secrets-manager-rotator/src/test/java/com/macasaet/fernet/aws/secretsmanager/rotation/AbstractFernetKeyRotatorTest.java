@@ -35,7 +35,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.SecureRandomSpi;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +72,13 @@ public class AbstractFernetKeyRotatorTest {
     private SecretsManager secretsManager;
     @Mock
     private AWSKMS kms;
-    @Spy
+
+    @Mock
+    private Spi randomSpi;
+    @Mock
+    private Provider.Service randomService;
+    @Mock
+    private Provider randomProvider;
     private SecureRandom random;
 
     private AbstractFernetKeyRotator rotator;
@@ -78,6 +86,17 @@ public class AbstractFernetKeyRotatorTest {
     @Captor
     private ArgumentCaptor<RotationRequest> requestCaptor;
 
+    class Spi extends SecureRandomSpi {
+        public void engineSetSeed(byte[] seed) {
+
+        }
+        public void engineNextBytes(byte[] bytes) {
+
+        }
+        public byte[] engineGenerateSeed(int numBytes) {
+            return new byte[0];
+        }
+    }
     @Before
     public void setUp() throws Exception {
         mockContext = openMocks(this);
@@ -85,6 +104,9 @@ public class AbstractFernetKeyRotatorTest {
         given(randomResult.getPlaintext()).willReturn(ByteBuffer.allocate(1024));
         given(kms.generateRandom(any(GenerateRandomRequest.class))).willReturn(randomResult);
 
+        given(randomService.newInstance(null)).willReturn(randomSpi);
+        given(randomProvider.getService("SecureRandom", "mock")).willReturn(randomService);
+        random = SecureRandom.getInstance("mock", randomProvider);
         rotator = new AbstractFernetKeyRotator(mapper, secretsManager, kms, random) {
             protected void testSecret(String secretId, String clientRequestToken) {
             }
@@ -202,7 +224,7 @@ public class AbstractFernetKeyRotatorTest {
         rotator.seed();
 
         // then
-        verify(random, times(1)).setSeed(bytes);
+        verify(randomSpi, times(1)).engineSetSeed(bytes);
     }
 
 }

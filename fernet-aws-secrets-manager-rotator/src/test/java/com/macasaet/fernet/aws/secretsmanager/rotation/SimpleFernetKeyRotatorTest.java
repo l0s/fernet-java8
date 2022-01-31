@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.SecureRandomSpi;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -67,12 +69,15 @@ public class SimpleFernetKeyRotatorTest {
     private SecretsManager secretsManager;
     @Mock
     private AWSKMS kms;
+    private SecureRandomSpi randomSpi;
     @Mock
+    private Provider.Service randomService;
+    @Mock
+    private Provider randomProvider;
     private SecureRandom random;
 
     private ObjectMapper mapper;
 
-    @InjectMocks
     private SimpleFernetKeyRotator rotator;
 
     @Before
@@ -81,23 +86,34 @@ public class SimpleFernetKeyRotatorTest {
         mapper = new ObjectMapper();
         mapper.registerModule(new JaxbAnnotationModule());
 
-        final Answer<Void> nonRandomBytes = new Answer<Void>() {
-            public Void answer(final InvocationOnMock invocation) throws Throwable {
-                final byte[] bytes = invocation.getArgument(0);
+        randomSpi = new SecureRandomSpi() {
+            protected void engineSetSeed(byte[] seed) {
+            }
+
+            protected void engineNextBytes(byte[] bytes) {
                 IntStream.range(0, bytes.length).parallel().forEach(i -> bytes[ i ] = 0);
-                return null;
+            }
+
+            protected byte[] engineGenerateSeed(int numBytes) {
+                final byte[] result = new byte[numBytes];
+                engineNextBytes(result);
+                return result;
             }
         };
-        doAnswer(nonRandomBytes).when(random).nextBytes(any(byte[].class));
-        final Answer<GenerateRandomResult> nonRandomResult = new Answer<GenerateRandomResult>() {
-            public GenerateRandomResult answer(final InvocationOnMock invocation) throws Throwable {
-                final GenerateRandomRequest request = invocation.getArgument(0);
-                final GenerateRandomResult retval = new GenerateRandomResult();
-                retval.setPlaintext(ByteBuffer.allocateDirect(request.getNumberOfBytes()));
-                return retval;
-            }
+
+        given(randomService.newInstance(null)).willReturn(randomSpi);
+        given(randomProvider.getService("SecureRandom", "mock")).willReturn(randomService);
+        random = SecureRandom.getInstance("mock", randomProvider);
+
+        final Answer<GenerateRandomResult> nonRandomResult = invocation -> {
+            final GenerateRandomRequest request = invocation.getArgument(0);
+            final GenerateRandomResult retval = new GenerateRandomResult();
+            retval.setPlaintext(ByteBuffer.allocateDirect(request.getNumberOfBytes()));
+            return retval;
         };
         given(kms.generateRandom(any(GenerateRandomRequest.class))).will(nonRandomResult);
+
+        rotator = new SimpleFernetKeyRotator(secretsManager, kms, random);
     }
 
     @After
