@@ -27,8 +27,6 @@ import java.util.Arrays;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
 
 import com.amazonaws.DefaultRequest;
 import com.amazonaws.Request;
@@ -40,14 +38,16 @@ import com.amazonaws.services.secretsmanager.model.PutSecretValueResult;
 public class MemoryOverwritingRequestHandlerTest {
 
     private AutoCloseable mockContext;
-    @Spy
     private SecureRandom random;
-    @InjectMocks
+
     private MemoryOverwritingRequestHandler handler;
 
     @Before
     public void setUp() {
         mockContext = openMocks(this);
+
+        random = new SecureRandom();
+        handler = new MemoryOverwritingRequestHandler(random);
     }
 
     @After

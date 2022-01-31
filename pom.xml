@@ -58,8 +58,8 @@
     <tag>HEAD</tag>
   </scm>
   <ciManagement>
-    <system>Travis CI</system>
-    <url>https://travis-ci.com/github/l0s/fernet-java8</url>
+    <system>GitHub Actions</system>
+    <url>https://github.com/l0s/fernet-java8/actions/workflows/ci.yml</url>
   </ciManagement>
   <dependencyManagement>
     <dependencies>
