@@ -1,4 +1,4 @@
 name: "Fernet Java CodeQL Configuration"
 disable-default-queries: true
 queries:
-  - uses: security-and-quality
+  - uses: security-extended
