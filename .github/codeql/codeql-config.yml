@@ -1,0 +1,8 @@
+name: "Fernet Java CodeQL Configuration"
+paths:
+  - **/src/main/java/**/*.java
+paths-ignore:
+  - **/src/test/**
+disable-default-queries: true
+queries:
+  - uses: security-and-quality

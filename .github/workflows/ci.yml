@@ -14,6 +14,11 @@ jobs:
         java-version: [ 8, 11, 17 ]
     steps:
     - uses: actions/checkout@v2
+    - name: Initialise SAST
+      uses: github/codeql-action/init@v2
+      languages: java
+      with:
+        config-file: ./.github/codeql/codeql-config.yml
     - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v2
       with:
@@ -41,3 +46,5 @@ jobs:
           pmd-${{ runner.os }}
           pmd
     - run: ./mvnw clean install
+    - name: Perform SAST Analysis
+      uses: github/codeql-action/analyze@v2
