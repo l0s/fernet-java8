@@ -24,7 +24,7 @@ jobs:
       id: build
       uses: google/clusterfuzzlite/actions/build_fuzzers@v1
       with:
-        language: java
+        language: jvm
         github-token: ${{ secrets.GITHUB_TOKEN }}
         sanitizer: ${{ matrix.sanitizer }}
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/l0s/fernet-fuzz-java.git
