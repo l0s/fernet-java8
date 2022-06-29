@@ -54,4 +54,4 @@ jobs:
         fuzz-seconds: 600
         mode: 'coverage'
         sanitizer: 'coverage'
-        storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.co    m/l0s/fernet-fuzz-java.git
+        storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/l0s/fernet-fuzz-java.git

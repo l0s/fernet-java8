@@ -30,7 +30,7 @@ test -r "${this_dir}/jazzer_agent_deploy.jar"
 
 # Magic comment, do not remove:
 # LLVMFuzzerTestOneInput
-# It's required by ClusterFuzzLine test_all.py
+# It's required by ClusterFuzzLite test_all.py
 # https://github.com/google/oss-fuzz/blob/1d588e62cdc119f676316fbcab13cc331c7fb08c/infra/base-images/base-runner/test_all.py#L95
 # It's how the framework identifies that this file is a fuzz target
 
