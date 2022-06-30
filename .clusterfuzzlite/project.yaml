@@ -12,7 +12,4 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-name: "Fernet Java CodeQL Configuration"
-disable-default-queries: true
-queries:
-  - uses: security-extended
+language: jvm

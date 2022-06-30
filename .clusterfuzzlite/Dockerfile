@@ -12,7 +12,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-name: "Fernet Java CodeQL Configuration"
-disable-default-queries: true
-queries:
-  - uses: security-extended
+FROM gcr.io/oss-fuzz-base/base-builder-jvm:v1
+RUN apt-get update \
+  && apt-get install -y make autoconf automake libtool maven shellcheck
+COPY . $SRC/.clusterfuzzlite
+WORKDIR .clusterfuzzlite
+COPY .clusterfuzzlite/build.sh $SRC/
+COPY .clusterfuzzlite/default.options $SRC/
+COPY .clusterfuzzlite/fuzz_target.m4 $SRC/
+COPY .clusterfuzzlite/fernet-fuzzer $SRC/.clusterfuzzlite/fernet-fuzzer/
