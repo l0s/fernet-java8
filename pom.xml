@@ -50,6 +50,8 @@
     <pmd.version>6.20.0</pmd.version>
     <jackson.version>2.13.3</jackson.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
+    <coverageThreshold>75</coverageThreshold>
+    <mutationThreshold>75</mutationThreshold>
   </properties>
   <scm>
     <url>https://github.com/l0s/fernet-java8</url>
@@ -135,7 +137,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M7</version>
+          <version>2.22.2</version>
           <configuration>
             <parallel>all</parallel>
             <useUnlimitedThreads>true</useUnlimitedThreads>
@@ -144,7 +146,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.0.0-M7</version>
+          <version>2.22.2</version>
           <configuration>
             <parallel>all</parallel>
             <useUnlimitedThreads>true</useUnlimitedThreads>
