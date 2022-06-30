@@ -28,6 +28,8 @@ jobs:
         language: jvm
         github-token: ${{ secrets.GITHUB_TOKEN }}
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/l0s/fernet-fuzz-java.git
+        storage-repo-branch: main
+        storage-repo-branch-coverage: gh-pages
     - name: Run Fuzzers
       id: run
       uses: google/clusterfuzzlite/actions/run_fuzzers@v1
@@ -37,6 +39,8 @@ jobs:
         mode: 'prune'
         sanitizer: ${{ matrix.sanitizer }}
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/l0s/fernet-fuzz-java.git
+        storage-repo-branch: main
+        storage-repo-branch-coverage: gh-pages
   Coverage:
     runs-on: ubuntu-latest
     steps:
@@ -55,3 +59,5 @@ jobs:
         mode: 'coverage'
         sanitizer: 'coverage'
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/l0s/fernet-fuzz-java.git
+        storage-repo-branch: main
+        storage-repo-branch-coverage: gh-pages
