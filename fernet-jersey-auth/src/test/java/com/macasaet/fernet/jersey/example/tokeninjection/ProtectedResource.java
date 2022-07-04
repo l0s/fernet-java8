@@ -71,7 +71,7 @@ public class ProtectedResource {
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
      *
-     * @param authHeader
+     * @param token
      *            a Fernet token
      * @return the secret information
      */

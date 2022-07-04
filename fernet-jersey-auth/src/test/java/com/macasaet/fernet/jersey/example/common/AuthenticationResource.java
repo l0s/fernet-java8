@@ -38,8 +38,8 @@ import com.macasaet.fernet.Validator;
  * This is an example of a resource that generates a Fernet token. Here, the
  * Fernet token identifies a session. Once a client has started a session using
  * this resource, they can issue requests by providing only the token they have
- * been provided. The do not need to provide login credentials again until the
- * token expires.
+ * been provided. They do not need to provide login credentials again until the
+ * session expires or is revoked.
  *
  * <p>Copyright &copy; 2017 Carlos Macasaet.</p>
  *
@@ -51,7 +51,7 @@ public class AuthenticationResource {
 	private final SecureRandom random = new SecureRandom();
 
 	@Inject
-	private UserRepository repository;
+	private PasswordService passwordService;
 	@Inject
 	private SessionRepository sessionRepository;
 	@Inject
@@ -81,8 +81,8 @@ public class AuthenticationResource {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String createSession(final LoginRequest request) {
-		final User user = repository.findUser(request.getUsername());
-		if (user != null && user.isPasswordCorrect(request.getSingleRoundPasswordHash())) {
+		final User user = passwordService.authenticateUser(request.getUsername(), request.getPlainTextPassword());
+		if (user != null) {
 			// password is correct, so generate an ephemeral session
 		    // store the session ID in the token payload
 		    final Session session = new Session(request.getUsername());

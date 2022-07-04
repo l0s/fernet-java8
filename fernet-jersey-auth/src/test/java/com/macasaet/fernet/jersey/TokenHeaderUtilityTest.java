@@ -39,7 +39,7 @@ public class TokenHeaderUtilityTest {
     private SecureRandom random;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         utility = new TokenHeaderUtility();
         random = new SecureRandom();
     }

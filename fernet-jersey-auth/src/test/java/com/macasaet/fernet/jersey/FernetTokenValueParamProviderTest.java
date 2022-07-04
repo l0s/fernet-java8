@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.jaxrs.FernetToken;
 
@@ -50,14 +49,12 @@ public class FernetTokenValueParamProviderTest {
     @Mock
     private Parameter parameter;
     @Mock
-    private Key key;
-    @Mock
     private Token token;
 
     private Function<ContainerRequest, Token> function;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mockContext = openMocks(this); // there seems to be a bug with @RunWith(MockitoJUnitRunner.class)
         doReturn(Token.class).when(parameter).getRawType();
         given(parameter.isAnnotationPresent(FernetToken.class)).willReturn(true);

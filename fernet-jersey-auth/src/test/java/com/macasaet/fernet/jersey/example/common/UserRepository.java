@@ -17,6 +17,7 @@ package com.macasaet.fernet.jersey.example.common;
 
 import static java.util.Collections.unmodifiableMap;
 
+import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +33,13 @@ import javax.inject.Singleton;
 @Singleton
 public class UserRepository {
 
-    private Map<String, User> datastore;
+    private final Map<String, User> datastore;
 
     {
         final Map<String, User> map = new HashMap<>();
-        map.put("alice", new User("1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=", true));
-        map.put("bob", new User("98UXS8DlhmSuc6-PtTnFNV7cJGluRn1z4By-W_IMs4Q=", true));
-        map.put("mallory", new User("Lpei3NWxhPsyc5NrJp6zkbHj4P_bji6Z7GsY0JSAUb8=", false));
+        map.put("alice", new User(CharBuffer.wrap("$argon2id$v=19$m=4096$t=48$p=8$6X6h6b9CeF1hydBU5n0Mow$ZxI+2f0e5pjqL84uUdCuL4yXNmiiy/L4fIEcm+ewHo4"), true, "42"));
+        map.put("bob", new User(CharBuffer.wrap("$argon2id$v=19$m=4096$t=48$p=8$YKQOlEgfpqS+30dEAY+Oiw$DVh47bymn+qHa069VIaQBbUpFFWz19kcjf9d8gbyjMY"), true, "524287"));
+        map.put("mallory", new User(CharBuffer.wrap("$argon2id$v=19$m=4096$t=48$p=8$FVC8xnLcADH9NQ1HUrMhIQ$FuNHVh5XJmZWNW8f/NkPrtq9tySvJvEPjTI/kOOkzbo"), false, "665280"));
         datastore = unmodifiableMap(map);
     }
 

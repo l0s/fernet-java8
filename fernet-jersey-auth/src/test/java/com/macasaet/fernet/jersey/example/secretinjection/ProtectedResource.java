@@ -43,13 +43,12 @@ public class ProtectedResource {
     /**
      * This is a secured endpoint. The Fernet token is passed in via the X-Auth-Token header parameter.
      *
-     * @param authHeader
-     *            a Fernet token
+     * @param session the session object for an authenticated user
      * @return the secret information
      */
     @GET
     public String getSecret(@FernetSecret final Session session) {
-        // if the token is invalid, an exception will be thrown and the next
+        // if the token is invalid or the session is revoked, an exception will be thrown and the next
         // line will not be executed
         // additional authorisation rules can be evaluated here such as ensuring
         // the user specified by the token has

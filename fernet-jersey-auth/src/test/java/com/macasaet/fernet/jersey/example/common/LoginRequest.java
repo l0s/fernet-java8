@@ -27,15 +27,15 @@ package com.macasaet.fernet.jersey.example.common;
 public class LoginRequest {
 
 	private String username;
-	private String singleRoundPasswordHash;
+	private CharSequence plainTextPassword;
 
 	public LoginRequest() {
 	}
 
-	public LoginRequest(String username, String singleRoundPasswordHash) {
+	public LoginRequest(final String username, final CharSequence plainTextPassword) {
 	    this();
 		setUsername(username);
-		setSingleRoundPasswordHash(singleRoundPasswordHash);
+		setPlainTextPassword(plainTextPassword);
 	}
 
 	public String getUsername() {
@@ -46,15 +46,14 @@ public class LoginRequest {
 		this.username = username;
 	}
 
-	/**
-	 * @return the SHA-256 hash of the plain-text password
-	 */
-	public String getSingleRoundPasswordHash() {
-		return singleRoundPasswordHash;
+	public CharSequence getPlainTextPassword() {
+		return plainTextPassword;
 	}
 
-	protected void setSingleRoundPasswordHash(String singleRoundPasswordHash) {
-		this.singleRoundPasswordHash = singleRoundPasswordHash;
+	protected void setPlainTextPassword(final CharSequence plainTextPassword) {
+		if(plainTextPassword == null || plainTextPassword.length() == 0) {
+			throw new IllegalArgumentException("plainTextPassword must be specified");
+		}
+		this.plainTextPassword = plainTextPassword;
 	}
-
 }
