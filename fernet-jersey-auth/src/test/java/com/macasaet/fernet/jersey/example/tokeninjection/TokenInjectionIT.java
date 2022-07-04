@@ -53,7 +53,7 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifySuccessfulBusinessRuleCheck() {
         // given
-        final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
+        final LoginRequest login = new LoginRequest("alice", "frog washer kirtle gaily fipple clunch");
         final Entity<LoginRequest> entity = Entity.json(login);
         final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
@@ -72,7 +72,7 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifyFailedBusinessRuleCheck() {
         // given
-        final LoginRequest login = new LoginRequest("mallory", "Lpei3NWxhPsyc5NrJp6zkbHj4P_bji6Z7GsY0JSAUb8=");
+        final LoginRequest login = new LoginRequest("mallory", "puling nach abend wield xenium holmos");
         final Entity<LoginRequest> entity = Entity.json(login);
         final String tokenString =  target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity, String.class);
 
@@ -91,7 +91,7 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifyFailedLogin() {
         // given
-        final LoginRequest login = new LoginRequest("bob", "NReIudfT_iovLMo-MCX8sClVr3UwbeEhAq7er6X_Kps=");
+        final LoginRequest login = new LoginRequest("bob", "raia lehr import foehn read albata");
         final Entity<LoginRequest> entity = Entity.json(login);
 
         // when / then
@@ -130,18 +130,19 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifyRevokedTokenUnusable() {
         // given
-        final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
+        final LoginRequest login = new LoginRequest("alice", "frog washer kirtle gaily fipple clunch");
         final Entity<LoginRequest> entity = Entity.json(login);
         final String tokenString = target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(entity,
                 String.class);
 
-        final Response revokeResponse = target("session").path("revocation").request(MediaType.TEXT_PLAIN_TYPE)
-                .put(Entity.text(tokenString));
-        assertEquals(204, revokeResponse.getStatus());
+        try(Response revokeResponse = target("session").path("revocation").request(MediaType.TEXT_PLAIN_TYPE)
+                .put(Entity.text(tokenString))) {
+            assertEquals(204, revokeResponse.getStatus());
 
-        // when / then
-        assertThrows(ForbiddenException.class,
-                () -> target("secrets").request().header("Authorization", "Bearer\t" + tokenString).get(String.class));
+            // when / then
+            assertThrows(ForbiddenException.class,
+                    () -> target("secrets").request().header("Authorization", "Bearer\t" + tokenString).get(String.class));
+        }
     }
 
     /**
@@ -151,7 +152,7 @@ public class TokenInjectionIT extends JerseyTest {
     @Test
     public final void verifyRenewedTokenUsable() {
         // given
-        final LoginRequest login = new LoginRequest("alice", "1QYCGznPQ1z8T1aX_CNXKheDMAnNSfq_xnSxWXPLeKU=");
+        final LoginRequest login = new LoginRequest("alice", "frog washer kirtle gaily fipple clunch");
         final String firstToken = target("session").request().accept(MediaType.TEXT_PLAIN_TYPE).post(Entity.json(login),
                 String.class);
         final String secondToken = target("session").path("renewal").request(MediaType.TEXT_PLAIN_TYPE)

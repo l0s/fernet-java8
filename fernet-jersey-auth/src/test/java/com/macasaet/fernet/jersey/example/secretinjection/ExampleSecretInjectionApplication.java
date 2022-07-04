@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import javax.inject.Singleton;
 import javax.ws.rs.core.GenericType;
 
+import com.macasaet.fernet.jersey.example.common.*;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.internal.inject.Binder;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -31,12 +32,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Validator;
 import com.macasaet.fernet.jersey.FernetSecretFeature;
-import com.macasaet.fernet.jersey.example.common.AuthenticationResource;
-import com.macasaet.fernet.jersey.example.common.CustomTokenValidator;
-import com.macasaet.fernet.jersey.example.common.KeySupplier;
-import com.macasaet.fernet.jersey.example.common.Session;
-import com.macasaet.fernet.jersey.example.common.SessionRepository;
-import com.macasaet.fernet.jersey.example.common.UserRepository;
 
 /**
  * <p>This is an example Jersey application configuration that enables injection of a Fernet token payload. Your
@@ -58,6 +53,7 @@ public class ExampleSecretInjectionApplication<T> extends ResourceConfig {
         protected void configure() {
             bind(UserRepository.class).to(UserRepository.class).in(Singleton.class);
             bind(SessionRepository.class).to(SessionRepository.class).in(Singleton.class);
+            bind(PasswordService.class).to(PasswordService.class).in(Singleton.class);
             bind(CustomTokenValidator.class).to(new GenericType<Validator<T>>(){}).in(Singleton.class);
             bind(CustomTokenValidator.class).to(new GenericType<Validator<Session>>(){}).in(Singleton.class);
             bind(KeySupplier.class).to(new GenericType<Supplier<Collection<Key>>>(){}).in(Singleton.class);

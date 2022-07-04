@@ -67,7 +67,7 @@ public class FernetSecretValueParamProviderTest {
     private Function<ContainerRequest, String> function;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mockContext = openMocks(this); // there seems to be a bug with @RunWith(MockitoJUnitRunner.class)
         given(parameter.isAnnotationPresent(FernetSecret.class)).willReturn(true);
         function = provider.getValueProvider(parameter);
