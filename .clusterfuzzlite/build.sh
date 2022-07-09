@@ -40,13 +40,14 @@ cp fernet-fuzzer/target/fernet-fuzzer-*.jar "${OUT}/fernet-fuzzer.jar"
 
 RUNTIME_CLASSPATH="\${this_dir}/fernet-java8.jar:\${this_dir}/fernet-fuzzer.jar"
 
-# if there are more fuzzers, turn this into a loop
+fuzzers="TokenEncryptDecryptFuzzer TokenDecryptFuzzer"
+echo "$fuzzers" | tr ' ' '\n' | while read -r fuzzer
+do
+  cp "${SRC}/default.options" "${OUT}/${fuzzer}.options"
 
-fuzzer="TokenEncryptDecryptFuzzer"
-cp "${SRC}/default.options" "${OUT}/${fuzzer}.options"
-
-m4 -D xCLASSPATH="$RUNTIME_CLASSPATH" \
-  -D xLD_LIBRARY_PATH="$JVM_LD_LIBRARY_PATH" \
-  "${SRC}/fuzz_target.m4" > "${OUT}/${fuzzer}"
-shellcheck "${OUT}/${fuzzer}"
-chmod +x "${OUT}/${fuzzer}"
+  m4 -D xCLASSPATH="$RUNTIME_CLASSPATH" \
+    -D xLD_LIBRARY_PATH="$JVM_LD_LIBRARY_PATH" \
+    "${SRC}/fuzz_target.m4" > "${OUT}/${fuzzer}"
+  shellcheck "${OUT}/${fuzzer}"
+  chmod +x "${OUT}/${fuzzer}"
+done

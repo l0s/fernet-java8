@@ -21,12 +21,18 @@ import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.Validator;
 
+/**
+ * This fuzzer simulates an attacker who has access to the system and is attempting to exploit the token mechanism.
+ */
 public class TokenEncryptDecryptFuzzer {
 
+    /*
+     * Run each fuzz input against the same key. Note that in practice, the key is likely rotated on a regular basis.
+     */
+    final static Key key = new Key("UrNImCIJQuYODgrBU5NgH5rpTc7l52IS5ELuhwF4RHU=");
     final static Validator<byte[]> validator = () -> Function.identity();
 
     public static void fuzzerTestOneInput(final FuzzedDataProvider data) {
-        final var key = Key.generateKey();
         final var payload = data.consumeBytes(4096);
         final var token = Token.generate(key, payload);
         final var serialised = token.serialise();
