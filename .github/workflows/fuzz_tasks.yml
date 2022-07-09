@@ -15,7 +15,7 @@
 name: Fuzz Scheduled Tasks
 on:
   schedule:
-    - cron: '0 5 * * FRI'
+    - cron: '0 8 * * *'
 permissions: read-all
 jobs:
   Prune:

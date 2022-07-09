@@ -15,7 +15,7 @@
 name: Batch Fuzzing
 on:
   schedule:
-    - cron: '0 3 * * THU'
+    - cron: '0 6 * * *'
 permissions: read-all
 jobs:
   BatchFuzz:
@@ -25,9 +25,7 @@ jobs:
       matrix:
         sanitizer:
         - address
-        # other sanitizers
-        # - undefined
-        # - memory
+        - undefined
     steps:
     - name: Build Fuzzers (${{ matrix.sanitizer }})
       id: build
