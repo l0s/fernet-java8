@@ -16,8 +16,7 @@ name: PR Fuzzing
 on:
   pull_request:
     paths:
-      #- '**/src/main/java/**'
-      - '**' # temporary for first commit
+      - '**/src/main/java/**'
 permissions: read-all
 jobs:
   PR:
