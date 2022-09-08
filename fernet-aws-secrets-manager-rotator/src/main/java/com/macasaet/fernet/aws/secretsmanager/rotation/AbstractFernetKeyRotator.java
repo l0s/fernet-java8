@@ -49,7 +49,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.BeanMembersShouldSerialize"})
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.BeanMembersShouldSerialize", "PMD.TooManyMethods"})
 abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     private final Logger logger = LogManager.getLogger(getClass());

@@ -50,6 +50,7 @@ under the License.
     <exclude name="AvoidFinalLocalVariable" />
     <exclude name="FieldNamingConventions" />
     <exclude name="AtLeastOneConstructor" />
+    <exclude name="EmptyControlStatement" />
   </rule>
   <rule ref="category/java/codestyle.xml/ControlStatementBraces">
     <properties>
