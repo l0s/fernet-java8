@@ -25,6 +25,16 @@
   <packaging>jar</packaging>
   <name>Fernet Java</name>
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.0</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
