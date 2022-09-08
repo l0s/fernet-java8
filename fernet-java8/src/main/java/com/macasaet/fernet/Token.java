@@ -47,13 +47,15 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals", "PMD.GodClass"})
 /*
  * TooManyMethods can be avoided by making the following API-breaking changes:
  * * remove the static `generate` methods and introduce a `TokenFactory` or `TokenBuilder`
  * * remove the public `validateAndDecrypt` methods since they are already available in the `Validator` interface
  * 
  * AvoidDuplicateLiterals is from the method-level @SuppressWarnings annotations
+ *
+ * GodClass cannot be avoided without making backward-incompatible changes
  */
 public class Token {
 
