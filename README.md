@@ -3,19 +3,20 @@
 [![Build Status](https://github.com/l0s/fernet-java8/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/l0s/fernet-java8/actions/workflows/ci.yml)
 [![Javadocs](https://javadoc.io/badge/com.macasaet.fernet/fernet-java8.svg)](https://javadoc.io/doc/com.macasaet.fernet/fernet-java8)
 [![Known Vulnerabilities](https://snyk.io/test/github/l0s/fernet-java8/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/l0s/fernet-java8?targetFile=pom.xml)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6199/badge)](https://bestpractices.coreinfrastructure.org/projects/6199)
 
 This is an implementation of the
-[Fernet Spec](https://github.com/fernet/spec) using Java 8.
+[Fernet Spec](https://github.com/fernet/spec) using Java.
 The goal is to use only native Java constructs to avoid pulling in any
 dependencies so the library would be more generally usable. It also takes
-advantage of the Java 8 time objects to add type-safety.
+advantage of the Java time objects to add type-safety.
 
 I am actively soliciting feedback on this library. If you have any thoughts,
 please [submit an issue](https://github.com/l0s/fernet-java8/issues).
 
 ## Features
 * fully-validated against the scenarios in the [Fernet Spec](https://github.com/fernet/spec)
-* type-safety by using Java 8 time objects (no confusing milliseconds vs seconds after the epoch)
+* type-safety by using Java time objects (no confusing milliseconds vs seconds after the epoch)
 * no dependencies!
 * pluggable mechanism so you can specify your own:
     * Clock
@@ -126,17 +127,8 @@ It includes a Lambda Function to enable key rotation.
 
 ## Development
 
-### Mutation Testing and Test Coverage
-
-This project uses PITest to evaluate test coverage and test effectiveness.
-The latest report is available [here](https://l0s.github.io/fernet-java8/fernet-java8/pit-reports/index.html).
-To generate a report for a local build, run:
-
-    ./mvnw clean install site
-
-### Releasing to The Central Repository
-
-    ./mvnw --batch-mode -Prelease clean release:clean release:prepare release:perform
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to build this
+project.
 
 ## Prior Art
 
