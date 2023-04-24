@@ -48,7 +48,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <pmd.version>6.49.0</pmd.version>
-    <jackson.version>2.14.2</jackson.version>
+    <jackson.version>2.15.0</jackson.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <coverageThreshold>75</coverageThreshold>
     <mutationThreshold>75</mutationThreshold>
