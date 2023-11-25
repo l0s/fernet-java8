@@ -26,7 +26,7 @@
   <description>This is an AWS Lambda for rotating a Fernet key or keys stored as a secret in AWS Secrets Manager.</description>
   <url>https://l0s.github.io/fernet-java8/${project.artifactId}</url>
   <properties>
-    <log4j.version>2.21.1</log4j.version>
+    <log4j.version>2.22.0</log4j.version>
     <coverageThreshold>80</coverageThreshold>
     <mutationThreshold>70</mutationThreshold>
   </properties>
