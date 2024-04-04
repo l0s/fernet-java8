@@ -48,7 +48,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <pmd.version>6.49.0</pmd.version>
-    <jackson.version>2.16.0</jackson.version>
+    <jackson.version>2.17.0</jackson.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <coverageThreshold>75</coverageThreshold>
     <mutationThreshold>75</mutationThreshold>
@@ -137,7 +137,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.2.2</version>
+          <version>3.2.5</version>
           <configuration>
             <parallel>all</parallel>
             <useUnlimitedThreads>true</useUnlimitedThreads>
@@ -146,7 +146,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.2.2</version>
+          <version>3.2.5</version>
           <configuration>
             <parallel>all</parallel>
             <useUnlimitedThreads>true</useUnlimitedThreads>
@@ -169,7 +169,7 @@
         <plugin>
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
-          <version>1.15.3</version>
+          <version>1.15.8</version>
           <configuration>
             <avoidCallsTo>
               <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
@@ -239,7 +239,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.2</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -269,7 +269,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.2</version>
+            <version>3.6.3</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
