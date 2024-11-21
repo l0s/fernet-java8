@@ -40,7 +40,7 @@ cp fernet-fuzzer/target/fernet-fuzzer-*.jar "${OUT}/fernet-fuzzer.jar"
 
 RUNTIME_CLASSPATH="\${this_dir}/fernet-java8.jar:\${this_dir}/fernet-fuzzer.jar"
 
-fuzzers="TokenEncryptDecryptFuzzer TokenDecryptFuzzer"
+fuzzers="TokenEncryptDecryptFuzzer TokenDecryptFuzzer TokenReplayFuzzer PayloadPaddingFuzzer"
 echo "$fuzzers" | tr ' ' '\n' | while read -r fuzzer
 do
   cp "${SRC}/default.options" "${OUT}/${fuzzer}.options"
