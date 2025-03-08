@@ -43,7 +43,6 @@ import com.macasaet.fernet.Key;
  *
  * @author Carlos Macasaet
  */
-@SuppressWarnings("PMD.LawOfDemeter")
 class SecretsManager {
 
     private final AWSSecretsManager delegate;

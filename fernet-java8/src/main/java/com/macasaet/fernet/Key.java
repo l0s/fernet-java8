@@ -159,7 +159,6 @@ public class Key {
      * @return the AES-encrypted payload. The length will always be a multiple of 16 (128 bits).
      * @see #decrypt(byte[], IvParameterSpec)
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public byte[] encrypt(final byte[] payload, final IvParameterSpec initializationVector) {
         final SecretKeySpec encryptionKeySpec = getEncryptionKeySpec();
         try {
@@ -197,7 +196,6 @@ public class Key {
      * @return the decrypted payload
      * @see Key#encrypt(byte[], IvParameterSpec)
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     protected byte[] decrypt(final byte[] cipherText, final IvParameterSpec initializationVector) {
         try {
             final Cipher cipher = Cipher.getInstance(getCipherTransformation());
@@ -217,7 +215,6 @@ public class Key {
     /**
      * @return the Base 64 URL representation of this Fernet key
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public String serialise() {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(fernetKeyBytes)) {
             writeTo(byteStream);
@@ -249,7 +246,6 @@ public class Key {
         return result;
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -263,7 +259,6 @@ public class Key {
                 && MessageDigest.isEqual(getEncryptionKey(), other.getEncryptionKey());
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
     protected byte[] sign(final byte version, final Instant timestamp, final IvParameterSpec initializationVector,
             final byte[] cipherText, final ByteArrayOutputStream byteStream)
         throws IOException {

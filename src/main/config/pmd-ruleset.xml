@@ -26,7 +26,7 @@ under the License.
     These are the custom PMD rules for the Fernet Java library.
   </description>
   <rule ref="category/java/errorprone.xml">
-    <exclude name="LoggerIsNotStaticFinal" />
+    <exclude name="ConstructorCallsOverridableMethod" />
   </rule>
   <rule ref="category/java/errorprone.xml/AssignmentInOperand">
     <properties>
@@ -36,18 +36,16 @@ under the License.
   <rule ref="category/java/security.xml" />
   <rule ref="category/java/bestpractices.xml">
     <exclude name="MissingOverride" />
+    <exclude name="AvoidReassigningLoopVariables" />
   </rule>
   <rule ref="category/java/codestyle.xml">
-    <exclude name="VariableNamingConventions" />
     <exclude name="LongVariable" />
     <exclude name="TooManyStaticImports" />
     <!-- ShortClassName was complaining about the Key class -->
     <exclude name="ShortClassName" />
     <exclude name="ClassNamingConventions" />
-    <exclude name="DefaultPackage" />
     <exclude name="CommentDefaultAccessModifier" />
     <exclude name="OnlyOneReturn" />
-    <exclude name="AvoidFinalLocalVariable" />
     <exclude name="FieldNamingConventions" />
     <exclude name="AtLeastOneConstructor" />
     <exclude name="EmptyControlStatement" />
@@ -61,6 +59,11 @@ under the License.
     <exclude name="ExcessiveImports" />
     <exclude name="DataClass" />
     <exclude name="LoosePackageCoupling" />
+  </rule>
+  <rule ref="category/java/design.xml/LawOfDemeter">
+    <properties>
+      <property name="trustRadius" value="2" />
+    </properties>
   </rule>
   <rule ref="category/java/multithreading.xml" />
   <rule ref="category/java/performance.xml" />

@@ -36,7 +36,6 @@ import com.macasaet.fernet.Key;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@SuppressWarnings("PMD.LawOfDemeter")
 public class SimpleFernetKeyRotator extends AbstractFernetKeyRotator {
 
     private static final int fernetKeySize = 32;

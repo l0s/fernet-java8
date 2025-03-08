@@ -21,6 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
 import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
 import static org.mutabilitydetector.unittesting.AllowedReason.provided;
@@ -207,6 +208,11 @@ public class TokenTest {
 
     @Test
     public final void verifyImmutable() {
+        // MutabilityDetector does not support the latest Java versions.
+        final String javaVersion = System.getProperty("java.version");
+        assumeTrue(javaVersion.startsWith("1.8")
+                || javaVersion.startsWith("11.")
+                || javaVersion.startsWith("17."));
         assertInstancesOf(Token.class, areImmutable(),
                 allowingForSubclassing(),
                 provided(IvParameterSpec.class).isAlsoImmutable(),

@@ -61,7 +61,7 @@ class MemoryOverwritingRequestHandler extends RequestHandler2 {
         }
     }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
+    @SuppressWarnings("PMD.UnnecessaryCast")
     protected void overwriteSecret(final PutSecretValueRequest putRequest) {
         final ByteBuffer buffer = putRequest.getSecretBinary();
         final byte[] bytes = new byte[buffer.capacity()];

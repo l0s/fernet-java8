@@ -23,6 +23,7 @@ import static nl.jqno.equalsverifier.Warning.STRICT_INHERITANCE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
 import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
 import static org.mutabilitydetector.unittesting.MutabilityAssert.assertInstancesOf;
@@ -58,7 +59,7 @@ public class KeyTest {
             new Key(invalidSigningKey, validEncryptionKey);
             fail("Expected validation exception");
             // then
-        } catch (final IllegalArgumentException iae) {
+        } catch (final IllegalArgumentException ignored) {
         }
     }
 
@@ -72,7 +73,7 @@ public class KeyTest {
             new Key(validSigningKey, invalidEncryptionKey);
             fail("Expected validation exception");
             // then
-        } catch (final IllegalArgumentException iae) {
+        } catch (final IllegalArgumentException ignored) {
         }
     }
 
@@ -195,6 +196,11 @@ public class KeyTest {
 
     @Test
     public final void verifyImmutable() {
+        // MutabilityDetector does not support the latest Java versions.
+        final String javaVersion = System.getProperty("java.version");
+        assumeTrue(javaVersion.startsWith("1.8")
+                || javaVersion.startsWith("11.")
+                || javaVersion.startsWith("17."));
         assertInstancesOf(Key.class, areImmutable(),
                 allowingForSubclassing(),
                 assumingFields("signingKey", "encryptionKey").areNotModifiedAndDoNotEscape());
