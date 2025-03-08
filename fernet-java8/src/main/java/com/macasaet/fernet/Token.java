@@ -225,7 +225,6 @@ public class Token {
      * @return the decrypted, deserialised payload of this token
      * @throws TokenValidationException if <em>key</em> was NOT used to generate this token
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public <T> T validateAndDecrypt(final Key key, final Validator<T> validator) {
         return validator.validateAndDecrypt(key, this);
     }
@@ -238,12 +237,11 @@ public class Token {
      * @return the decrypted, deserialised payload of this token
      * @throws TokenValidationException if none of the keys were used to generate this token
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public <T> T validateAndDecrypt(final Collection<? extends Key> keys, final Validator<T> validator) {
         return validator.validateAndDecrypt(keys, this);
     }
 
-    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.LawOfDemeter"})
+    @SuppressWarnings("PMD.ConfusingTernary")
     protected byte[] validateAndDecrypt(final Key key, final Instant earliestValidInstant,
             final Instant latestValidInstant) {
         if (getVersion() != (byte) 0x80) {
@@ -261,7 +259,6 @@ public class Token {
     /**
      * @return the Base 64 URL encoding of this token in the form Version | Timestamp | IV | Ciphertext | HMAC
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public String serialise() {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream(
                 tokenStaticBytes + getCipherText().length)) {
@@ -281,7 +278,6 @@ public class Token {
      * @throws IOException
      *             if data cannot be written to the underlying stream
      */
-    @SuppressWarnings("PMD.LawOfDemeter")
     public void writeTo(final OutputStream outputStream) throws IOException {
         try (DataOutputStream dataStream = new DataOutputStream(outputStream)) {
             dataStream.writeByte(getVersion());

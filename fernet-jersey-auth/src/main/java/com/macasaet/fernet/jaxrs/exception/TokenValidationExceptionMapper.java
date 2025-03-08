@@ -35,7 +35,6 @@ import com.macasaet.fernet.TokenValidationException;
  * @author Carlos Macasaet
  */
 @Provider
-@SuppressWarnings("PMD.LawOfDemeter")
 public class TokenValidationExceptionMapper implements ExceptionMapper<TokenValidationException> {
 
     public Response toResponse(final TokenValidationException exception) {

@@ -30,7 +30,6 @@ import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
  * @see com.macasaet.fernet.jaxrs.FernetToken
  * @see com.macasaet.fernet.Token
  */
-@SuppressWarnings("PMD.LawOfDemeter")
 class FernetTokenBinder extends AbstractBinder {
 
     protected void configure() {

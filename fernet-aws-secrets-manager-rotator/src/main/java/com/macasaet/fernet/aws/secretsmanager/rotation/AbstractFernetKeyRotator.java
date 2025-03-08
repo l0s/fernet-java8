@@ -49,7 +49,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.LawOfDemeter", "PMD.BeanMembersShouldSerialize", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.BeanMembersShouldSerialize", "PMD.TooManyMethods"})
 abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     private final Logger logger = LogManager.getLogger(getClass());
@@ -126,9 +126,6 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
                 return;
             case TEST_SECRET:
                 testSecret(secretId, clientRequestToken);
-                return;
-            default:
-                throw new IllegalArgumentException("Missing or invalid step provided");
         }
     }
 
@@ -205,6 +202,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      * 
      * This requires the permission: <code>kms:GenerateRandom</code>
      */
+    @SuppressWarnings("PMD.AvoidSynchronizedStatement")
     protected void seed() {
         if (!seeded.get()) {
             synchronized (random) {
@@ -238,6 +236,7 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      *
      * @param secret secret data that is no longer needed
      */
+    @SuppressWarnings("PMD.UnnecessaryCast")
     protected void wipe(final ByteBuffer secret) {
         ((Buffer)secret).clear();
         final byte[] random = new byte[secret.capacity()];
