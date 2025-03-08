@@ -199,8 +199,8 @@ public class KeyTest {
         // MutabilityDetector does not support the latest Java versions.
         final String javaVersion = System.getProperty("java.version");
         assumeTrue(javaVersion.startsWith("1.8")
-                || "11".equals(javaVersion)
-                || "17".equals(javaVersion));
+                || javaVersion.startsWith("11.")
+                || javaVersion.startsWith("17."));
         assertInstancesOf(Key.class, areImmutable(),
                 allowingForSubclassing(),
                 assumingFields("signingKey", "encryptionKey").areNotModifiedAndDoNotEscape());
