@@ -18,17 +18,20 @@ package com.macasaet.fernet;
 import static com.macasaet.fernet.Constants.encoder;
 import static com.macasaet.fernet.Constants.encryptionKeyBytes;
 import static com.macasaet.fernet.Constants.signingKeyBytes;
-import static nl.jqno.equalsverifier.Warning.ALL_FIELDS_SHOULD_BE_USED;
-import static nl.jqno.equalsverifier.Warning.STRICT_INHERITANCE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mutabilitydetector.unittesting.AllowedReason.allowingForSubclassing;
 import static org.mutabilitydetector.unittesting.AllowedReason.assumingFields;
 import static org.mutabilitydetector.unittesting.MutabilityAssert.assertInstancesOf;
 import static org.mutabilitydetector.unittesting.MutabilityMatchers.areImmutable;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.time.Instant;
 
@@ -36,9 +39,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
-
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
 
 /**
  * Unit tests for the {@link Key} class.
@@ -185,13 +185,35 @@ public class KeyTest {
     }
 
     @Test
-    public final void verifyEqualityContract() {
+    public final void verifyEqualityContract() throws ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         // given
-        final SingleTypeEqualsVerifierApi<Key> verifier =
-                EqualsVerifier.forClass(Key.class).suppress(STRICT_INHERITANCE).suppress(ALL_FIELDS_SHOULD_BE_USED);
+        // EqualsVerifier requires Java 17+
+        // Using it with older versions breaks at compile time.
+        final String javaVersion = System.getProperty("java.version");
+        assumeFalse(javaVersion.startsWith("1.8")
+                || javaVersion.startsWith("11."));
+
+        final Class<?> apiT = Class.forName("nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi");
+        final Class<?> warningT = Class.forName("nl.jqno.equalsverifier.Warning");
+        final Method suppressM = apiT.getMethod("suppress", Array.newInstance(warningT, 0).getClass());
+        final Method verifyM = apiT.getMethod("verify");
+        final Field strictInheritanceF = warningT.getField("STRICT_INHERITANCE");
+        final Field allFieldsShouldBeUsedF = warningT.getField("ALL_FIELDS_SHOULD_BE_USED");
+        final Class<?> verifierT = Class.forName("nl.jqno.equalsverifier.EqualsVerifier");
+        final Method forClassM = verifierT.getMethod("forClass", Class.class);
+
+        final Object strictInheritance = strictInheritanceF.get(null);
+        final Object allFieldsShouldBeUsed = allFieldsShouldBeUsedF.get(null);
+        final Object warnings = Array.newInstance(warningT, 2);
+        Array.set(warnings, 0, strictInheritance);
+        Array.set(warnings, 1, allFieldsShouldBeUsed);
+
+        Object verifier = forClassM.invoke(null, Key.class);
+        verifier = suppressM.invoke(verifier, warnings);
 
         // when / then
-        verifier.verify();
+        verifyM.invoke(verifier);
     }
 
     @Test
