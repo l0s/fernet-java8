@@ -85,7 +85,7 @@
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>
       <artifactId>equalsverifier</artifactId>
-      <version>3.19.3</version>
+      <version>4.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -124,26 +124,6 @@
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <configuration>
-          <targetClasses>
-            <param>com.macasaet.fernet.*</param>
-          </targetClasses>
-          <targetTests>
-            <param>com.macasaet.fernet.*</param>
-          </targetTests>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>mutationCoverage</goal>
-            </goals>
-            <phase>verify</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
         <executions>
@@ -166,17 +146,6 @@
   <reporting>
     <plugins>
       <plugin>
-        <groupId>org.pitest</groupId>
-        <artifactId>pitest-maven</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
         <configuration>
@@ -185,4 +154,51 @@
       </plugin>
     </plugins>
   </reporting>
+  <profiles>
+    <profile>
+      <id>mutation-testing</id>
+      <activation>
+        <jdk>[11, )</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <configuration>
+              <targetClasses>
+                <param>com.macasaet.fernet.*</param>
+              </targetClasses>
+              <targetTests>
+                <param>com.macasaet.fernet.*</param>
+              </targetTests>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>report</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
 </project>

@@ -47,7 +47,7 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals", "PMD.GodClass"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 /*
  * TooManyMethods can be avoided by making the following API-breaking changes:
  * * remove the static `generate` methods and introduce a `TokenFactory` or `TokenBuilder`
@@ -117,7 +117,6 @@ public class Token {
      * @throws IllegalTokenException if the input string cannot be a valid
      *                               token irrespective of key or timestamp.
      */
-    @SuppressWarnings({"PMD.PrematureDeclaration", "PMD.DataflowAnomalyAnalysis"})
     public static Token fromBytes(final byte[] bytes) {
         if (bytes.length < minimumTokenBytes) {
             throw new IllegalTokenException("Not enough bits to generate a Token");

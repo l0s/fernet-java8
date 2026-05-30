@@ -33,6 +33,7 @@ import java.util.function.Function;
  *            The type of the payload. The Fernet token encodes the payload in binary. The type T should be a domain
  *            object or data transfer object representation of that data.
  */
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface StringObjectValidator<T> extends Validator<T> {
 
     default Charset getCharset() {

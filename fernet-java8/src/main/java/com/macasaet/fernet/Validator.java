@@ -39,6 +39,7 @@ import java.util.function.Predicate;
  * @see StringValidator
  * @author Carlos Macasaet
  */
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface Validator<T> {
 
     /**
@@ -98,7 +99,6 @@ public interface Validator<T> {
      * @return the deserialised contents of the token
      * @throws TokenValidationException if the token is invalid.
      */
-    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     default T validateAndDecrypt(final Key key, final Token token) {
         final Instant now = Instant.now(getClock());
         final byte[] plainText = token.validateAndDecrypt(key, now.minus(getTimeToLive()), now.plus(getMaxClockSkew()));

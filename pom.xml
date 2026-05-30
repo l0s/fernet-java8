@@ -47,7 +47,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <pmd.version>7.11.0</pmd.version>
+    <pmd.version>7.22.0</pmd.version>
     <jackson.version>2.18.3</jackson.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <coverageThreshold>75</coverageThreshold>
@@ -169,7 +169,7 @@
         <plugin>
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
-          <version>1.17.4</version>
+          <version>1.25.3</version>
           <configuration>
             <avoidCallsTo>
               <avoidCallsTo>java.security.SecureRandom</avoidCallsTo>
