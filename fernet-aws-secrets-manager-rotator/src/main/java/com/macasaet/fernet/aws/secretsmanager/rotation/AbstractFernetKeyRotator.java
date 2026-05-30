@@ -49,7 +49,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * <p>Copyright &copy; 2018 Carlos Macasaet.</p>
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.BeanMembersShouldSerialize", "PMD.TooManyMethods"})
+@SuppressWarnings("PMD.TooManyMethods")
 abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
 
     private final Logger logger = LogManager.getLogger(getClass());
@@ -177,7 +177,6 @@ abstract class AbstractFernetKeyRotator implements RequestStreamHandler {
      */
     protected abstract void testSecret(String secretId, String clientRequestToken);
 
-    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     protected void finishSecret(final String secretId, final String clientRequestToken,
             final Map<String, List<String>> versions) {
         final Entry<? extends String, ?> currentEntry = versions.entrySet().stream().filter(entry -> {
