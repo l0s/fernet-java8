@@ -57,7 +57,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Carlos Macasaet
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "PMD.GodClass"})
+@SuppressWarnings("PMD.GodClass")
 public class Key {
 
     private final byte[] signingKey;
