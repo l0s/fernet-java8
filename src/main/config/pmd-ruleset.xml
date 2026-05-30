@@ -60,6 +60,7 @@ under the License.
     <exclude name="DataClass" />
     <exclude name="LoosePackageCoupling" />
     <exclude name="PublicMemberInNonPublicType" />
+    <exclude name="UseUtilityClass" />
   </rule>
   <rule ref="category/java/design.xml/LawOfDemeter">
     <properties>
