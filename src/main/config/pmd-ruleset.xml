@@ -59,6 +59,7 @@ under the License.
     <exclude name="ExcessiveImports" />
     <exclude name="DataClass" />
     <exclude name="LoosePackageCoupling" />
+    <exclude name="PublicMemberInNonPublicType" />
   </rule>
   <rule ref="category/java/design.xml/LawOfDemeter">
     <properties>
