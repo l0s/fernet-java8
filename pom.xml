@@ -146,7 +146,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.5.3</version>
+          <version>3.5.6</version>
           <configuration>
             <parallel>all</parallel>
             <useUnlimitedThreads>true</useUnlimitedThreads>
@@ -188,7 +188,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.26.0</version>
+          <version>3.28.0</version>
           <configuration>
             <analysisCache>true</analysisCache>
             <rulesets>
