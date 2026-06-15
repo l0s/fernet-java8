@@ -115,7 +115,7 @@
     <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-lambda-java-log4j2</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.4</version>
         <scope>runtime</scope>
     </dependency>
     <dependency>
