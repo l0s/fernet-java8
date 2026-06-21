@@ -14,13 +14,16 @@
    limitations under the License.
 */
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Function;
+import java.time.ZoneId;
+import java.util.UUID;
 import javax.crypto.BadPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
 import com.code_intelligence.jazzer.api.FuzzedDataProvider;
+import com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh;
 import com.macasaet.fernet.Key;
 import com.macasaet.fernet.Token;
 import com.macasaet.fernet.TokenValidationException;
@@ -32,31 +35,36 @@ import com.macasaet.fernet.Validator;
  */
 public class TokenDecryptFuzzer {
 
+    /**
+     * Freeze time for the fuzzer. In practice, the clock will return a different instant every second.
+     */
+    final static Clock clock = Clock.fixed(Instant.ofEpochSecond(581182474), ZoneId.of("UTC"));
     /*
      * Run each fuzz input against the same key. Note that in practice, the key is likely rotated on a regular basis.
      */
     final static Key key = new Key("UrNImCIJQuYODgrBU5NgH5rpTc7l52IS5ELuhwF4RHU=");
-    final static Validator<byte[]> validator = () -> Function.identity();
+    final static Validator<UUID> validator = new UuidValidator(clock);
+    final static Utility utility = new Utility();
 
     public static void fuzzerTestOneInput(final FuzzedDataProvider data) {
-        final var ivBytes = new byte[16];
-        for (int i = ivBytes.length; --i >= 0; ivBytes[i] = data.consumeByte()) ;
-        final var initializationVector = new IvParameterSpec(ivBytes);
-        final var cipherTextLength = data.consumeInt(1, 4096) * 16;
-        final var cipherText = new byte[cipherTextLength];
-        for (int i = cipherTextLength; --i >= 0; cipherText[i] = data.consumeByte()) ;
-        final var signature = new byte[32];
-        for (int i = signature.length; --i >= 0; signature[i] = data.consumeByte()) ;
-        final var timestamp = Instant.now().plus(Duration.ofSeconds(data.consumeLong(-60, 60)));
-        final var token = new Token((byte) -128, timestamp, initializationVector, cipherText, signature) {
+        final var initializationVector = new IvParameterSpec(utility.consumeBytes(data, 16));
+        final var cipherText = utility.consumeBytes(data, 32); // random payload the size of an encrypted UUID
+        final var signature = utility.consumeBytes(data, 32); // random signature of the right size
+        final var timestamp = clock.instant().plus(Duration.ofSeconds(data.consumeLong(-60, 60)));
+        // generate the shape of a valid token without knowing the encryption or signing key
+        final var token = new Token((byte) 0x80, timestamp, initializationVector, cipherText, signature) {
         };
+
         try {
-            token.validateAndDecrypt(key, validator);
-            throw new IllegalStateException("Random input passed validation");
+            final var result = token.validateAndDecrypt(key, validator);
+            throw new FuzzerSecurityIssueHigh("Random input passed validation and generated UUID: " + result.toString());
         } catch (final TokenValidationException tve) {
-            if(tve.getCause() instanceof BadPaddingException) {
-                throw new IllegalStateException("Random input forged signature");
+            if (tve.getCause() instanceof BadPaddingException) {
+                throw new FuzzerSecurityIssueHigh("Random input forged signature: " + tve.getCause().getMessage(), tve.getCause());
             }
         }
     }
+
+
+
 }
